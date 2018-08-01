@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link rel="stylesheet" type="text/css" media="screen" href="main.css" /> -->
+    <!-- <script src="main.js"></script> -->
+</head>
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+    }
+
+    #wrap {
+        z-index: 9;
+    }
+
+    .movie {
+        display: inline-block;
+        width: 240px;
+        height: 135px;
+        overflow: hidden;
+        margin: 5px 15px;
+        position: relative;
+    }
+
+    .movie .progress-bar {
+        position: absolute;
+        width: 220px;
+        height: 5px;
+        background-color: rgba(0, 0, 0, .6);
+        top: 5px;
+        left: 10px;
+        border-radius: 5px;
+        visibility: hidden;
+        overflow: hidden;
+    }
+
+    .movie .mask {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        background-color: rgba(0, 0, 0, .2);
+        transition: opacity .1s linear;
+        z-index: 1;
+    }
+
+    .movie:hover {
+        /* cursor: pointer; */
+    }
+
+    .movie:hover .mask {
+        opacity: 1;
+        cursor: pointer;
+    }
+
+    .movie:hover .progress-bar {
+        visibility: visible;
+    }
+
+    .movie .progress-bar span {
+        display: block;
+        width: 0;
+        height: 100%;
+        background-color: #ffffff;
+        z-index: 9;
+    }
+
+    .movie img {
+        width: 720px;
+        height: 408px;
+        /* overflow: hidden; */
+    }
+</style>
+
+<body>
+    <!-- <div class="movie">
+        <img src="https://puui.qpic.cn/video_caps/0/s0741d97h7o.q4.jpg/0">
+    </div> -->
+    <div id="wrap"></div>
+</body>
+
+<script>
+    const D_TIME = 1000 / 60;
+
+    function Throttle(fn, t = D_TIME) {
+        if (fn.timer) clearTimeout(fn.timer);
+        fn.timer = setTimeout(fn, t)
+    }
+</script>
+
+<script>
+    function init() {
+        var wrap = document.getElementById("wrap");
+        var childDom;
+
+
+        for (let i = 0; i < 3; i++) {
+            var node = document.createElement("div");
+            node.className = "movie";
+            // node.dataset.index = i;
+
+            //mask
+            var mask = document.createElement("div");
+            mask.dataset.index = i;
+            mask.className = "mask"
+
+            //进度div sNode
+            var sNode = document.createElement("div");
+            sNode.className = "progress-bar";
+
+            //进度条 process
+            var process = document.createElement("span");
+            sNode.appendChild(process);
+
+            //图片
+            var img = document.createElement("img");
+            img.src = Math.random() > 0.5 ? "https://puui.qpic.cn/video_caps/0/s0741d97h7o.q4.jpg/0" : "https://puui.qpic.cn/video_caps/0/s0741qfdf12.q4.jpg/0";
+            img.className = "img";
+            img.dataset.index = i;
+
+            node.appendChild(img);
+            node.appendChild(sNode);
+            node.appendChild(mask);
+
+            wrap.appendChild(node)
+        }
+
+    }
+
+    (function () {
+        init();
+    })()
+
+
+    function handleEventListener(event) {
+        // console.log(event);
+        // console.log('layerX',event.layerX);
+        // console.log('movementX',event.movementX);
+
+        var { index } = event.target.dataset;
+        if (!index) return;
+        switch (event.type) {
+            case "mousemove":
+                var getCoordinate = function (pageX) {
+                    var pos = Math.ceil(pageX / (240 / 8));
+                    var x, y, z = pos % 3;
+                    x = (z === 0 ? 2 : z - 1) * 240;
+                    if (pos > 6) {
+                        //第三排
+                        y = 2 * 135;
+                    } else if (pos > 3) {
+                        //第二排
+                        y = 1 * 135;
+                    } else {
+                        //第一排
+                        y = 0;
+                    }
+
+                    return { x, y }
+                }
+
+                var wrapEl = document.getElementById("wrap");//wrap element
+                var m = wrapEl.getElementsByClassName("img")[index];
+                /**
+                * @desc 图片转换
+                */
+                var cor = getCoordinate(event.layerX);
+                m.style.transform = `translate(-${cor.x}px,-${cor.y}px)`;
+
+                /**
+                * @desc 进度条
+                */
+                var pEl = wrapEl.getElementsByClassName("progress-bar")[index]; //process element
+                pEl.getElementsByTagName("span")[0].style.width = `${((event.layerX / 240) * 100).toFixed(2)}%`;//process-bar
+                break;
+            case "mouseout":
+                var wrapEl = document.getElementById("wrap");//wrap element
+                var m = wrapEl.getElementsByClassName("img")[index];
+
+                var pEl = wrapEl.getElementsByClassName("progress-bar")[index]; //process element
+                pEl.getElementsByTagName("span")[0].style.width = '0';//process-bar
+                // pEl.style.visibility = "hidden";
+
+                m.style.transform = `translate(0,0)`;
+                break;
+
+            case "mouseover":
+                var wrapEl = document.getElementById("wrap");//wrap element
+                var pEl = wrapEl.getElementsByClassName("progress-bar")[index]; //process element
+                // pEl.style.visibility = "visible";
+
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    document.onreadystatechange = function () {
+        // console.log(223, document.readyState);
+        switch (document.readyState) {
+            case "interactive":
+                break;
+
+            case "complete":
+                // var d = document.getElementsByClassName("movie");
+                var d = document.getElementById("wrap");
+                // d.addEventListener('mousemove', Throttle(handleEventListener.bind(this,event)));
+
+                d.addEventListener('mousemove',  event=> {
+                    Throttle(handleEventListener.bind(this, event))
+                });//移动(函数防抖)
+
+                d.addEventListener('mouseout', handleEventListener);//移出
+                d.addEventListener('mouseover', handleEventListener);//移入
+                break;
+
+            default:
+                return;
+        }
+    }
+</script>
+
+</html>
