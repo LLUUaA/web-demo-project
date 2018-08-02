@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>双飞翼布局</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+    <script src="main.js"></script>
+</head>
+<style lang="">
+    body,
+    div {
+        margin: 0;
+        padding: 0;
+    }
+
+    .hearder,
+    .left,
+    .right,
+    .footer {
+        text-align: center;
+    }
+
+    .hearder,
+    .footer {
+        background-color: gray;
+        height: 100px;
+        line-height: 100px;
+    }
+
+    .main,
+    .left,
+    .right {
+        float: left;
+        min-height: 200px;
+    }
+
+    .main {
+        width: 100%;
+        background-color: dodgerblue;
+    }
+
+    .main .main-container {
+        /*** margin & padding 都可实现*/
+        /* margin: 0 240px 0 200px; */
+        padding: 0 240px 0 200px;
+    }
+
+    .left {
+        width: 200px;
+        background-color: deeppink;
+        margin-left: -100%;
+    }
+
+    .right {
+        margin-left: -240px;
+        width: 240px;
+        background-color: darkturquoise;
+    }
+
+    .footer {
+        clear: both;
+    }
+</style>
+
+<body>
+    <!-- 基本和圣杯布局类似，主要差别在于先固定main的位置然后再定位left 和right 。 .main-container margin .left 和 .right宽度，实现布局-->
+    <div class="hearder">hearder</div>
+    <div class="main">
+        <div class="main-container">
+            1mainmainmainmain mainmainmainmain mainmainmainmainmainmainmainmainmainmain mainmainmainmain
+        </div>
+    </div>
+    <div class="left">left</div>
+    <div class="right">right</div>
+    <div class="footer">footer</div>
+</body>
+
+</html>
+

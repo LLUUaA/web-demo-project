@@ -1,0 +1,77 @@
+<html>
+<head></head>
+<style lang="">
+    body,
+    div {
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        min-width: 700px;
+    }
+
+    .hearder,
+    .left,
+    .right,
+    .footer {
+        text-align: center;
+    }
+
+    .footer{
+        clear: both;
+    }
+
+    .hearder,
+    .footer {
+        background-color: gray;
+        height: 100px;
+        line-height: 100px;
+    }
+
+    .c {
+        padding: 0 240px 0 200px;
+    }
+
+    .c div {
+        position: relative;
+        float: left;
+        min-height: 200px;
+    }
+
+    .middle {
+        width: 100%;
+        word-wrap: break-word;
+        word-break: break-all;
+        background-color: blue;
+        color: #ffffff;
+    }
+
+    .left {
+        width: 200px;
+        background-color: red;
+        margin-left: -100%;
+        left: -200px;
+    }
+
+    .right {
+        width: 240px;
+        background-color: green;
+        margin-left: -240px;
+        right: -240px;
+    }
+</style>
+
+<body>
+    <!-- left-> margin-left 100%;left:负元素的宽度px。right->margin-left:负元素的宽度px;right:负元素的宽度px。width:middle-> 100% -->
+    <div class="hearder">hearder</div>
+    <div class="c">
+        <div class="middle">圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局圣杯布局</div>
+        <div class="left">left</div>
+        <div class="right">right</div>
+    </div>
+    <div class="footer">footer</div>
+</body>
+
+</html>
+
