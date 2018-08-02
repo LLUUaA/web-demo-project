@@ -150,20 +150,12 @@
         switch (event.type) {
             case "mousemove":
                 var getCoordinate = function (pageX) {
-                    var pos = Math.ceil(pageX / (240 / 8));
-                    var x, y, z = pos % 3;
-                    x = (z === 0 ? 2 : z - 1) * 240;
-                    if (pos > 6) {
-                        //第三排
-                        y = 2 * 135;
-                    } else if (pos > 3) {
-                        //第二排
-                        y = 1 * 135;
-                    } else {
-                        //第一排
-                        y = 0;
-                    }
+                    const imgRow = 3 , totalImg = 8;
+                    var pos = Math.ceil(pageX / (240 / totalImg));
+                    var x, y, z = Math.floor(pos / imgRow);
 
+                    x = ((pos - (z * imgRow)) - 1) * 240; //pos是从1开始，而z是从0开始所以要减1
+                    y = z * 135;
                     return { x, y }
                 }
 
