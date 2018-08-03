@@ -127,8 +127,8 @@
         color: #ffffff;
         padding: 0 10px;
         box-sizing: border-box;
-
-        visibility: hidden;
+        /* visibility: hidden; */
+        visibility: visible;
 
         /* transition: all .6s ease-out; */
         /* opacity: 0; */
@@ -148,13 +148,26 @@
     #movie-wrap .controls .process-bar {
         width: 100%;
         background-color: rgba(255, 255, 255, .6);
+        position: relative;
     }
 
     #movie-wrap .controls .process-bar span {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
         display: block;
         width: 0;
         height: 100%;
+    }
+
+    #movie-wrap .controls .process-bar .play {
         background-color: rgba(0, 0, 0, .6);
+    }
+
+    #movie-wrap .controls .process-bar .pre {
+        background-color: rgba(0, 0, 0, .3);
     }
 
     #movie-wrap .controls .volume {}
@@ -177,7 +190,8 @@
         <div id="controls" class="controls">
             <span id="play" class="play" data-control="play">play</span>
             <div id="process-bar" class="process-bar">
-                <span></span>
+                <span class="play"></span>
+                <span class="pre"></span>
             </div>
 
             <div id="volume" class="volume" data-control="volume">
@@ -199,36 +213,47 @@
     var play = document.getElementById("play");//播放
     var process = document.getElementById("process-bar");//进度div
     var processBar = process.getElementsByTagName("span")[0];;//进度条
+    var preBar = process.getElementsByTagName("span")[1];;//选择进度
     var volume = document.getElementById("volume");//音量
     var full = document.getElementById("full");//全屏、退出全屏
 
+    var videoDuration;
 
     var processHeight = parseInt(window.getComputedStyle(process).width);//获取进度条宽度
 
     play.addEventListener('click', handleControls);
     full.addEventListener('click', handleControls);
 
-    // process.addEventListener('timeupdate',function(event){
-
-    // })
-
     process.addEventListener('mousemove', event => {
+        Throttle(handleProcess.bind(this, event))
+    });
+
+    process.addEventListener('click', event => {
         Throttle(handleProcess.bind(this, event))
     });
 
     movie.addEventListener('timeupdate',function(event){
         // console.log(123,event);
-        console.log(111,processHeight);
+        // console.log(111,processHeight);
+
         const { currentTime ,duration} = event.target;
         processBar.style.width = `${((currentTime/duration).toFixed(2))*100}%`;
+        videoDuration = duration;
         
     })
 
     function handleProcess(event){
-        // console.log(123,event);
         console.log('offsetX',event.offsetX);
-
-        movie.currentTime = event.offsetX;
+        switch (event.type) {
+            case 'click':
+                movie.currentTime = ((event.offsetX / processHeight).toFixed(2)) * videoDuration;
+                break;
+            case 'mousemove':
+                preBar.style.width = `${((event.offsetX / processHeight).toFixed(2)) * 100}%`;
+                break;
+            default:
+                break;
+        }
     }
 
     function handleControls(event) {
