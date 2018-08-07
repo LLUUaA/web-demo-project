@@ -10,14 +10,13 @@
     <!-- <script src="main.js"></script> -->
 </head>
 <style>
-
     body {
         width: 100%;
         height: 100%;
         overflow: hidden;
 
         /* 隐藏鼠标 */
-        /* cursor: none; */ 
+        /* cursor: none; */
     }
 
     * {
@@ -96,13 +95,19 @@
         height: 450px;
         margin: 0 auto;
         position: relative;
+        -ms-user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
     }
 
     #movie-wrap .movie {
         width: 100%;
         height: 100%;
+        max-height: 100%;
         margin: 0;
         padding: 0;
+        background-color: #010001;
     }
 
     #movie-wrap.full {
@@ -121,25 +126,28 @@
         width: 100%;
         height: 40px;
         line-height: 40px;
-        /* background-color: rgba(0, 0, 0, .3); */
         bottom: 0;
         left: 0;
         color: #ffffff;
         padding: 0 10px;
+        font-size: 14px;
         box-sizing: border-box;
-        /* visibility: hidden; */
+    }
+
+    #movie-wrap:hover .controls{
+        box-shadow: inset 0 -20px 60px -15px #222222;
+    }
+
+    #movie-wrap .player-control{
+        visibility: hidden;
+    }
+
+    #movie-wrap:hover .player-control {
         visibility: visible;
-        /* transition: all .6s ease-out; */
-        /* opacity: 0; */
     }
 
     #movie-wrap:hover {
         cursor: pointer;
-    }
-
-    #movie-wrap:hover #controls {
-        /* opacity: 1; */
-        visibility: visible;
     }
 
     #movie-wrap .controls .play {
@@ -147,7 +155,47 @@
         text-align: center;
         overflow: hidden;
     }
-    
+
+    #movie-wrap .controls .volume {
+
+        position: relative;
+    }
+
+    #movie-wrap .controls .volume #volume-bar {
+        position: absolute;
+        left: 5px;
+        bottom: 100%;
+        width: 8px;
+        height: 60px;
+        background-color: rgba(0, 0, 0, .6);
+        border-radius: 5px;
+        visibility: hidden;
+    }
+
+    #movie-wrap .controls .volume:hover #volume-bar{
+        visibility: visible;
+    }
+
+    #movie-wrap .controls .volume #volume-bar .volume-process{
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 60%;
+        background-color: rgba(0, 0, 0, .9);
+        border-radius: 5px;
+    }
+
+    #movie-wrap .controls .volume {
+        width: 20px;
+        height: 20px;
+    }
+    #movie-wrap .controls .volume img {
+        width: 100%;
+        height: 100%;
+        vertical-align: middle;
+    }
+
     #movie-wrap .controls .full {
         width: 50px;
         text-align: center;
@@ -161,11 +209,11 @@
         background-color: rgba(0, 0, 0, .25);
         bottom: 40px;
         left: 0;
-        transition: all .3s;
+        transition: transform .3s;
         transform-origin: center;
     }
 
-    #movie-wrap  .process-bar span {
+    #movie-wrap .process-bar span {
         position: absolute;
         left: 0;
         top: 0;
@@ -176,8 +224,7 @@
     }
 
     #movie-wrap .process-bar:hover {
-        /* height: 10px; */
-        transform: scaleY(1.9);
+        transform: scaleY(2);
         box-shadow: 0 0 2px rgba(0, 0, 0, .2);
     }
 
@@ -185,9 +232,40 @@
         background-color: rgba(0, 0, 0, .6);
     }
 
-    #movie-wrap  .process-bar .pre {
+    #movie-wrap .process-bar .pre {
         background-color: rgba(0, 0, 0, .3);
         visibility: hidden;
+        border-right: 1px solid purple;
+        z-index: 99;
+        position: relative;
+    }
+
+    #movie-wrap .process-bar .pre::after,
+    #movie-wrap .process-bar .pre::before {
+        content: '';
+        position: absolute;
+        width: 6px;
+        height: 1px;
+        background-color: purple;
+    }
+
+    #movie-wrap .process-bar .pre::after {
+        right: -3px;
+        top: -1px;
+    }
+
+    #movie-wrap .process-bar .pre::before {
+        right: -3px;
+        top: 6px;
+    }
+
+    #movie-wrap .process-bar .pre .pre-current-time {
+        position: absolute;
+        right: -15px;
+        top: -15px;
+        color: #ffffff;
+        transform: scaleY(0.5) !important;
+        font-size: 12px;
     }
 
     #movie-wrap .process-bar:hover .pre {
@@ -201,16 +279,16 @@
         left: 50%;
         top: 50%;
         border-radius: 50%;
-        transform: translate(-50%,-50%);
+        transform: translate(-50%, -50%);
         background-color: rgba(0, 0, 0, .4);
         border-radius: 50%;
         padding: 10px;
     }
 
-      #movie-wrap .ply-btn-c img {
-          width: 100%;
-          height: 100%;
-      }
+    #movie-wrap .ply-btn-c img {
+        width: 100%;
+        height: 100%;
+    }
 
     #movie-wrap .controls .volume {}
 
@@ -225,37 +303,41 @@
 
     <div id="movie-wrap">
         <video id="movie" class="movie" preload="auto">
-            <source src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"
-                type="video/mp4"> Your browser does not support the video tag.
+            <!-- <source src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" type="video/mp4">  -->
+            <source src="http://1255398128.vod2.myqcloud.com/7a29e9b3vodtransgzp1255398128/009e55cf7447398156207460854/v.f20.mp4" type="video/mp4"> Your browser does not support the video tag.
         </video>
 
-        <div class="ply-btn-c">
-            <!-- <img src="./assets//ico_play.svg"> -->
-            <img src="./assets//ico_pause.svg">
-        </div>
-
-        <div id="process-bar" class="process-bar">
-                <span class="play"></span>
-                <span class="pre"></span>
-        </div>
-
-        <div id="controls" class="controls">
-            <span id="play" class="play" data-control="play">play</span>
-            <!-- <div id="process-bar" class="process-bar">
-                <span class="play"></span>
-                <span class="pre"></span>
-            </div> -->
-
-            <div id="movie-time">
-                <div class="current">00:00</div>
-                <div class="total">00:00</div>
+        <div class="player-control">
+            <div class="ply-btn-c">
+                <!-- <img src="./assets//ico_play.svg"> -->
+                <img src="./assets//ico_pause.svg">
             </div>
 
-            <div id="volume" class="volume" data-control="volume">
-                <span></span>
+            <div id="process-bar" class="process-bar">
+                <span class="play"></span>
+                <span class="pre">
+                    <a class="pre-current-time">00:00</a>
+                </span>
             </div>
-
-            <span id="full" class="full" data-control="full">full</span>
+        
+            <div id="controls" class="controls">
+                <span id="play" class="play" data-control="play">play</span>
+        
+                <div id="movie-time">
+                    <span class="current">00:00</span>
+                    <span class="">/</span>
+                    <span class="total">00:00</span>
+                </div>
+        
+                <div id="volume" class="volume" data-control="volume">
+                    <img src="./assets/ico_volume.svg">
+                    <div id="volume-bar">
+                        <div class="volume-process"></div>
+                    </div>
+                </div>
+        
+                <span id="full" class="full" data-control="full">full</span>
+            </div>
         </div>
     </div>
 </body>
@@ -264,7 +346,7 @@
 <script>
     var movieWrap = document.getElementById("movie-wrap");
     const clientWidth = window.screen.availWidth;
-    const clientHeight = window.screen.availHeight ;
+    const clientHeight = window.screen.availHeight;
 
     var movie = document.getElementById("movie");//视频
     var play = document.getElementById("play");//播放
@@ -274,30 +356,30 @@
     var volume = document.getElementById("volume");//音量
     var full = document.getElementById("full");//全屏、退出全屏
     var playTime = document.getElementById("movie-time");
+    var preCurrentTime = preBar.getElementsByClassName("pre-current-time")[0];//选择进度时的时间显示
+
 
     // 进度条相关
-    var videoDuration;//视频总时长
-    var processWidth ;//进度条宽度
-    var videoCurrentTime;//播放时间
+    var videoDuration = 0;//视频总时长
+    var processWidth;//进度条宽度
+    var videoCurrentTime = 0;//播放时间
 
     getPlayProcessWidth();
 
     play.addEventListener('click', handleControls);
     full.addEventListener('click', handleControls);
-
     process.addEventListener('mousemove', event => {
         Throttle(handleProcess.bind(this, event))
+        process.addEventListener('click', event => {
+            Throttle(handleProcess.bind(this, event))
+        })
     });
 
-    process.addEventListener('click', event => {
-        Throttle(handleProcess.bind(this, event))
-    });
-
-    movie.addEventListener('timeupdate',function(event){
+    movie.addEventListener('timeupdate', function (event) {
         // console.log(123,event);
         // console.log(111,processWidth);
-        const { currentTime ,duration} = event.target;
-        processBar.style.width = `${((currentTime/duration).toFixed(2))*100}%`;
+        const { currentTime, duration } = event.target;
+        processBar.style.width = `${((currentTime / duration).toFixed(2)) * 100}%`;
         videoDuration = duration;
         videoCurrentTime = currentTime;
     })
@@ -307,46 +389,81 @@
         processWidth = parseInt(window.getComputedStyle(process).width)
     }
 
+    //清除定时
+    function clearDurationTimeOut() {
+        clearInterval(setDuration.timer);
+    }
+
+    //秒数转显示格式
+    function getDuration(duration) {
+        var hours, minutes, seconds;
+        duration = parseInt(duration);
+        // let totalSeconds = (timeExpiry - timeNow) / 1000;
+        var totalSeconds = duration;
+        var hours = parseInt(totalSeconds / 3600);
+        var minutes = parseInt((totalSeconds - (3600 * hours)) / 60);
+        var seconds = parseInt(totalSeconds - (3600 * hours + minutes * 60));
+
+        return `${hours ? hours + ':' : ''}${minutes > 9 ? minutes : '0' + minutes}:${seconds > 9 ? seconds : '0' + seconds}` || "-:-"
+    }
+
+    //设置播放时间
     function setDuration() {
+        const current = playTime.getElementsByClassName("current")[0];
+        const total = playTime.getElementsByClassName("total")[0];
+        const setTime = () => {
+            current.innerText = getDuration(videoCurrentTime);
+            total.innerText = getDuration(videoDuration);
+        }
+        setTime();
         clearInterval(setDuration.timer);
         setDuration.timer = setInterval(() => {
-            var current = playTime.getElementsByClassName("current")[0];
-            var total = playTime.getElementsByClassName("total")[0];
-            console.log("setDuration",videoCurrentTime,videoDuration);
-            current.innerText = videoCurrentTime ||"00:00";
-            total.innerText = videoDuration;
+            setTime();
         }, 1000);
     }
 
-    function handleProcess(event){
-        console.log('offsetX',event.offsetX);
+
+    //播放进度条相关
+    function handleProcess(event) {
         switch (event.type) {
             case 'click':
-                movie.currentTime = ((event.offsetX / processWidth).toFixed(2)) * videoDuration;
+                //选择播放位置
+                const currTime = ((event.offsetX / processWidth).toFixed(2)) * videoDuration;
+                movie.currentTime = currTime
+                videoCurrentTime = currTime;
+                setDuration();
                 break;
             case 'mousemove':
-                preBar.style.width = `${((event.offsetX / processWidth).toFixed(2)) * 100}%`;
+                //move 进度条
+                const per = ((event.offsetX / processWidth).toFixed(2));//百分比
+                preBar.style.width = `${per * 100}%`;//预进度位置
+                preCurrentTime.innerText = getDuration(videoDuration * per);//预进度位置时间
                 break;
             default:
                 break;
         }
     }
 
+    //控制播放相关
     function handleControls(event) {
         const { control } = event.target.dataset;
         switch (control) {
             case "play":
+                //播放
                 movie.play();
-                setDuration();
                 play.setAttribute('data-control', 'pause');
                 play.innerText = "pause";
+                setDuration();
                 break;
             case "pause":
+                //暂停
                 movie.pause();
                 play.setAttribute('data-control', 'play');
                 play.innerText = "play";
+                clearDurationTimeOut();
                 break;
             case "full":
+                //全屏
                 fullScreen(true, function () {
                     full.setAttribute('data-control', 'exitFull');
                     full.innerText = "exitFull";
@@ -355,6 +472,7 @@
                 });
                 break;
             case "exitFull":
+                //退出全屏
                 fullScreen(false, function () {
                     full.setAttribute('data-control', 'full');
                     full.innerText = "full";
@@ -367,7 +485,7 @@
         }
     }
 
-    function fullScreen(fullStatus=true, callback) {
+    function fullScreen(fullStatus = true, callback) {
         var docElm = document.documentElement;
 
         function full() {
@@ -429,13 +547,13 @@
         //     fullscreenState.innerHTML = (document.msFullscreenElement) ? "" : "not ";
         // }, false);
 
-        if(fullStatus) {
+        if (fullStatus) {
             full();
-        }else{
+        } else {
             exitFull();
         }
 
-        console.log("fullStatus",fullStatus);
+        console.log("fullStatus", fullStatus);
         if ("function" === typeof callback) callback();
     }
 
