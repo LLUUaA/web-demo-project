@@ -1,0 +1,157 @@
+<html lang="en" class="">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex">
+    <style class="cp-pen-styles">
+        /*  CSS Spec:  | style | offset-x | offset-y | blur-radius | spread-radius | color */
+        @import url(https://fonts.googleapis.com/css?family=Slabo+27px);
+        .top {
+            box-shadow: 0 -15px 15px -15px #2C3E50;
+        }
+
+        .right {
+            box-shadow: 15px 0 15px -15px #2C3E50;
+        }
+
+        .bottom {
+            box-shadow: 0 15px 15px -15px #2C3E50;
+        }
+
+        .left {
+            box-shadow: -15px 0 15px -15px #2C3E50;
+        }
+
+        .all {
+            box-shadow: 0 0 15px #2C3E50;
+        }
+
+        .inset-top {
+            box-shadow: inset 0 15px 15px -15px #2C3E50;
+        }
+
+        .inset-right {
+            box-shadow: inset -15px 0 15px -15px #2C3E50;
+        }
+
+        .inset-bottom {
+            box-shadow: inset 0 -15px 15px -15px #2C3E50;
+        }
+
+        .inset-left {
+            box-shadow: inset 15px 0 15px -15px #2C3E50;
+        }
+
+        .inset-all {
+            box-shadow: inset 0 0 15px #2C3E50;
+        }
+
+        .left-right {
+            box-shadow: -15px 0 15px -15px #2C3E50, 15px 0 15px -15px #2C3E50;
+        }
+
+        .top-bottom {
+            box-shadow: 0 -15px 15px -15px #2C3E50, 0 15px 15px -15px #2C3E50;
+        }
+
+        .inset-left-right {
+            box-shadow: inset 15px 0 15px -15px #2C3E50, inset -15px 0 15px -15px #2C3E50;
+        }
+
+        .inset-top-bottom {
+            box-shadow: inset 0 15px 15px -15px #2C3E50, inset 0 -15px 15px -15px #2C3E50;
+        }
+
+        body {
+            background-color: #1ABC9C;
+            color: #fff;
+            letter-spacing: 1px;
+            font: 1em 'Slabo 27px', serif;
+        }
+
+        body h1 {
+            margin: 20px;
+            font-size: 3.5em;
+            letter-spacing: 5px;
+            color: #006666;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        body h2 {
+            margin: 20px;
+            font-size: 1.5em;
+            color: #006666;
+            text-align: center;
+        }
+
+        body p {
+            margin: 20px;
+            font-size: 1.1em;
+        }
+
+        body .container {
+            text-align: center;
+            clear: both;
+            margin: auto;
+            max-width: 960px;
+        }
+
+        body .container.lead {
+            max-width: 710px;
+            text-align: justify;
+        }
+
+        body .box {
+            display: inline-block;
+            height: 120px;
+            width: 160px;
+            margin: 30px 10px;
+            position: relative;
+            background: #16A085;
+        }
+
+        body .box:after {
+            color: #fff;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            line-height: 120px;
+            color: #eee;
+            content: attr(class) " ";
+        }
+    </style>
+    <script type="text/javascript" id="waxCS">var WAX = function () { var _arrInputs; return { getElement: function (i) { return _arrInputs[i]; }, setElement: function (i) { _arrInputs = i; } } }(); function waxGetElement(i) { return WAX.getElement(i); } function coSetPageData(t, d) { if ('wax' == t) { WAX.setElement(d); } }</script>
+    <script type="text/javascript" id="waxCS">var WAX = function () { var _arrInputs; return { getElement: function (i) { return _arrInputs[i]; }, setElement: function (i) { _arrInputs = i; } } }(); function waxGetElement(i) { return WAX.getElement(i); } function coSetPageData(t, d) { if ('wax' == t) { WAX.setElement(d); } }</script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="box top"></div>
+        <div class="box right"></div>
+        <div class="box bottom"></div>
+        <div class="box left"></div>
+        <div class="box all"></div>
+    </div>
+
+    <div class="container">
+        <div class="box inset-top"></div>
+        <div class="box inset-right"></div>
+        <div class="box inset-bottom"></div>
+        <div class="box inset-left"></div>
+        <div class="box inset-all"></div>
+    </div>
+
+    <div class="container">
+        <div class="box top-bottom"></div>
+        <div class="box left-right"></div>
+        <div class="box inset-top-bottom"></div>
+        <div class="box inset-left-right"></div>
+    </div>
+
+</body>
+
+</html>
