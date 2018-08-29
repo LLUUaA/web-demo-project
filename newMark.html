@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Marked in the browser</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="./assets/css/marked.github.css" />
+</head>
+<style>
+
+</style>
+<body>
+    <div id="content"></div>
+    <button id="start">start</button>
+    <button id="stop">stop</button>
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/marked.min.js"></script>
+    <script>
+        document.getElementById('content').innerHTML =
+            marked('# Marked in the browser\n\nRendered by **marked**.');
+        $.ajax({
+            url: 'http://127.0.0.1:3000/file',
+            dataType: 'text',
+            success: function (res) {
+                document.getElementById('content').innerHTML = marked(res);
+            }
+        })
+
+        let startEl =  document.getElementById('start');
+        let stopEl =  document.getElementById('stop');
+        let toId = 1000 ,timer;
+        
+        startEl.addEventListener('click',()=>{
+            timer = setInterval(() => {
+                $.ajax({
+                    url: `https://h5farm.17paipai.cn/farm_http/http/addFriends/peer_id/${toId}/t/83ab0dfa854c569003d9d7918545393b/u/522615006`,
+                    headers: {
+                        "Content-Type":"application/x-www-form-urlencoded"
+                    },
+                    success: function (res) {
+                        console.log('success', res);
+                    },
+                    fail: function (err) {
+                        console.warn('warn', err);
+                    }
+                })
+
+                toId++;
+            },500)
+        })
+
+        stopEl.addEventListener('click',()=>{
+            console.log(111);
+            clearInterval(timer);
+            toId = 1000;
+        })
+
+
+    </script>
+</body>
+
+</html>
