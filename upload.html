@@ -12,10 +12,13 @@
         <input type="file" onchange="fileChange(event)">
 
 </body>
+
+<script src="./assets/js/jquery.min.js"></script>
+
 <script>
     function fileChange(event) {
         console.log(event.target.files);
-        // this.uploadFiles(event.target.files);
+        this.uploadFiles(event.target.files);
     }
 
 
@@ -29,29 +32,30 @@
         index;
       // return;
       file = files[0];
-      total = Math.ceil(file.size / chunkSize);
+      // total = Math.ceil(file.size / chunkSize);
+      total = 1;
 
       for (let i = 0; i < total; i++) {
         let start = chunkSize * i,end = chunkSize * (i + 1),formData = new FormData();
-        formData.append("file", file.slice(chunkSize * i, chunkSize * (i + 1)));
-        formData.append("total", total);
-        formData.append("index", i+1);
-        formData.append("filename", file.name || 'test');
-        this.$http
-          .post("http://localhost:3000/api/file", formData, {
-            headers: {
-              "Content-Range": `bytes ${start}-${end}/${file.size}`
-            }
-          })
-          .then(
-            function(res) {
-              console.log("req", res);
-            },
-            function(err) {
-              // 请求失败处理
-              console.error("err", err);
-            }
-          );
+
+        // formData.append("file", file.slice(chunkSize * i, chunkSize * (i + 1)));
+        // formData.append("total", total);
+        // formData.append("index", i+1);
+        // formData.append("filename", file.name || 'test');
+
+        formData.append('file',file)
+        
+        console.log('formData',formData)
+        // $.get('http://localhost:3000/file');
+        $.ajax({
+          url: 'http://localhost:3000/file',
+          type: 'POST',
+          cache: false,
+          data: formData,
+          processData: false,
+          contentType: false
+        }).done(function (res) {
+        }).fail(function (res) { });
       }
 
       return;
