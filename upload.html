@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link rel="stylesheet" type="text/css" media="screen" href="main.css" /> -->
+    <!-- <script src="main.js"></script> -->
+</head>
+<body>
+        <input type="file" onchange="fileChange(event)">
+
+</body>
+
+<script src="./assets/js/jquery.min.js"></script>
+
+<script>
+    function fileChange(event) {
+        console.log(event.target.files);
+        this.uploadFiles(event.target.files);
+    }
+
+
+      function uploadFiles(files) {
+      // const chunkSize = 2 * 1024 * 1024 ;//2M
+      console.log("files", files);
+      const chunkSize = 2097152;
+      let header,
+        total,
+        file,
+        index;
+      // return;
+      file = files[0];
+      // total = Math.ceil(file.size / chunkSize);
+      total = 1;
+
+      for (let i = 0; i < total; i++) {
+        let start = chunkSize * i,end = chunkSize * (i + 1),formData = new FormData();
+
+        // formData.append("file", file.slice(chunkSize * i, chunkSize * (i + 1)));
+        // formData.append("total", total);
+        // formData.append("index", i+1);
+        // formData.append("filename", file.name || 'test');
+
+        formData.append('file',file)
+        
+        console.log('formData',formData)
+        // $.get('http://localhost:3000/file');
+        $.ajax({
+          url: 'http://localhost:3000/file',
+          type: 'POST',
+          cache: false,
+          data: formData,
+          processData: false,
+          contentType: false
+        }).done(function (res) {
+        }).fail(function (res) { });
+      }
+
+      return;
+
+      formData.append("file", files[0].slice(0 - 1024));
+      this.$http
+        .post("http://localhost:3000/api/file", formData, {
+          headers: {
+            "Content-Range": `bytes ${0}-${1000}/${files[0].size}`
+          }
+        })
+        .then(
+          function(res) {
+            console.log("req", res);
+          },
+          function(err) {
+            // 请求失败处理
+            console.error("err", err);
+          }
+        );
+    }
+</script>
+</html>
