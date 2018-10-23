@@ -12,8 +12,10 @@
   <script src="main.js"></script>
 </head>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
-<link rel="stylesheet" type="text/css" media="screen" href="./assets/css/marked.github.css" />
 <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+<link rel="stylesheet" type="text/css" media="screen" href="./assets/css/marked.github.css" />
+
+
 
 <body>
   <textarea id="md"></textarea>
@@ -24,7 +26,7 @@
 <script>
   var simplemde = new SimpleMDE({ element: document.getElementById("md") });
   function submit() {
-    console.log(simplemde.value("## title"));
+    console.log(simplemde.value());
   }
 </script>
 

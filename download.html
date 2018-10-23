@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,30 +9,57 @@
     <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
     <script src="main.js"></script>
 </head>
+
 <body>
-   <a id="download" href="https://storage.bubaocloud.com/api/download/pMEhfEq4V63BTlwqzHBX3dYrimdLbakjRbxiaVKXhnaEsZfTvd4mYqdqXqifthSfg1StOf-1" download="test">下载</a>
+    <a id="download" href="https://storage.bubaocloud.com/api/download/pMEhfEq4V63BTlwqzHBX3dYrimdLbakjRbxiaVKXhnaEsZfTvd4mYqdqXqifthSfg1StOf-1"
+        download="test">下载</a>
+    <button onclick="test('0','')">click</button>
+    <!-- <img src="https://xinao.bubaocloud.com:7229/api/qrCode/wxa/topicDetails/topicId%3D59//20/create?width=5000"> -->
+    <!-- <video controls src="https://xinao-oss.bubaocloud.com/LittleBuBao/1cbdacb5847640b79c8b6f2c34276985/1539139440586.mp4?Expires=1539143075&OSSAccessKeyId=NFTBgsZ51DdGGkYF&Signature=cqtVpzcMZi5gIEPLPwHgAghYNHk%3D&.mp4"></video> -->
 </body>
 <script>
 
-    var d = document.getElementById("download");
+    // var d = document.getElementById("download");
 
-    d.addEventListener("progress" ,function(res){
-        console.log('progress',res);
-    });
+    // d.addEventListener("progress" ,function(res){
+    //     console.log('progress',res);
+    // });
 
-    d.addEventListener("click",function(res){
-        console.log('click',res);
-    });
+    // d.addEventListener("click",function(res){
+        //     console.log('click',res);
+        // });
 
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'https://storage.bubaocloud.com/api/download/pMEhfEq4V63BTlwqzHBX3dYrimdLbakjRbxiaVKXhnaEsZfTvd4mYqdqXqifthSfg1StOf-1');
-    xhr.onprogress = function (event) {
-        console.log(event);
-        // if (event.lengthComputable) {
-        //     console.log(event.loaded);
-        //     console.log(event.total);
-        // }
-    };
-    xhr.send();
-</script>
+        // var xhr = new XMLHttpRequest();
+        // xhr.open('GET', 'https://storage.bubaocloud.com/api/download/pMEhfEq4V63BTlwqzHBX3dYrimdLbakjRbxiaVKXhnaEsZfTvd4mYqdqXqifthSfg1StOf-1');
+        // xhr.onprogress = function (event) {
+        //     console.log(event);
+        //     // if (event.lengthComputable) {
+        //     //     console.log(event.loaded);
+        //     //     console.log(event.total);
+        //     // }
+        // };
+
+        // xhr.send();
+        const requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+                            window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+        const cancelAnimationFrame = window.cancelAnimationFrame || window.webkitCancelAnimationFrame;
+        let animation = null;
+        let a = 0;
+
+        const exec = () => {
+            animation = requestAnimationFrame(fn);
+        };
+        const fn = (time) => {
+            console.log(a++);
+            if (a === 100) {
+                cancelAnimationFrame(animation);
+            } else {
+                exec();
+            }
+        }
+        exec();
+
+
+    </script>
+
 </html>

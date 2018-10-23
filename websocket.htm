@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Page Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+  <script src="main.js"></script> -->
+</head>
+<body>
+  
+</body>
+<script src="https://cdn.bootcss.com/socket.io/2.1.1/socket.io.js"></script>
+
+<script>
+  var socket = io("ws://localhost:3000");
+  console.log('socket',socket);
+  socket.emit('message',233);
+  socket.on('message',function(data){
+    console.log('on message',data);
+  })
+</script>
+<script>
+    // var ws = new WebSocket("ws://localhost:3000");
+    // console.log('ws',ws);
+    // ws.onmessage(event=>{
+    //   console.log('onmessage',event);
+    // })
+
+    // wx.onclose (event=>{
+    //   console.log('onclose',event);
+    // })
+
+    // wx.onopen  (event=>{
+    //   console.log('onclose',event);
+    // })
+
+    // wx.onerror(err=>{
+    //   console.log('onerror',err);
+    // })
+</script>
+</html>
