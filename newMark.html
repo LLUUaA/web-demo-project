@@ -20,7 +20,7 @@
             marked('# Marked in the browser\n\nRendered by **marked**.');
         $.ajax({
             url: 'http://127.0.0.1:3000/file',
-            dataType: 'text',
+            dataType: 'json',
             success: function (res) {
                 document.getElementById('content').innerHTML = marked(res);
             }
