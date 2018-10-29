@@ -12,11 +12,14 @@
 
 <body>
   <div id="box">
-    <input id="input" placeholder="input">
+    <input id="input"  autocomplete="off" placeholder="input">
   </div>
   <!-- <button onclick="sendSocketMsg()">send SocketMsg</button> -->
   <button id="btn2" onclick="refreshList()">refresh list</button>
   <button onclick="sendMsg()">SEND</button>
+  <div>收到的消息</div>
+  <div id="reciveMsg"></div>
+  <div>在线列表</div>
   <div id="onlieList"></div>
 </body>
 <script src="https://cdn.bootcss.com/socket.io/2.1.1/socket.io.js"></script>
@@ -41,10 +44,13 @@
  function sendMsg() {
    $.ajax({
      url:baseUrl + "/message/send",
+     type:'post',
      data:{
        content: $("#input").val(),
        toId:toId
      }
+   }).then(res=>{
+    $("#input").val('');
    })
   }
 
@@ -67,12 +73,16 @@
 
 <script>
   var socket = io("ws://localhost:3001");
+  var reciveMsgEl  = document.getElementById("reciveMsg");
   var el = document.getElementById("box");
-  console.log('socket', socket);
+  // console.log('socket', socket);
   socket.on('connect', function () {
     socket.emit('message', 11);
     socket.on(socket.id, function (data) {
       console.log('on msg single', data);
+      let node = document.createElement("li");
+      node.innerText = data.msg;
+      reciveMsgEl.appendChild(node)
     }); //简单实现单-单通信
 
     socket.on('message', function (data) {
