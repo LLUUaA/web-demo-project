@@ -2,114 +2,86 @@
 <html>
 
 <head>
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Page Title</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
-  <script src="main.js"></script> -->
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
 </head>
 
 <body>
-  <div id="box">
-    <input id="input"  autocomplete="off" placeholder="input">
+  <div id="app">
+    <el-container>
+      <el-header>Header</el-header>
+      <el-main>
+        <el-tabs type="border-card">
+          <el-tab-pane label="在线聊天">在线聊天</el-tab-pane>
+          <el-tab-pane label="聊天室">聊天室</el-tab-pane>
+        </el-tabs>
+        <!-- <el-button @click="dialogVisible = true">Button</el-button> -->
+      </el-main>
+    </el-container>
+    <el-dialog title="登陆" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
+      <span>请登录</span>
+      <el-input prefix-icon='el-icon-mobile-phone' placeholder="账号"></el-input>
+      <el-input prefix-icon='el-icon-view' placeholder="密码" type='password' clearable="true"></el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">登 陆</el-button>
+      </span>
+    </el-dialog>
   </div>
-  <!-- <button onclick="sendSocketMsg()">send SocketMsg</button> -->
-  <button id="btn2" onclick="refreshList()">refresh list</button>
-  <button onclick="sendMsg()">SEND</button>
-  <div>收到的消息</div>
-  <div id="reciveMsg"></div>
-  <div>在线列表</div>
-  <div id="onlieList"></div>
 </body>
-<script src="https://cdn.bootcss.com/socket.io/2.1.1/socket.io.js"></script>
-<script src="./assets/js/jquery.min.js"></script>
-
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script>
-  var baseUrl = 'http://localhost:3000';
-
-  var onlineEl = document.getElementById("onlieList");
-  var toId;
-  function sendSocketMsg() {
-    socket.emit('message', 'send new msg')
-  }
-
-  function tochat(event) {
-    console.log(event);
-    var {id} = event.target.dataset;
-    if(!id) return;
-    toId = id;
-  }
-
- function sendMsg() {
-   $.ajax({
-     url:baseUrl + "/message/send",
-     type:'post',
-     data:{
-       content: $("#input").val(),
-       toId:toId
-     }
-   }).then(res=>{
-    $("#input").val('');
-   })
-  }
-
-  function refreshList() {
-    $.ajax({
-      url: baseUrl + "/message/onLine",
-      success: function (res) {
-        var html = '';
-        (res||[]).forEach(item => {
-          html += `<li data-id=${item}>${item}</li>`;
-        });
-        onlineEl.innerHTML = `<ul onclick="tochat(event)">${html}</ul>`
-      },
-      error: function (err) {
-        console.log(err);
-      }
-    });
-  }
-</script>
-
-<script>
-  var socket = io("ws://localhost:3001");
-  var reciveMsgEl  = document.getElementById("reciveMsg");
-  var el = document.getElementById("box");
-  // console.log('socket', socket);
-  socket.on('connect', function () {
-    socket.emit('message', 11);
-    socket.on(socket.id, function (data) {
-      console.log('on msg single', data);
-      let node = document.createElement("li");
-      node.innerText = data.msg;
-      reciveMsgEl.appendChild(node)
-    }); //简单实现单-单通信
-
-    socket.on('message', function (data) {
-      console.log('on message', data);
-    });
-
+  new Vue({
+    el: '#app',
+    data: function () {
+      return { dialogVisible: false }
+    }
   })
 </script>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+  }
 
-<script>
-    // var ws = new WebSocket("ws://localhost:3000");
-    // console.log('ws',ws);
-    // ws.onmessage(event=>{
-    //   console.log('onmessage',event);
-    // })
+  .el-header,
+  .el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
 
-    // wx.onclose (event=>{
-    //   console.log('onclose',event);
-    // })
+  .el-aside {
+    background-color: #D3DCE6;
+    color: #333;
+    text-align: center;
+    line-height: 200px;
+  }
 
-    // wx.onopen  (event=>{
-    //   console.log('onclose',event);
-    // })
+  .el-main {
+    background-color: #E9EEF3;
+    color: #333;
+    text-align: center;
+    /* line-height: 160px; */
+  }
 
-    // wx.onerror(err=>{
-    //   console.log('onerror',err);
-    // })
-</script>
+  body>.el-container {
+    margin-bottom: 40px;
+  }
+
+  .el-container:nth-child(5) .el-aside,
+  .el-container:nth-child(6) .el-aside {
+    line-height: 260px;
+  }
+
+  .el-container:nth-child(7) .el-aside {
+    line-height: 320px;
+  }
+</style>
 
 </html>
