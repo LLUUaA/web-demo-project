@@ -12,9 +12,16 @@
     <el-container>
       <el-header>Header</el-header>
       <el-main>
-        <el-tabs type="border-card">
-          <el-tab-pane label="在线聊天">在线聊天</el-tab-pane>
-          <el-tab-pane label="聊天室">聊天室</el-tab-pane>
+        <el-tabs type="border-card" @tab-click="tabClick">
+          <el-tab-pane data-id="online" label="在线聊天">
+            <div>在线聊天</div>
+            <el-card class="box-card">
+                <div v-for="o in onLineList" :key="o" class="item">
+                  {{'好友ID: ' + o }}
+                </div>
+              </el-card>
+          </el-tab-pane>
+          <el-tab-pane data-id="chat" label="聊天室">聊天室</el-tab-pane>
         </el-tabs>
         <!-- <el-button @click="dialogVisible = true">Button</el-button> -->
       </el-main>
@@ -30,15 +37,64 @@
     </el-dialog>
   </div>
 </body>
+<!-- import socket.io  -->
+<script src="https://cdn.bootcss.com/socket.io/2.1.1/socket.io.js"></script>
 <!-- import Vue before Element -->
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="./assets/js/jquery.min.js"></script>
 <!-- import JavaScript -->
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script>
+  const baseUrl = 'http://localhost:3000';
   new Vue({
     el: '#app',
     data: function () {
-      return { dialogVisible: false }
+      return { 
+        dialogVisible: false,
+        onLineList:[]
+        }
+    },
+    mounted() {
+      var socket = io("ws://localhost:3001");
+      console.log('socket', socket);
+      socket.on('connect', function () {
+        socket.emit('message', 11);
+        socket.on(socket.id, function (data) {
+          console.log('on msg single', data);
+        }); //简单实现单-单通信
+
+        socket.on('message', function (data) {
+          console.log('on message', data);
+        });
+
+      })
+    },
+    methods: {
+      tabClick(event) {
+        const { id } = event.$el.dataset;
+        console.log('tabClick', id);
+        switch (id) {
+          case 'online':
+            $.ajax({
+              url: baseUrl + '/message/onLine'
+            }).then(res => {
+              console.log('online', res);
+              this.onLineList = res;
+            }).catch(console.log)
+            break;
+          case 'chat':
+
+            break;
+
+          default:
+            break;
+        }
+
+      },
+
+      handleClose(event) {
+        console.log('handleClose', event);
+      }
     }
   })
 </script>
@@ -81,6 +137,14 @@
 
   .el-container:nth-child(7) .el-aside {
     line-height: 320px;
+  }
+
+  .box-card {
+    
+  }
+
+  .box-card .item{
+    text-align: start;
   }
 </style>
 
