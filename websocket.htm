@@ -10,29 +10,31 @@
 <body>
   <div id="app">
     <el-container>
-      <el-header>Header</el-header>
+      <el-header>
+        <el-button class="login-btn" @click="showLogin">注册/登陆</el-button>
+      </el-header>
       <el-main>
         <el-tabs type="border-card" @tab-click="tabClick">
           <el-tab-pane data-id="online" label="在线聊天">
             <div>在线聊天</div>
             <el-card class="box-card">
-                <div v-for="o in onLineList" :key="o" class="item">
-                  {{'好友ID: ' + o }}
-                </div>
-              </el-card>
+              <div v-for="o in onLineList" :key="o" class="item">
+                {{'好友ID: ' + o }}
+              </div>
+            </el-card>
           </el-tab-pane>
           <el-tab-pane data-id="chat" label="聊天室">聊天室</el-tab-pane>
         </el-tabs>
         <!-- <el-button @click="dialogVisible = true">Button</el-button> -->
       </el-main>
     </el-container>
-    <el-dialog title="登陆" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
+    <el-dialog class="dialog" title="登陆" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
       <span>请登录</span>
-      <el-input prefix-icon='el-icon-mobile-phone' placeholder="账号"></el-input>
-      <el-input prefix-icon='el-icon-view' placeholder="密码" type='password' clearable="true"></el-input>
+      <el-input class="ipt" prefix-icon='el-icon-mobile-phone' v-model="form.account" placeholder="账号"></el-input>
+      <el-input class="ipt" prefix-icon='el-icon-view' v-model="form.password" placeholder="密码" type='password' :clearable="true" ></el-input>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">登 陆</el-button>
+        <el-button type="primary" @click="login">登 陆</el-button>
       </span>
     </el-dialog>
   </div>
@@ -49,27 +51,39 @@
   new Vue({
     el: '#app',
     data: function () {
-      return { 
+      return {
         dialogVisible: false,
-        onLineList:[]
-        }
+        form:{},
+        onLineList: []
+      }
     },
     mounted() {
-      var socket = io("ws://localhost:3001");
-      console.log('socket', socket);
-      socket.on('connect', function () {
-        socket.emit('message', 11);
-        socket.on(socket.id, function (data) {
-          console.log('on msg single', data);
-        }); //简单实现单-单通信
+     const session =  window.localStorage.getItem('session');
+    //  console.log(1111,session);
+    if(!session) {
+      this.dialogVisible = true;
+    }else {
+      this.connectSocket();
+    }
 
-        socket.on('message', function (data) {
-          console.log('on message', data);
-        });
-
-      })
     },
     methods: {
+      connectSocket() {
+        var socket = io("ws://localhost:3001");
+        console.log('socket', socket);
+        socket.on('connect', function () {
+          socket.emit('message', 11);
+          socket.on(socket.id, function (data) {
+            console.log('on msg single', data);
+          }); //简单实现单-单通信
+
+          socket.on('message', function (data) {
+            console.log('on message', data);
+          });
+
+        })
+      },
+
       tabClick(event) {
         const { id } = event.$el.dataset;
         console.log('tabClick', id);
@@ -92,6 +106,24 @@
 
       },
 
+      showLogin() {
+        this.dialogVisible = true;
+      },
+
+      login() {
+        $.ajax({
+          url:baseUrl+'/account/login',
+          type:'post',
+          data:this.form
+        })
+        .then(res=>{
+          console.log('login',res);
+          window.localStorage.setItem('session',res.sessionKey)
+        },err=>{
+
+        })
+      },
+
       handleClose(event) {
         console.log('handleClose', event);
       }
@@ -112,6 +144,12 @@
     line-height: 60px;
   }
 
+  .login-btn {
+    float: right;
+    margin-top: 10px;
+    margin-right: 15px;
+  }
+
   .el-aside {
     background-color: #D3DCE6;
     color: #333;
@@ -124,6 +162,10 @@
     color: #333;
     text-align: center;
     /* line-height: 160px; */
+  }
+
+  .dialog .ipt {
+    margin-top: 10px;
   }
 
   body>.el-container {
@@ -139,11 +181,9 @@
     line-height: 320px;
   }
 
-  .box-card {
-    
-  }
+  .box-card {}
 
-  .box-card .item{
+  .box-card .item {
     text-align: start;
   }
 </style>
