@@ -11,7 +11,20 @@
   <div id="app">
     <el-container>
       <el-header>
-        <el-button class="login-btn" @click="showLogin">注册/登陆</el-button>
+        <div class="login-btn" v-if="!userInfo || !userInfo.uid">
+          <a href="#" @click="">注册 · </a>
+          <a href="#" @click="showLogin">登陆</a>
+        </div>
+
+        <el-dropdown v-else class="login-btn user-wrap">
+          <el-badge is-dot>
+            <img class="avatar" :src="userInfo.avatar || './assets/img/ico_headImg.svg'">
+          </el-badge>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item disabled>账号信息</el-dropdown-item>
+            <el-dropdown-item divided @click="loginOut">退出</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
       </el-header>
       <el-main>
         <el-tabs type="border-card" @tab-click="tabClick">
@@ -31,7 +44,7 @@
     <el-dialog class="dialog" title="登陆" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
       <span>请登录</span>
       <el-input class="ipt" prefix-icon='el-icon-mobile-phone' v-model="form.account" placeholder="账号"></el-input>
-      <el-input class="ipt" prefix-icon='el-icon-view' v-model="form.password" placeholder="密码" type='password' :clearable="true" ></el-input>
+      <el-input class="ipt" prefix-icon='el-icon-view' v-model="form.password" placeholder="密码" type='password' :clearable="true"></el-input>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="login">登 陆</el-button>
@@ -53,18 +66,19 @@
     data: function () {
       return {
         dialogVisible: false,
-        form:{},
-        onLineList: []
+        form: {},
+        onLineList: [],
+        userInfo: null
       }
     },
     mounted() {
-     const session =  window.localStorage.getItem('session');
-    //  console.log(1111,session);
-    if(!session) {
-      this.dialogVisible = true;
-    }else {
-      this.connectSocket();
-    }
+      const session = window.localStorage.getItem('session');
+      //  console.log(1111,session);
+      if (!session) {
+        this.dialogVisible = true;
+      } else {
+        this.connectSocket();
+      }
 
     },
     methods: {
@@ -110,22 +124,35 @@
         this.dialogVisible = true;
       },
 
+      loginOut() {
+
+      },
+
       login() {
         $.ajax({
-          url:baseUrl+'/account/login',
-          type:'post',
-          data:this.form
+          url: baseUrl + '/account/login',
+          type: 'post',
+          data: this.form
         })
-        .then(res=>{
-          console.log('login',res);
-          window.localStorage.setItem('session',res.sessionKey)
-        },err=>{
-
-        })
+          .then(res => {
+            this.$message({
+              message:'登陆成功',
+              type:'success'
+            });
+            window.localStorage.setItem('session', res.sessionKey);
+            this.userInfo = res;
+            this.handleClose();
+          }, err => {
+            this.$message({
+              message:err.responseJSON.content || '登陆失败',
+              type:'warning'
+            });
+          })
       },
 
       handleClose(event) {
-        console.log('handleClose', event);
+        // console.log('handleClose', event);
+        this.dialogVisible = false;
       }
     }
   })
@@ -148,6 +175,19 @@
     float: right;
     margin-top: 10px;
     margin-right: 15px;
+  }
+
+  .login-btn a {
+    color: #303133;
+  }
+
+  .user-wrap {
+    height: 40px;
+  }
+
+  .user-wrap .avatar {
+    width: 40px;
+    height: 40px;
   }
 
   .el-aside {
