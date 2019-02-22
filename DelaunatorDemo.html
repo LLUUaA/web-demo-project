@@ -27,23 +27,40 @@
       this.config = {
         boundary: 200,//边界大小
         noise: 60, // 噪声
-        triangleSize:130 //三角形大小
+        triangleSize: 130 //三角形大小
       }
     }
 
     start() {
       this.generate();
+      this.animate();
+    }
+
+    animate() {
+      if (!this.dots.length) {
+        requestAnimationFrame(this.animate.bind(this));
+        return;
+      };
+
+      this.ctx.clearRect(0, 0, this.VW, this.VW); //清楚
+
+      this.dots.forEach(p => {
+        p.update();
+      });
+
+      this.dots.forEach(dot => {
+        dot.draw();
+      })
+      requestAnimationFrame(this.animate.bind(this));
+
     }
 
     generate() {
       let points = []; //坐标点
       const ctx = this.ctx;
-      const { boundary,noise,triangleSize } = this.config;
+      const { boundary, noise, triangleSize } = this.config;
 
       this.generateDots(this.VW, this.VH);
-      this.dots.forEach(dot => {
-        dot.draw();
-      })
 
       for (let i = 0 - boundary; i < this.VW + boundary; i += triangleSize) {
         for (let j = 0 - boundary; j < this.VH + boundary; j += triangleSize) {
@@ -56,13 +73,13 @@
       const delaunator = Delaunator.from(points);
       let coordinates = [];
       let triangles = delaunator.triangles;
-
+      this.ctx.beginPath();
       for (let i = 0; i < triangles.length; i += 3) {
-          ctx.moveTo(points[triangles[i]][0], points[triangles[i]][1]);
-          ctx.lineTo(points[triangles[i]][0], points[triangles[i]][1]);
-          ctx.lineTo(points[triangles[i + 1]][0], points[triangles[i + 1]][1]);
-          ctx.lineTo(points[triangles[i + 2]][0], points[triangles[i + 2]][1]);
-          ctx.strokeStyle = 'rgba(0,0,0, ' + getRandomFloat(0.1, 0.7) + ')';
+        ctx.moveTo(points[triangles[i]][0], points[triangles[i]][1]);
+        ctx.lineTo(points[triangles[i]][0], points[triangles[i]][1]);
+        ctx.lineTo(points[triangles[i + 1]][0], points[triangles[i + 1]][1]);
+        ctx.lineTo(points[triangles[i + 2]][0], points[triangles[i + 2]][1]);
+        ctx.strokeStyle = 'rgba(0,0,0, ' + getRandomFloat(0.1, 0.7) + ')';
       }
 
       // ctx.fillStyle = 'rgba(0,0,0, ' + getRandomFloat(0.1, 0.7) + ')';
@@ -97,13 +114,18 @@
       this.ctx = p.ctx;
       this.x = getRandomInt(0, p.width);
       this.y = getRandomInt(0, p.height);
+      this.ox = this.x;
+      this.oy = this.y;
       this.r = getRandomFloat(1, 2);
+      this.interval = getRandomInt(1000, 5000);
+      this.limit = getRandomInt(5, 15);
       this.opacity = getRandomFloat(0.1, 0.7);
     }
 
     // 更新
     update() {
-
+      this.x = this.ox + (Math.cos(performance.now() / this.interval) * this.limit);
+      this.y = this.oy + ((Math.sin(performance.now() / this.interval) * this.limit) / 2);
     }
 
     // draw
@@ -116,7 +138,6 @@
     }
   }
 
-
   function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
@@ -124,7 +145,6 @@
   function getRandomFloat(min, max) {
     return (Math.random() * (max - min) + min);
   }
-
 
   // 监听页面加载完成
   window.addEventListener('load', function () {
