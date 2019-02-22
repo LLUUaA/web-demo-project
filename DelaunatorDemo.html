@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Page Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+</body>
+
+<script src="./assets/js/delaunator.min.js"></script>
+<script>
+  class Space {
+    constructor() {
+      let c = document.getElementById("canvas");
+      this.ctx = c.getContext('2d');
+      this.VW = c.parentElement.clientWidth;
+      this.VH = c.parentElement.clientHeight;
+      c.width = this.VW;
+      c.height = this.VH;
+      this.dots = []; //背景star
+      // 配置
+      this.config = {
+        boundary: 200,//边界大小
+        noise: 60, // 噪声
+        triangleSize:130 //三角形大小
+      }
+    }
+
+    start() {
+      this.generate();
+    }
+
+    generate() {
+      let points = []; //坐标点
+      const ctx = this.ctx;
+      const { boundary,noise,triangleSize } = this.config;
+
+      this.generateDots(this.VW, this.VH);
+      this.dots.forEach(dot => {
+        dot.draw();
+      })
+
+      for (let i = 0 - boundary; i < this.VW + boundary; i += triangleSize) {
+        for (let j = 0 - boundary; j < this.VH + boundary; j += triangleSize) {
+          var x = i + getRandomInt(0, noise);
+          var y = j + getRandomInt(0, noise);
+          points.push([x, y]);
+        }
+      }
+
+      const delaunator = Delaunator.from(points);
+      let coordinates = [];
+      let triangles = delaunator.triangles;
+
+      for (let i = 0; i < triangles.length; i += 3) {
+          ctx.moveTo(points[triangles[i]][0], points[triangles[i]][1]);
+          ctx.lineTo(points[triangles[i]][0], points[triangles[i]][1]);
+          ctx.lineTo(points[triangles[i + 1]][0], points[triangles[i + 1]][1]);
+          ctx.lineTo(points[triangles[i + 2]][0], points[triangles[i + 2]][1]);
+          ctx.strokeStyle = 'rgba(0,0,0, ' + getRandomFloat(0.1, 0.7) + ')';
+      }
+
+      // ctx.fillStyle = 'rgba(0,0,0, ' + getRandomFloat(0.1, 0.7) + ')';
+      // ctx.closePath();
+      // ctx.fill();
+
+      ctx.stroke()
+    }
+
+    /**
+    * 
+    */
+    generateDots(w, h, min, max) {
+      let dots = [];
+      let dotSet = {
+        ctx: this.ctx,
+        width: w,
+        height: h
+      }
+
+      for (let i = 0; i < 250; i++) {
+        dots.push(new Dots(dotSet))
+      }
+
+      this.dots = dots;
+    }
+  }
+
+  // dots class 背景
+  class Dots {
+    constructor(p) {
+      this.ctx = p.ctx;
+      this.x = getRandomInt(0, p.width);
+      this.y = getRandomInt(0, p.height);
+      this.r = getRandomFloat(1, 2);
+      this.opacity = getRandomFloat(0.1, 0.7);
+    }
+
+    // 更新
+    update() {
+
+    }
+
+    // draw
+    draw() {
+      this.ctx.beginPath();
+      this.ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      this.ctx.fillStyle = 'rgba(255,255,255, ' + this.opacity + ')';
+      // this.ctx.fillStyle = 'rgba(0,0,0, ' + this.opacity + ')';
+      this.ctx.fill();
+    }
+  }
+
+
+  function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function getRandomFloat(min, max) {
+    return (Math.random() * (max - min) + min);
+  }
+
+
+  // 监听页面加载完成
+  window.addEventListener('load', function () {
+    const space = new Space();
+    // start
+    space.start();
+  })
+
+</script>
+
+<style>
+  body,
+  html {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    font-size: 0;
+    background-color: #0b8793;
+  }
+</style>
+
+</html>

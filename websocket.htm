@@ -53,7 +53,8 @@
   </div>
 </body>
 <!-- import socket.io  -->
-<script src="https://cdn.bootcss.com/socket.io/2.1.1/socket.io.js"></script>
+<!-- <script src="https://cdn.bootcss.com/socket.io/2.1.1/socket.io.js"></script> -->
+<script src="./assets//js/socket.io.js"></script>
 <!-- import Vue before Element -->
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
 <script src="./assets/js/jquery.min.js"></script>
@@ -61,6 +62,7 @@
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script>
   const baseUrl = 'http://localhost:3000';
+  let session = null;
   new Vue({
     el: '#app',
     data: function () {
@@ -72,8 +74,7 @@
       }
     },
     mounted() {
-      const session = window.localStorage.getItem('session');
-      //  console.log(1111,session);
+      session = window.localStorage.getItem('session');;
       if (!session) {
         this.dialogVisible = true;
       } else {
@@ -84,10 +85,11 @@
     methods: {
       connectSocket() {
         const socket = io('ws://localhost:3001',{
-          extraHeaders: {
-    'X-Custom-Header-For-My-Project': 'my-secret-access-token',
-    'Cookie': 'user_session=NI2JlCKF90aE0sJZD9ZzujtdsUqNYSBYxzlTsvdSUe35ZzdtVRGqYFr0kdGxbfc5gUOkR9RGp20GVKza; path=/; expires=Tue, 07-Apr-2015 18:18:08 GMT; secure; HttpOnly'
-  }
+          path:'/test',
+          transports: ['websocket'],
+          query:{
+            token:session
+          }
         });
         console.log('socket', socket);
         socket.on('connect', function () {
@@ -95,17 +97,22 @@
           socket.on(socket.id, function (data) {
             console.log('on msg single', data);
           }); //简单实现单-单通信
-
           socket.on('message', function (data) {
             console.log('on message', data);
           });
+        })
 
+        socket.on('error',(err)=>{
+          console.log(err);
+          this.$message({
+              message: err || 'socket error',
+              type:'warning'
+            });
         })
       },
 
       tabClick(event) {
         const { id } = event.$el.dataset;
-        console.log('tabClick', id);
         switch (id) {
           case 'online':
             $.ajax({
