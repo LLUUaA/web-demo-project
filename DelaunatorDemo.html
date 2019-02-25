@@ -23,16 +23,25 @@
       c.width = this.VW;
       c.height = this.VH;
       this.dots = []; //背景star
+      this.coordinates = []; //三角形points坐标
+      this.coordinatesMove = {}; //坐标移动和周长
       // 配置
       this.config = {
         boundary: 200,//边界大小
         noise: 60, // 噪声
-        triangleSize: 130 //三角形大小
+        triangleSize: 130, //三角形大小
+        color1: '#28042f',
+        color2: '#0b8793',
+        pointAnimationSpeed: 20,
+        pointVariationX: 20,
+        pointVariationY: 35,
       }
+
+      this.generateTriangles();
+      this.generateDots(this.VW, this.VH);
     }
 
     start() {
-      this.generate();
       this.animate();
     }
 
@@ -42,8 +51,9 @@
         return;
       };
 
-      this.ctx.clearRect(0, 0, this.VW, this.VW); //清楚
+      this.ctx.clearRect(0, 0, this.VW, this.VW); //清除
 
+      this.draw();
       this.dots.forEach(p => {
         p.update();
       });
@@ -51,16 +61,70 @@
       this.dots.forEach(dot => {
         dot.draw();
       })
-      requestAnimationFrame(this.animate.bind(this));
 
+      this.animateTriangles();
+      requestAnimationFrame(this.animate.bind(this));
     }
 
-    generate() {
-      let points = []; //坐标点
+    draw() {
+      const coordinates = this.coordinates,
+        ctx = this.ctx;
+      coordinates.forEach(t => {
+        ctx.beginPath();
+        var coords = [];
+        coords.push({ x: t[0][0], y: t[0][1] });
+        coords.push({ x: t[1][0], y: t[1][1] });
+        coords.push({ x: t[2][0], y: t[2][1] });
+
+        ctx.strokeStyle = t[3];
+        ctx.fillStyle = t[3];
+        var dp = [0, 1, 2, 0];
+        dp.forEach((el, ind) => {
+          if (this.coordinatesMove[coords[el].x] && this.coordinatesMove[coords[el].x][coords[el].y] != undefined) {
+            var c = { x: coords[el].x, y: coords[el].y };
+            var change = this.coordinatesMove[coords[el].x][coords[el].y] || { x: 0, y: 0 };
+
+            if (ind == 0) {
+              ctx.moveTo(c.x + change.x, c.y + change.y);
+            }
+            else {
+              ctx.lineTo(c.x + change.x, c.y + change.y);
+            }
+          }
+        });
+
+        ctx.fill();
+        ctx.stroke();
+      })
+    }
+
+    /**
+    * 主图形
+    */
+    animateTriangles() {
+      Object.keys(this.coordinatesMove).forEach(x=>{
+            Object.keys(this.coordinatesMove[x]).forEach(y=>{
+                const per = this.coordinatesMove[x][y].per + this.config.pointAnimationSpeed/1000;
+                this.coordinatesMove[x][y] += this.config.pointAnimationSpeed/1000;
+                var changeX = (Math.cos(per)*this.config.pointVariationX);
+                var changeY = (Math.sin(per)*this.config.pointVariationY);
+                this.coordinatesMove[x][y] = {
+                    x: changeX,
+                    y: changeY,
+                    per:per
+                };
+            });
+        });
+    }
+
+    // 生成三角形
+    generateTriangles() {
+      let points = [],//生成坐标点
+        coordinates = [],//坐标
+        coordinatesMove = {}; //移动的距离
+
       const ctx = this.ctx;
       const { boundary, noise, triangleSize } = this.config;
-
-      this.generateDots(this.VW, this.VH);
 
       for (let i = 0 - boundary; i < this.VW + boundary; i += triangleSize) {
         for (let j = 0 - boundary; j < this.VH + boundary; j += triangleSize) {
@@ -71,26 +135,50 @@
       }
 
       const delaunator = Delaunator.from(points);
-      let coordinates = [];
       let triangles = delaunator.triangles;
-      this.ctx.beginPath();
+
       for (let i = 0; i < triangles.length; i += 3) {
-        ctx.moveTo(points[triangles[i]][0], points[triangles[i]][1]);
-        ctx.lineTo(points[triangles[i]][0], points[triangles[i]][1]);
-        ctx.lineTo(points[triangles[i + 1]][0], points[triangles[i + 1]][1]);
-        ctx.lineTo(points[triangles[i + 2]][0], points[triangles[i + 2]][1]);
-        ctx.strokeStyle = 'rgba(0,0,0, ' + getRandomFloat(0.1, 0.7) + ')';
+        let t = [points[triangles[i]], points[triangles[i + 1]], points[triangles[i + 2]]];
+
+        let coords = [];//设置坐标点
+        coords.push({ x: t[0][0], y: t[0][1] })
+        coords.push({ x: t[1][0], y: t[1][1] })
+        coords.push({ x: t[2][0], y: t[2][1] })
+        let color = gradient(getCenter(coords), this.VW, this.VH, this.config.color1, this.config.color2);;
+        t.push(color);//color
+        coordinates.push(t);
       }
+      coordinates.forEach(t => {
+        t.forEach((p) => {
+          let [x, y] = p,
+            per = x / this.VW;
 
-      // ctx.fillStyle = 'rgba(0,0,0, ' + getRandomFloat(0.1, 0.7) + ')';
-      // ctx.closePath();
-      // ctx.fill();
+          if (!coordinatesMove[x]) {
+            coordinatesMove[x] = {};
+          }
 
-      ctx.stroke()
+          if (!coordinatesMove[x][y]) {
+            coordinatesMove[x][y] = {};
+          }
+
+          coordinatesMove[x][y] = {
+            x:0,
+            y:0
+          };
+
+          // Perimeter（周长）
+          coordinatesMove[x][y]['per'] = per * 2 * Math.PI;;
+        })
+      })
+
+      this.coordinatesMove = coordinatesMove;
+      this.coordinates = coordinates;
+      console.log('coordinates', coordinates);
+      console.log('coordinatesMove', coordinatesMove);
     }
 
     /**
-    * 
+    * 生成背景star
     */
     generateDots(w, h, min, max) {
       let dots = [];
@@ -133,7 +221,6 @@
       this.ctx.beginPath();
       this.ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
       this.ctx.fillStyle = 'rgba(255,255,255, ' + this.opacity + ')';
-      // this.ctx.fillStyle = 'rgba(0,0,0, ' + this.opacity + ')';
       this.ctx.fill();
     }
   }
@@ -145,6 +232,66 @@
   function getRandomFloat(min, max) {
     return (Math.random() * (max - min) + min);
   }
+
+  function gradient(coords, width, height, leftColor, rightColor) {
+
+    var x = coords.x;
+    var y = coords.y;
+
+    var per = 0;
+
+    per = (x / width);
+
+    var per2 = 0;
+
+    per2 = (y / height);
+
+    per = (per2 + per) / 2;
+
+    if (per > 1) {
+      per = 1;
+    }
+    else if (per < 0) {
+      per = 0;
+    }
+
+
+    var color1 = leftColor;
+    var color2 = rightColor;
+    var hex = function (x) {
+      x = x.toString(16);
+      return (x.length == 1) ? '0' + x : x;
+    };
+
+    var r = Math.ceil(parseInt(color1.substring(1, 3), 16) * per + parseInt(color2.substring(1, 3), 16) * (1 - per));
+    var g = Math.ceil(parseInt(color1.substring(3, 5), 16) * per + parseInt(color2.substring(3, 5), 16) * (1 - per));
+    var b = Math.ceil(parseInt(color1.substring(5, 7), 16) * per + parseInt(color2.substring(5, 7), 16) * (1 - per));
+
+    var middle = "#" + hex(r) + hex(g) + hex(b);
+
+    return middle;
+  }
+
+  function getPointBetweenPoints(p1, p2, d) {
+    var dist = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+    var t = d / dist;
+    return {
+      x: (((1 - t) * p1.x) + t * p2.x),
+      y: (((1 - t) * p1.y) + t * p2.y),
+    };
+  }
+
+  function getCenter(coords) {
+    var sumX = 0;
+    var sumY = 0;
+
+    coords.forEach(p => {
+        sumX += p.x;
+        sumY += p.y;
+    });
+
+    return { x: sumX / coords.length, y: sumY / coords.length }
+}
 
   // 监听页面加载完成
   window.addEventListener('load', function () {
