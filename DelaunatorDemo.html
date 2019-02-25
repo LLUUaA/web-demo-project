@@ -16,12 +16,9 @@
 <script>
   class Space {
     constructor() {
-      let c = document.getElementById("canvas");
-      this.ctx = c.getContext('2d');
-      this.VW = c.parentElement.clientWidth;
-      this.VH = c.parentElement.clientHeight;
-      c.width = this.VW;
-      c.height = this.VH;
+      this.ctx = null;
+      this.VW = 0
+      this.VH = 0;
       this.dots = []; //背景star
       this.coordinates = []; //三角形points坐标
       this.coordinatesMove = {}; //坐标移动和周长
@@ -32,13 +29,26 @@
         triangleSize: 130, //三角形大小
         color1: '#28042f',
         color2: '#0b8793',
-        pointAnimationSpeed: 20,
+        pointAnimationSpeed: 15,
         pointVariationX: 20,
         pointVariationY: 35,
       }
 
+      window.addEventListener('resize', this.resize.bind(this));
+      this.resize();
+    }
+
+    resize() {
+      let c = document.getElementById("canvas");
+      this.ctx = c.getContext('2d');
+      this.VW = c.parentElement.clientWidth;
+      this.VH = c.parentElement.clientHeight;
+      c.width = this.VW;
+      c.height = this.VH;
+
       this.generateTriangles();
       this.generateDots(this.VW, this.VH);
+
     }
 
     start() {
@@ -173,8 +183,8 @@
 
       this.coordinatesMove = coordinatesMove;
       this.coordinates = coordinates;
-      console.log('coordinates', coordinates);
-      console.log('coordinatesMove', coordinatesMove);
+      // console.log('coordinates', coordinates);
+      // console.log('coordinatesMove', coordinatesMove);
     }
 
     /**
@@ -305,11 +315,12 @@
 <style>
   body,
   html {
+    padding: 0;
     margin: 0;
     height: 100%;
     width: 100%;
     font-size: 0;
-    background-color: #0b8793;
+    overflow: hidden;
   }
 </style>
 
