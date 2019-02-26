@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>twitter.emoji</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  twitter.emoji
+  <p id="show"></p>
+</body>
+<script src="./assets/js/twemoji.min.js"></script>
+<script>
+  // var emoji =  twemoji.parse('😶🇵🇸🉑🇨🇳🇺🇿');
+  var emoji = twemoji.parse(
+  'I \u2764\uFE0F emoji!',
+  function(icon, options, variant) {
+    return '/assets/' + options.size + '/' + icon + '.gif';
+  }
+);
+  var emoji =  twemoji.parse('😶🇵🇸🉑🇨🇳🇺🇿');
+  var el = document.getElementById("show");
+  el.innerHTML = emoji;
+  
+</script>
+</html>
