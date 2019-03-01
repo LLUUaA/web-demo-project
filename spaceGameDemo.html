@@ -2,6 +2,9 @@
   项目地址 https://codepen.io/Loopez10/pen/dMaVdQ
   素材1. https://s3-us-west-2.amazonaws.com/s.cdpn.io/600764/sprite.png
   素材2. https://s3-us-west-2.amazonaws.com/s.cdpn.io/600764/explosion.png
+
+  (三角形)边长公式 ：c = Math.sqrt(a^2 + b^2 - 2abcosC)
+  (三角形)角度计算公式 ： cosA = (b^2 + c^2 - a^2)/2bc
  -->
 
 <!DOCTYPE html>
@@ -28,13 +31,29 @@
       game.width = this.vw;
       game.height = this.vh;
 
+      this.fireObserver = {}; //fire 
+
       let spriteImg = new Image();
       spriteImg.src = "https://s3-us-west-2.amazonaws.com/s.cdpn.io/600764/sprite.png";
       this.spriteImg = spriteImg;
-      
+
       // 图片加载完成
       spriteImg.onload = () => {
         this.drawBackground();
+        game.addEventListener('click', (event) => {
+          console.log('onClick', event);
+          this.fire({
+            x:event.offsetX,
+            y:event.offsetY
+          });
+        });
+        game.addEventListener('mousemove', (event) => {
+          // console.log('mousemove',event);
+          // this.fire({
+          //   x:event.offsetX,
+          //   y:event.offsetY
+          // });
+        })
       }
     }
 
@@ -45,9 +64,48 @@
 
       this.ctx.drawImage(this.spriteImg, 200, 0, 80, 100, 0, 0, 80, 100); //plane
       this.ctx.drawImage(this.spriteImg, 280, 0, 140, 140, 100, 0, 140, 140); //stone
-      this.ctx.drawImage(this.spriteImg, 210, 100, 50, 100, 250, 0, 50, 100); //Bullet
+      this.ctx.drawImage(this.spriteImg, 210, 100, 50, 80, 250, 0, 50, 80); //Bullet
       this.ctx.drawImage(this.spriteImg, 420, 0, 100, 100, 300, 0, 100, 100); //start
       this.ctx.drawImage(this.spriteImg, 520, 0, 100, 100, 400, 0, 100, 100); //restart
+    }
+    
+    // fire
+    fire(coordinate) {
+      const center =this.getCenterCoordinate();
+      let dx =  coordinate.x - center.x;
+      let dy =  coordinate.y - center.y;
+      var deg = Math.atan2(dx,dy);
+
+      this.ctx.save();//保存状态
+      this.ctx.translate(center.x, center.y);//设置画布上的(0,0)位置，也就是旋转的中心点
+      this.ctx.rotate(deg);
+
+      this.ctx.drawImage(this.spriteImg, 210, 100, 50, 75, -8, -180, 50, 80); //Bullet
+      this.ctx.restore();//恢复状态
+    }
+
+    // 获取中心
+    getCenterCoordinate() {
+      return {
+        x: this.vw / 2,
+        y: this.vh / 2
+      }
+    }
+  }
+
+  class Fire {
+    constructor(coordinate = {}) {
+      this.speed = 10;
+      this.x = coordinate.x;
+      this.y = coordinate.y;
+    }
+    
+    draw () {
+
+    }
+
+    update() {
+
     }
   }
 
@@ -80,7 +138,8 @@
     background-size: cover;
   }
 
-  canvas.playing {
+  canvas.playing,
+  canvas {
     cursor: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/600764/aim_red.png') 17.5 17.5, auto !important;
   }
 
