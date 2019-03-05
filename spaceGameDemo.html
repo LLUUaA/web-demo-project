@@ -31,7 +31,8 @@
       game.width = this.vw;
       game.height = this.vh;
 
-      this.fireObserver = {}; //fire 
+      this.fireObserver = []; //fire
+      this.enemyObserver = []; //enemy
 
       let spriteImg = new Image();
       spriteImg.src = "https://s3-us-west-2.amazonaws.com/s.cdpn.io/600764/sprite.png";
@@ -40,11 +41,12 @@
       // 图片加载完成
       spriteImg.onload = () => {
         this.drawBackground();
+        this.generateEnemy();
         game.addEventListener('click', (event) => {
           console.log('onClick', event);
           this.fire({
-            x:event.offsetX,
-            y:event.offsetY
+            x: event.offsetX,
+            y: event.offsetY
           });
         });
         game.addEventListener('mousemove', (event) => {
@@ -68,23 +70,87 @@
       this.ctx.drawImage(this.spriteImg, 420, 0, 100, 100, 300, 0, 100, 100); //start
       this.ctx.drawImage(this.spriteImg, 520, 0, 100, 100, 400, 0, 100, 100); //restart
     }
-    
-    // fire
-    fire(coordinate) {
-      const center =this.getCenterCoordinate();
-      let dx =  coordinate.x - center.x;
-      let dy =  coordinate.y - center.y;
-      var deg = Math.atan2(dx,dy);
 
-      this.ctx.save();//保存状态
-      this.ctx.translate(center.x, center.y);//设置画布上的(0,0)位置，也就是旋转的中心点
-      this.ctx.rotate(deg);
-
-      this.ctx.drawImage(this.spriteImg, 210, 100, 50, 75, -8, -180, 50, 80); //Bullet
-      this.ctx.restore();//恢复状态
+    start() {
+      this.animate();
     }
 
-    // 获取中心
+    // animate
+    animate() {
+      this.ctx.clearRect(0, 0, this.vw, this.vh); //清除
+      this.drawBackground();
+      this.fireAnimate();
+      this.enemyAnimate();
+      requestAnimationFrame(this.animate.bind(this));
+    }
+
+    fireAnimate() {
+      const center = this.getCenterCoordinate();
+      this.fireObserver.forEach((fire, index) => {
+        if (fire.mY > -((this.vw / 2) + 180)) {
+          this.handleExplode(fire, index);
+
+          this.ctx.save();//保存状态
+          this.ctx.translate(center.x, center.y);//设置画布上的(0,0)位置，也就是旋转的中心点
+          this.ctx.rotate(fire.deg);
+          this.ctx.drawImage(this.spriteImg, 210, 100, 50, 75, -8, fire.mY, 19, 30); //Bullet
+          this.ctx.restore();//恢复状态
+          fire.mY -= 10;
+        } else {
+          this.fireObserver.splice(index, 1);
+        }
+      });
+    }
+
+    enemyAnimate() {
+      const center = this.getCenterCoordinate();
+      this.enemyObserver.forEach((enemy, index) => {
+        this.ctx.save();//保存状态
+        this.ctx.translate(center.x, center.y);//设置画布上的(0,0)位置，也就是旋转的中心点
+        this.ctx.rotate(enemy.deg);
+        this.ctx.drawImage(this.spriteImg, 280, 0, 140, 140,  - 8 , enemy.y, 140 * enemy.size, 140 * enemy.size); //stone 
+        this.ctx.restore();//恢复状态
+
+        // enemy.x = enemy.x - enemy.speed;
+        enemy.y = enemy.y  - enemy.speed;
+      });
+    }
+
+    // explode
+    handleExplode() {
+
+    }
+
+    // fire
+    fire(coordinate) {
+      const center = this.getCenterCoordinate();
+      var deg = Math.atan2(coordinate.x - center.x, -(coordinate.y - center.y));
+      this.fireObserver.push({
+        deg,
+        mY: -130
+      })
+    }
+
+    // 生成敌人
+    generateEnemy() {
+      // const y = getRandomInt(-180,190);
+      const size = getRandomFloat(.5, 1);
+      const speed = getRandomFloat(2, 5);
+      const deg = getRandomFloat(-Math.PI,Math.PI);
+
+      this.enemyObserver.push({
+        y:this.vw/2,
+        size,
+        deg,
+        speed
+        });
+
+        console.log('deg',deg);
+
+      setTimeout(this.generateEnemy.bind(this),1000);
+    }
+
+    // 获取中心点
     getCenterCoordinate() {
       return {
         x: this.vw / 2,
@@ -93,26 +159,20 @@
     }
   }
 
-  class Fire {
-    constructor(coordinate = {}) {
-      this.speed = 10;
-      this.x = coordinate.x;
-      this.y = coordinate.y;
-    }
-    
-    draw () {
-
-    }
-
-    update() {
-
-    }
-  }
 
   // 监听页面加载完成
   window.addEventListener('load', function () {
-    new Game();
+    const game = new Game();
+    game.start();
   })
+
+  function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function getRandomFloat(min, max) {
+    return (Math.random() * (max - min) + min);
+  }
 
 </script>
 <style>
