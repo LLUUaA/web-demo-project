@@ -123,13 +123,27 @@
       if (enemy.y < 180) {
         this.enemyObserver.splice(index, 1); //test
         // this.gameOver();
+        return;
       }
 
       const fireObserver = this.fireObserver,
         len = fireObserver.length;
 
       for (let i = 0; i < len; i++) {
-        let fire = fireObserver[i];
+        let fire = fireObserver[i],
+          x,
+          y;
+
+        if (fire.deg > (Math.PI / 2) && fire.deg < Math.PI
+          || fire.deg < 0 && fire.deg > -(Math.PI / 2)) {// 二、四象限
+          x = Math.cos(fire.deg) * fire.mY;
+          y = Math.sin(fire.deg) * fire.mY;
+        } else {
+          x = Math.cos(fire.deg + Math.PI) * fire.mY;
+          y = Math.sin(fire.deg + Math.PI) * fire.mY;
+        }
+
+        console.log('x=%d and y=%d ',x,y)
       }
     }
 
@@ -142,6 +156,8 @@
     fire(coordinate) {
       const center = this.getCenterCoordinate();
       var deg = Math.atan2(coordinate.x - center.x, -(coordinate.y - center.y));
+
+      console.log('fire deg',deg);
       this.fireObserver.push({
         deg,
         mY: -130
@@ -162,7 +178,7 @@
         speed
         });
 
-        console.log('deg',deg);
+        console.log('enemy deg',deg);
 
       // setTimeout(this.generateEnemy.bind(this),1000);
     }
