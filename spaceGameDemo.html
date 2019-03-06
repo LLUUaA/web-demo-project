@@ -75,6 +75,10 @@
       this.animate();
     }
 
+    gameOver () {
+
+    }
+
     // animate
     animate() {
       this.ctx.clearRect(0, 0, this.vw, this.vh); //清除
@@ -88,8 +92,6 @@
       const center = this.getCenterCoordinate();
       this.fireObserver.forEach((fire, index) => {
         if (fire.mY > -((this.vw / 2) + 180)) {
-          this.handleExplode(fire, index);
-
           this.ctx.save();//保存状态
           this.ctx.translate(center.x, center.y);//设置画布上的(0,0)位置，也就是旋转的中心点
           this.ctx.rotate(fire.deg);
@@ -105,19 +107,34 @@
     enemyAnimate() {
       const center = this.getCenterCoordinate();
       this.enemyObserver.forEach((enemy, index) => {
+        this.handleExplode(enemy, index);
         this.ctx.save();//保存状态
         this.ctx.translate(center.x, center.y);//设置画布上的(0,0)位置，也就是旋转的中心点
         this.ctx.rotate(enemy.deg);
-        this.ctx.drawImage(this.spriteImg, 280, 0, 140, 140,  - 8 , enemy.y, 140 * enemy.size, 140 * enemy.size); //stone 
+        this.ctx.drawImage(this.spriteImg, 280, 0, 140, 140,  - 8 , enemy.y, enemy.size, enemy.size); //stone 
         this.ctx.restore();//恢复状态
-
         // enemy.x = enemy.x - enemy.speed;
         enemy.y = enemy.y  - enemy.speed;
       });
     }
 
     // explode
-    handleExplode() {
+    handleExplode(enemy, index) {
+      if (enemy.y < 180) {
+        this.enemyObserver.splice(index, 1); //test
+        // this.gameOver();
+      }
+
+      const fireObserver = this.fireObserver,
+        len = fireObserver.length;
+
+      for (let i = 0; i < len; i++) {
+        let fire = fireObserver[i];
+      }
+    }
+
+    // explodeAnimate
+    explodeAnimate(x,y) {
 
     }
 
@@ -134,8 +151,8 @@
     // 生成敌人
     generateEnemy() {
       // const y = getRandomInt(-180,190);
-      const size = getRandomFloat(.5, 1);
-      const speed = getRandomFloat(2, 5);
+      const size = getRandomFloat(70, 140) ;
+      const speed = getRandomFloat(1, 4);
       const deg = getRandomFloat(-Math.PI,Math.PI);
 
       this.enemyObserver.push({
@@ -147,7 +164,7 @@
 
         console.log('deg',deg);
 
-      setTimeout(this.generateEnemy.bind(this),1000);
+      // setTimeout(this.generateEnemy.bind(this),1000);
     }
 
     // 获取中心点
