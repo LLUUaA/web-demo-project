@@ -129,12 +129,12 @@
       }
 
       const fireObserver = this.fireObserver,
-        enemyObserver = this.enemyObserver,
-        enemyLen = enemyObserver.length,
         len = fireObserver.length;
 
       for (let i = 0; i < len; i++) {
-        const fire = fireObserver[i];
+        const fire = fireObserver[i],
+          enemyObserver = this.enemyObserver,
+          enemyLen = enemyObserver.length;
         let fireCoor = this.getFECoordinate(fire.deg, fire.mY);
         // console.log('fire: x=%d and y=%d ', fireCoor.x, fireCoor.y)
         for (let j = 0; j < enemyLen; j++) {
