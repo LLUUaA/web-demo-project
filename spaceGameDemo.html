@@ -22,6 +22,8 @@
 </body>
 
 <script>
+  const PI = Math.PI;
+
   class Game {
     constructor() {
       let game = document.getElementById("game");
@@ -75,7 +77,7 @@
       this.animate();
     }
 
-    gameOver () {
+    gameOver() {
 
     }
 
@@ -111,10 +113,10 @@
         this.ctx.save();//保存状态
         this.ctx.translate(center.x, center.y);//设置画布上的(0,0)位置，也就是旋转的中心点
         this.ctx.rotate(enemy.deg);
-        this.ctx.drawImage(this.spriteImg, 280, 0, 140, 140,  - 8 , enemy.y, enemy.size, enemy.size); //stone 
+        this.ctx.drawImage(this.spriteImg, 280, 0, 140, 140, - 8, enemy.y, enemy.size, enemy.size); //stone 
         this.ctx.restore();//恢复状态
         // enemy.x = enemy.x - enemy.speed;
-        enemy.y = enemy.y  - enemy.speed;
+        enemy.y = enemy.y - enemy.speed;
       });
     }
 
@@ -127,29 +129,47 @@
       }
 
       const fireObserver = this.fireObserver,
+        enemyObserver = this.enemyObserver,
+        enemyLen = enemyObserver.length,
         len = fireObserver.length;
 
       for (let i = 0; i < len; i++) {
-        let fire = fireObserver[i],
-          x,
-          y;
+        const fire = fireObserver[i];
+        let fireCoor = this.getFECoordinate(fire.deg, fire.mY);
+        // console.log('fire: x=%d and y=%d ', fireCoor.x, fireCoor.y)
+        for (let j = 0; j < enemyLen; j++) {
+          const enemyItem = enemyObserver[i];
+          let enemyCoor = this.getFECoordinate(enemyItem.deg, enemyItem.y);
+          // console.log('enemy: x=%d and y=%d ', enemyCoor.x, enemyCoor.y);
+          if(fireCoor.x > enemyCoor.x && fireCoor.x < enemyCoor.x + enemyItem.size
+           && fireCoor.y > enemyCoor.y && fireCoor.y < enemyCoor.y + enemyItem.size ) {
+             console.log('boom~~~');
+             this.explodeAnimate(0,0,j);
+             break;
+          }
 
-        if (fire.deg > (Math.PI / 2) && fire.deg < Math.PI
-          || fire.deg < 0 && fire.deg > -(Math.PI / 2)) {// 二、四象限
-          x = Math.cos(fire.deg) * fire.mY;
-          y = Math.sin(fire.deg) * fire.mY;
-        } else {
-          x = Math.cos(fire.deg + Math.PI) * fire.mY;
-          y = Math.sin(fire.deg + Math.PI) * fire.mY;
         }
-
-        console.log('x=%d and y=%d ',x,y)
       }
     }
 
-    // explodeAnimate
-    explodeAnimate(x,y) {
+    // get fire or enemy coordinate
+    getFECoordinate(deg, cy) {
+      let x, y;
+      if (deg > (PI / 2) && deg < PI
+        || deg < 0 && deg > -(PI / 2)) {// 二、四象限
+        x = Math.cos(deg) * cy;
+        y = Math.sin(deg) * cy;
+      } else {
+        x = Math.cos(deg + PI) * cy;
+        y = Math.sin(deg + PI) * cy;
+      }
 
+      return { x, y }
+    }
+
+    // explodeAnimate
+    explodeAnimate(x, y,index) {
+      this.enemyObserver.splice(index, 1);
     }
 
     // fire
@@ -157,7 +177,7 @@
       const center = this.getCenterCoordinate();
       var deg = Math.atan2(coordinate.x - center.x, -(coordinate.y - center.y));
 
-      console.log('fire deg',deg);
+      console.log('fire deg', deg);
       this.fireObserver.push({
         deg,
         mY: -130
@@ -167,20 +187,20 @@
     // 生成敌人
     generateEnemy() {
       // const y = getRandomInt(-180,190);
-      const size = getRandomFloat(70, 140) ;
+      const size = getRandomFloat(70, 140);
       const speed = getRandomFloat(1, 4);
-      const deg = getRandomFloat(-Math.PI,Math.PI);
+      const deg = getRandomFloat(-PI, PI);
 
       this.enemyObserver.push({
-        y:this.vw/2,
+        y: this.vw / 2,
         size,
         deg,
         speed
-        });
+      });
 
-        console.log('enemy deg',deg);
+      console.log('enemy deg', deg);
 
-      // setTimeout(this.generateEnemy.bind(this),1000);
+      setTimeout(this.generateEnemy.bind(this),1000);
     }
 
     // 获取中心点
