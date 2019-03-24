@@ -9,24 +9,73 @@
 </head>
 
 <body>
-    <a 
-    id="download" 
-    href="https://storage.bubaocloud.com/api/download/pMEhfEq4V63BTlwqzHBX3dYrimdLbakjRbxiaVKXhnaEsZfTvd4mYqdqXqifthSfg1StOf-1"
-    download="test">下载
+    <a id="download" href="https://storage.bubaocloud.com/api/download/pMEhfEq4V63BTlwqzHBX3dYrimdLbakjRbxiaVKXhnaEsZfTvd4mYqdqXqifthSfg1StOf-1"
+        download="test">下载
     </a>
     <ul id="click">
         <li>link a</li>
         <li>link b</li>
         <li>link c</li>
     </ul>
-
+    <div class="mask-test">
+        <video id="testVido" autoplay  src="https://media.w3.org/2010/05/sintel/trailer.mp4"></video>
+        <!-- <div class="mask"></div>
+        <div class="mask2"></div> -->
+        <div class="wrap">
+            <div class="txt">我是弹幕。我是弹幕。我是弹幕。我是弹幕我是弹幕。我是弹幕。我是弹幕。我是弹幕我是弹幕。我是弹幕。我是弹幕。我是弹幕</div>
+        </div>
+    </div>
 </body>
 <script>
     const clickEl = document.getElementById("click");
-    clickEl.addEventListener('click',(event)=>{
-        console.log('click',event)
-        location.hash='ok=1'
+    clickEl.addEventListener('click', (event) => {
+        console.log('click', event)
+        location.hash = 'ok=1'
     })
+
+    const videoEl = document.getElementById("testVido");
 </script>
+
+<style>
+    .mask-test {
+        position: relative;
+        width: 100%;
+        height: 600px;
+    }
+
+    .mask-test video,
+    .mask-test .wrap {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .mask-test .wrap {
+        -webkit-mask-image: linear-gradient(to right, rgb(0, 0, 0), rgb(0, 0, 0) 1.09718%, rgba(0, 0, 0, 0) 1.09718%), linear-gradient(to right, rgba(0, 0, 0, 0) 98.9028%, rgb(0, 0, 0) 98.9028%, rgb(0, 0, 0)), linear-gradient(rgb(0, 0, 0), rgb(0, 0, 0) 10.7383%, rgba(0, 0, 0, 0) 10.7383%), linear-gradient(rgba(0, 0, 0, 0) 89.2617%, rgb(0, 0, 0) 89.2617%, rgb(0, 0, 0)), url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDIwMDEwOTA0Ly9FTiIKICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+CjxzdmcgdmVyc2lvbj0iMS4wIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiB3aWR0aD0iNjI4cHgiIGhlaWdodD0iMzU1cHgiIHZpZXdCb3g9IjAgMCAzMjAuMDAwMDAwIDE4MC4wMDAwMDAiCiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij4KCjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAuMDAwMDAwLDE4MC4wMDAwMDApIHNjYWxlKDAuMTAwMDAwLC0wLjEwMDAwMCkiCmZpbGw9IiMwMDAwMDAiIHN0cm9rZT0ibm9uZSI+CjxwYXRoIGQ9Ik0wIDkwMCBsMCAtOTAwIDk5NCAwIDk5NSAwIC0yIDc3IGMtMyAxNjcgMjkgMzY4IDcyIDQ0NCAxNyAyOSA2MAoxNDQgNzEgMTg5IDIzIDkwIDQzIDEzMSA4MyAxNjYgMjIgMTkgNDYgMzQgNTIgMzQgNyAwIDIwIDkgMzAgMjAgMTAgMTEgMzcgMjUKNTkgMzAgNzUgMTkgODYgMjcgODYgNjEgMCAxOCAtNiA0MCAtMTMgNDggLTggOSAtMjQgNDkgLTM3IDg5IC00MSAxMzAgLTExCjMwNiA2NCAzODEgbDM2IDM2IDEwMyAzIGMxMTYgNCAxMzUgLTQgMTg1IC04MiAyMyAtMzcgMjYgLTUwIDI1IC0xMzYgMCAtNzMKLTQgLTEwMyAtMTkgLTEzMCAtMjIgLTQzIC0yNiAtMTU4IC02IC0xODMgMjQgLTI4IDExNiAtNzQgMTYzIC04MSAzOCAtNiA1NgotMTYgMTA3IC02NyA0NyAtNDcgNjYgLTc0IDg0IC0xMjUgMTkgLTUzIDI3IC02NCA0NSAtNjQgbDIzIDAgMCA1NDUgMCA1NDUKLTE2MDAgMCAtMTYwMCAwIDAgLTkwMHoiLz4KPC9nPgo8L3N2Zz4K")
+    }
+
+    .mask-test .txt {
+        min-width: 200px;
+        position: absolute;
+        right: 10px;
+        top: 200px;
+        color: red;
+        z-index: 5;
+        animation: move 5s linear infinite;
+        transition: 5s;
+    }
+
+    @keyframes move {
+        0% {
+            right: 0;
+        }
+
+        100% {
+            right: 100%;
+        }
+    }
+</style>
 
 </html>
