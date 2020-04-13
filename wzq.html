@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>WZQ</title>
+</head>
+
+<body>
+    <canvas id="wzq" style="margin: 0 auto;"></canvas>
+</body>
+<script>
+    /** base **/
+    const canvas = document.getElementById("wzq");
+    const ctx = canvas.getContext("2d");
+    const lines = 30;
+    const qSize = 450;
+    const chessSize = 10;
+    const cellH = qSize / lines;
+    /** chess **/
+    const firstChessType = 1; // 1 -> white 2 -> black
+    const currentChess = {
+        step: 0,
+        playerType: null,
+        x: 0,
+        y: 0,
+    }; // current chess 
+    const chessboard = new Array(lines); // chess board
+    const chessHistory = [];
+    /** main **/
+    this.draw();
+
+    const canvasEl = document.querySelector("#wzq");
+    canvasEl.addEventListener('click', tap); //tap
+    function draw() {
+        canvas.width = qSize;
+        canvas.height = qSize;
+        ctx.fillStyle = "#000";
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.lineTo(0, 0);
+        ctx.lineTo(0, qSize);
+        ctx.lineTo(qSize, qSize);
+        ctx.lineTo(qSize, 0);
+        ctx.closePath();
+        for (let i = 0; i < lines; i++) {
+            const cellDx = cellH * i;
+            ctx.moveTo(0, cellDx);
+            ctx.lineTo(qSize, cellDx);
+            ctx.moveTo(cellDx, 0);
+            ctx.lineTo(cellDx, qSize);
+        }
+        ctx.stroke();
+    }
+
+    function tap(e) {
+        // console.log(`layer x = ${e.layerX} layer y = ${e.layerY}`);
+        const { layerX, layerY } = e;
+        const xIndex = Math.floor((layerX + cellH / 2) / cellH);
+        const yIndex = Math.floor((layerY + cellH / 2) / cellH);
+        currentChess.playerType = currentChess.step % 2 === 0 ? chessPlayerType.black : chessPlayerType.white;
+        currentChess.x = xIndex;
+        currentChess.y = yIndex;
+        drawChess();
+        record();
+        checkVictory();
+        currentChess.step++;
+    }
+
+    const chessPlayerType = {
+        black: "_BLACK_",
+        white: "_WHITE_"
+    };
+
+    /*** test **/
+    function drawChess() {
+        const { x, y, playerType } = currentChess;
+        const color = playerType === chessPlayerType.black ? "black" : "white";
+        console.log("c", color, x, y);
+        ctx.fillStyle = color;
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(cellH * x, cellH * y, chessSize / 2, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    /** record chess **/
+    function record() {
+        const { x, y, playerType } = currentChess;
+        if (!chessboard[x]) {
+            chessboard[x] = new Array(lines);
+        }
+        chessboard[x][y] = playerType;
+        chessHistory.push(coord(x, y));
+        console.log("record", chessboard);
+    }
+
+
+    /** 
+    *
+    * @desciption direction 8 
+    * @desciption 1.left 2.leftTop 3.top 4.rightTop 5.right 6.bottomRight 7.bottom 8.bottomLeft
+    * 
+    **/
+    const directions = {
+        left: coord(-1, 0),
+        leftTop: coord(-1, -1),
+        top: coord(0, -1),
+        rightTop: coord(1, -1),
+        right: coord(1, 0),
+        bottomRight: coord(1, 1),
+        bottom: coord(0, 1),
+        bottomLeft: coord(-1, 1),
+    };
+
+    /** check victory **/
+    function checkVictory() {
+        const { x, y, playerType } = currentChess;
+        const chessCoord = { x, y };
+        let cCount = 1; // defalut 1 (include current coord)
+
+        const check = function (checkCoord) {
+            console.log('checkCoord', checkCoord);
+            console.log('chessCoord', chessCoord);
+            const cx = chessCoord.x + checkCoord.x;
+            const cy = chessCoord.y + checkCoord.y;
+            if (cCount === 5) {
+                return true;
+            };
+            if (chessboard[x][y] === playerType) {
+                chessCoord.x = cx;
+                chessCoord.y = cy;
+                cCount++;
+                check(...arguments);
+            } else {
+                return false;
+            }
+
+        };
+        // for (const key in directions) {
+        //     const checkCoord = directions[key];
+        //     if (check(checkCoord)) {
+        //         alert(`${playerType} victory`);
+        //         break;
+        //     }
+        //     else {
+        //         cCount = 1;
+        //         chessCoord.x = x;
+        //         chessCoord.y = y;
+        //         continue;
+        //     }
+        // }
+
+        /// test check
+        const checkCoord = directions.top;
+        if (check(checkCoord)) {
+            alert(`${playerType} victory`);
+        }
+    }
+
+    function coord(x, y) {
+        return { x, y }
+    }
+
+</script>
+
+</html>
