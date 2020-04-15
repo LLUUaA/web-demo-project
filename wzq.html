@@ -10,7 +10,10 @@
   </head>
 
   <body>
-    <canvas id="wzq" style="margin: 0 auto;"></canvas>
+    <canvas
+      id="wzq"
+      style="margin: 0 auto; background-color: #e4c089;"
+    ></canvas>
   </body>
   <script>
     /** base **/
@@ -18,24 +21,30 @@
     const ctx = canvas.getContext("2d");
     const lines = 30;
     const qSize = 450;
-    const chessSize = 10;
+    const chessSize = 12;
     const cellH = qSize / lines;
-    /** chess **/
-    const firstChessType = 1; // 1 -> white 2 -> black
-    const currentChess = {
-      step: 0,
-      playerType: null,
-      x: 0,
-      y: 0,
-    }; // current chess
-    const chessboard = new Array(lines); // chess board
-    const chessHistory = [];
-    /** main **/
-    this.draw();
-
+    let currentChess, chessboard, chessHistory;
+    reset();
     const canvasEl = document.querySelector("#wzq");
     canvasEl.addEventListener("click", tap); //tap
-    function draw() {
+
+    // reset
+    function reset() {
+      /** chess **/
+      currentChess = {
+        step: 0,
+        playerType: null,
+        x: 0,
+        y: 0,
+      }; // current chess
+      chessboard = new Array(lines); // chess board
+      chessHistory = [];
+      /** main **/
+      this.drawChessBoard();
+    }
+
+    // draw chess board
+    function drawChessBoard() {
       canvas.width = qSize;
       canvas.height = qSize;
       ctx.fillStyle = "#000";
@@ -57,7 +66,6 @@
     }
 
     function tap(e) {
-      // console.log(`layer x = ${e.layerX} layer y = ${e.layerY}`);
       const { layerX, layerY } = e;
       const xIndex = Math.floor((layerX + cellH / 2) / cellH);
       const yIndex = Math.floor((layerY + cellH / 2) / cellH);
@@ -67,10 +75,15 @@
           : chessPlayerType.white;
       currentChess.x = xIndex;
       currentChess.y = yIndex;
+
+      if (!canDrawChess()) {
+        return;
+      }
+
       drawChess();
       record();
       checkVictory();
-      currentChess.step++;
+      currentChess.step++; // step ++
     }
 
     const chessPlayerType = {
@@ -78,11 +91,24 @@
       white: "_WHITE_",
     };
 
-    /*** test **/
+    /**
+     * @desc can draw
+     * @returns {Bool}
+     */
+    function canDrawChess() {
+      const { x, y } = currentChess;
+      // if draw
+      if (chessboard[x] && chessboard[x][y]) {
+        return false;
+      }
+
+      return true;
+    }
+
+    // draw chess
     function drawChess() {
       const { x, y, playerType } = currentChess;
       const color = playerType === chessPlayerType.black ? "black" : "white";
-      console.log("c", color, x, y);
       ctx.fillStyle = color;
       ctx.save();
       ctx.beginPath();
@@ -100,7 +126,6 @@
       }
       chessboard[x][y] = playerType;
       chessHistory.push(coord(x, y));
-      console.log("record", chessboard);
     }
 
     /**
@@ -144,9 +169,16 @@
       const check = (currentCoord) => {
         const cx = currentCoord.x + offsetCoord.x;
         const cy = currentCoord.y + offsetCoord.y;
+        if (!chessboard[cx]) {
+          return count;
+        }
         if (chessboard[cx][cy] === playerType) {
           count++;
-          check({ cx, cy });
+          // tips x,y
+          check({
+            x: cx,
+            y: cy,
+          });
         } else {
           return;
         }
@@ -161,7 +193,8 @@
       for (const { prev, next } of _directions2) {
         const cCount = getConnectCount(prev) + getConnectCount(next) + 1;
         if (cCount > 4) {
-          alert(`${playerType} victory,congrations!`);
+          confirm(`${playerType} victory,congrations!`);
+          reset();
           break;
         }
       }
