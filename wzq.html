@@ -9,12 +9,41 @@
     <title>WZQ</title>
   </head>
 
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 100vw;
+      height: 100vh;
+      text-align: center;
+      background-color: #ececec;
+      overflow: hidden;
+    }
+    #wzq {
+      background-color: #e4c089;
+    }
+    button {
+      width: 150px;
+      text-align: center;
+      font-size: 1.3em;
+      cursor: pointer;
+    }
+  </style>
+
   <body>
-    <canvas
-      id="wzq"
-      style="margin: 0 auto; background-color: #e4c089;"
-    ></canvas>
+    <div class="container">
+      <h3 id="title">黑棋先手</h3>
+      <canvas id="wzq"></canvas>
+      <h4 id="currentPlayer"></h4>
+      <div>
+        <button id="regret">悔棋</button>
+        <button id="replay">重新开始</button>
+      </div>
+    </div>
   </body>
+  <!-- common -->
   <script>
     // class coord
     class Coord {
@@ -31,36 +60,209 @@
       }
     }
 
+    class MyJQ {
+      constructor(selector) {
+        this.selector = selector;
+        this.el = document.querySelector(selector);
+      }
+      innerHTML(val) {
+        this.el.innerHTML = val;
+        return this;
+      }
+
+      click(cb) {
+        if ("function" === typeof cb) {
+          this.el.addEventListener("click", cb);
+        }
+        return this;
+      }
+    }
+
+    // inject my JQ
+    function inject(selector) {
+      try {
+        return new MyJQ(selector);
+      } catch (error) {
+        console.log("Error", error);
+      }
+    }
+
+    // my JQ
+    const $ = inject;
+  </script>
+
+  <script>
+    /** constant  **/
+    const chessPlayerType = {
+      black: "_BLACK_",
+      white: "_WHITE_",
+    };
+
+    const chessColor = {
+      [chessPlayerType.black]: "black",
+      [chessPlayerType.white]: "white",
+    };
+
+    const I18n = {
+      en: {},
+      "zh-cn": {
+        [chessPlayerType.black]: "黑棋",
+        [chessPlayerType.white]: "白棋",
+        currentChessPlayer: "当前棋手",
+        regret: "是否确定悔棋？",
+        replay: "是否确定重新开始？",
+        emptyChessBoard: "没有可反悔的棋子！",
+        congrations: "胜利了，恭喜！！",
+        pleaseReplay: "请重新开始游戏。",
+      },
+    };
+
     /** base **/
     const canvas = document.getElementById("wzq");
     const ctx = canvas.getContext("2d");
-    const lines = 30;
-    const qSize = 450;
-    const chessSize = 12;
+    const lines = 30; // 棋盘线
+    const qSize = 550; // 棋盘大小
+    const chessSize = 14; // 棋子大小
     const cellH = qSize / lines;
-    let currentChess, chessboard, chessHistory;
-    reset();
+    const currentChess = new Coord();
+    let chessboard, chessHistory, isVictory;
+    // i18n
+    const local = I18n["zh-cn"];
     const canvasEl = document.querySelector("#wzq");
-    canvasEl.addEventListener("click", tap); //tap
+    // reset
+    reset();
+    //tap
+    canvasEl.addEventListener("click", tap);
+    // regret
+    $("#regret").click(() => {
+      if (isVictory) {
+        alert(local.pleaseReplay);
+        return;
+      }
+
+      if (!chessHistory.length) {
+        alert(local.emptyChessBoard);
+        return;
+      }
+
+      if (confirm(local.regret)) {
+        handleRegret();
+      }
+    });
+    // replay
+    $("#replay").click(() => {
+      if (confirm(local.replay)) {
+        reset();
+      }
+    });
+
+    function tap(e) {
+      // if victory
+      if (!!isVictory) {
+        return;
+      }
+      const { layerX, layerY } = e;
+      // const xIndex = Math.floor((layerX + cellH / 2) / cellH);
+      // const yIndex = Math.floor((layerY + cellH / 2) / cellH);
+      const chessCoord = getChessCoord(layerX, layerY);
+      currentChess.playerType =
+        currentChess.step % 2 === 0
+          ? chessPlayerType.black
+          : chessPlayerType.white;
+      currentChess.x = chessCoord.x;
+      currentChess.y = chessCoord.y;
+
+      if (!canDrawChess()) {
+        return;
+      }
+      // draw chess
+      drawChess(chessCoord, chessColor[currentChess.playerType], chessSize);
+      record();
+      showPlayer();
+      if (checkVictory()) {
+        isVictory = true;
+        showVictory();
+      } else {
+        // step ++
+        currentChess.step++;
+      }
+    }
+
+    /**
+     * @desc get chess coord
+     * @desc 获取棋子的坐标（根据位置）
+     *
+     */
+    function getChessCoord(layerX, layerY) {
+      const x = Math.floor((layerX + cellH / 2) / cellH);
+      const y = Math.floor((layerY + cellH / 2) / cellH);
+      return new Coord(x, y);
+    }
 
     // reset
     function reset() {
       /** chess  current chess**/
-      // currentChess = {
-      //   step: 0,
-      //   playerType: null,
-      //   x: 0,
-      //   y: 0,
-      // };
-      currentChess = new Coord();
       currentChess.step = 0;
       currentChess.playerType = null;
-
+      isVictory = false;
       // chess board
       chessboard = new Array(lines);
       chessHistory = [];
       /** main **/
-      this.drawChessBoard();
+      drawChessBoard();
+      drawChessBoardCenter();
+      showPlayer();
+    }
+
+    /**
+     * @desc draw center
+     * @desc 画棋盘中心点(5个位置)
+     *
+     */
+    function drawChessBoardCenter() {
+      const centerCoord = getChessCoord(qSize / 2, qSize / 2);
+      const offsetLeftTop = new Coord(-5, -5);
+      const offsetRightTop = new Coord(5, -5);
+      const fixedPoints = [
+        offsetLeftTop,
+        offsetLeftTop.inverseCoord(),
+        offsetRightTop,
+        offsetRightTop.inverseCoord(),
+      ];
+
+      for (const item of fixedPoints) {
+        const x = centerCoord.x + item.x;
+        const y = centerCoord.y + item.y;
+        drawChess(new Coord(x, y), "#333", 8);
+      }
+
+      drawChess(centerCoord, "#333", 8);
+    }
+
+    /**
+     * @desc handle regret
+     * @desc 悔棋需要判断是哪方在悔棋
+     * @desc 由于现在没有做联机 所以不需要做太复杂，只能反悔当前这颗棋子(可连续悔棋)
+     */
+    function handleRegret() {
+      // delete history
+      chessboard[currentChess.x][currentChess.y] = null;
+      chessHistory.pop();
+      // repaint chess board
+      drawChessBoard();
+      // draw Center
+      drawChessBoardCenter();
+      // draw chess
+      for (const chessCoord of chessHistory) {
+        currentChess.x = chessCoord.x;
+        currentChess.y = chessCoord.y;
+        currentChess.playerType = chessboard[chessCoord.x][chessCoord.y];
+        drawChess(chessCoord, chessColor[currentChess.playerType], chessSize);
+      }
+      // step --
+      currentChess.step--;
+      // show player
+      showPlayer();
     }
 
     // draw chess board
@@ -85,31 +287,33 @@
       ctx.stroke();
     }
 
-    function tap(e) {
-      const { layerX, layerY } = e;
-      const xIndex = Math.floor((layerX + cellH / 2) / cellH);
-      const yIndex = Math.floor((layerY + cellH / 2) / cellH);
-      currentChess.playerType =
-        currentChess.step % 2 === 0
-          ? chessPlayerType.black
-          : chessPlayerType.white;
-      currentChess.x = xIndex;
-      currentChess.y = yIndex;
-
-      if (!canDrawChess()) {
-        return;
-      }
-
-      drawChess();
-      record();
-      checkVictory();
-      currentChess.step++; // step ++
+    /**
+     * @desc show page player
+     *
+     **/
+    function showPlayer() {
+      try {
+        let { playerType } = currentChess;
+        let innerTxt = `${local.currentChessPlayer}：-`;
+        if (playerType) {
+          playerType =
+            chessPlayerType.black === playerType
+              ? chessPlayerType.white
+              : chessPlayerType.black;
+          innerTxt = `${local.currentChessPlayer}：${local[playerType]}`;
+        }
+        $("#currentPlayer").innerHTML(innerTxt);
+      } catch (error) {}
     }
 
-    const chessPlayerType = {
-      black: "_BLACK_",
-      white: "_WHITE_",
-    };
+    /**
+     * @desc show victory
+     *
+     **/
+    function showVictory() {
+      const { playerType } = currentChess;
+      $("#title").innerHTML(`${local[playerType]}${local.congrations}`);
+    }
 
     /**
      * @desc can draw
@@ -125,15 +329,26 @@
       return true;
     }
 
-    // draw chess
-    function drawChess() {
-      const { x, y, playerType } = currentChess;
-      const color = playerType === chessPlayerType.black ? "black" : "white";
+    /**
+     * @desc draw chess
+     * @params {Coord} chessCoord
+     * @params {Color} color
+     * @params {int} size
+     **/
+    function drawChess(chessCoord, color, size) {
+      // const { x, y, playerType } = currentChess;
+      // ctx.fillStyle = chessColor[playerType];
       ctx.fillStyle = color;
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(0, 0);
-      ctx.arc(cellH * x, cellH * y, chessSize / 2, 0, 2 * Math.PI);
+      ctx.arc(
+        cellH * chessCoord.x,
+        cellH * chessCoord.y,
+        size / 2,
+        0,
+        2 * Math.PI
+      );
       ctx.fill();
       ctx.restore();
     }
@@ -208,17 +423,19 @@
       return count;
     }
 
-    /** check victory **/
+    /**
+     * @desc check victory
+     * @returns {Bool} true -> victory false-> continiue
+     */
     function checkVictory() {
       const { playerType } = currentChess;
       for (const { prev, next } of _directions2) {
         const cCount = getConnectCount(prev) + getConnectCount(next) + 1;
         if (cCount > 4) {
-          confirm(`${playerType} victory,congrations!`);
-          reset();
-          break;
+          return true;
         }
       }
+      return false;
     }
   </script>
 </html>
