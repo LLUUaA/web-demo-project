@@ -16,6 +16,21 @@
     ></canvas>
   </body>
   <script>
+    // class coord
+    class Coord {
+      constructor(x, y) {
+        this.x = x || 0;
+        this.y = y || 0;
+      }
+
+      inverseCoord() {
+        return {
+          x: 0 - this.x,
+          y: 0 - this.y,
+        };
+      }
+    }
+
     /** base **/
     const canvas = document.getElementById("wzq");
     const ctx = canvas.getContext("2d");
@@ -30,14 +45,19 @@
 
     // reset
     function reset() {
-      /** chess **/
-      currentChess = {
-        step: 0,
-        playerType: null,
-        x: 0,
-        y: 0,
-      }; // current chess
-      chessboard = new Array(lines); // chess board
+      /** chess  current chess**/
+      // currentChess = {
+      //   step: 0,
+      //   playerType: null,
+      //   x: 0,
+      //   y: 0,
+      // };
+      currentChess = new Coord();
+      currentChess.step = 0;
+      currentChess.playerType = null;
+
+      // chess board
+      chessboard = new Array(lines);
       chessHistory = [];
       /** main **/
       this.drawChessBoard();
@@ -125,7 +145,7 @@
         chessboard[x] = new Array(lines);
       }
       chessboard[x][y] = playerType;
-      chessHistory.push(coord(x, y));
+      chessHistory.push(new Coord(x, y));
     }
 
     /**
@@ -135,34 +155,35 @@
      *
      **/
     const directions = {
-      left: coord(-1, 0),
-      leftTop: coord(-1, -1),
-      top: coord(0, -1),
-      rightTop: coord(1, -1),
-      right: coord(1, 0),
-      bottomRight: coord(1, 1),
-      bottom: coord(0, 1),
-      bottomLeft: coord(-1, 1),
+      left: new Coord(-1, 0),
+      leftTop: new Coord(-1, -1),
+      top: new Coord(0, -1),
+      rightTop: new Coord(1, -1),
+      // right: new Coord(1, 0),
+      // bottomRight: new Coord(1, 1),
+      // bottom: new Coord(0, 1),
+      // bottomLeft: new Coord(-1, 1),
     };
     const _directions2 = [
       {
         prev: directions.left,
-        next: inverseCoord(directions.left),
+        next: directions.left.inverseCoord(),
       },
       {
         prev: directions.leftTop,
-        next: inverseCoord(directions.leftTop),
+        next: directions.leftTop.inverseCoord(),
       },
       {
         prev: directions.top,
-        next: inverseCoord(directions.top),
+        next: directions.top.inverseCoord(),
       },
       {
         prev: directions.rightTop,
-        next: inverseCoord(directions.rightTop),
+        next: directions.rightTop.inverseCoord(),
       },
     ];
 
+    // 计算棋子
     function getConnectCount(offsetCoord) {
       const { x, y, playerType } = currentChess;
       let count = 0;
@@ -198,17 +219,6 @@
           break;
         }
       }
-    }
-
-    function coord(x, y) {
-      return { x, y };
-    }
-
-    function inverseCoord({ x, y }) {
-      return {
-        x: 0 - x,
-        y: 0 - y,
-      };
     }
   </script>
 </html>
