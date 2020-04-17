@@ -43,7 +43,7 @@
       </div>
     </div>
   </body>
-  <!-- common -->
+  <!-- common script -->
   <script>
     // class coord
     class Coord {
@@ -90,7 +90,7 @@
     // my JQ
     const $ = inject;
   </script>
-
+  <!-- main script -->
   <script>
     /** constant  **/
     const chessPlayerType = {
@@ -383,18 +383,22 @@
       {
         prev: directions.left,
         next: directions.left.inverseCoord(),
+        key: "left",
       },
       {
         prev: directions.leftTop,
         next: directions.leftTop.inverseCoord(),
+        key: "leftTop",
       },
       {
         prev: directions.top,
         next: directions.top.inverseCoord(),
+        key: "top",
       },
       {
         prev: directions.rightTop,
         next: directions.rightTop.inverseCoord(),
+        key: "rightTop",
       },
     ];
 
@@ -436,6 +440,35 @@
         }
       }
       return false;
+    }
+  </script>
+  <!-- robot script -->
+  <script>
+    function getNextCoord(chessboard, currentChessType) {
+      const selfRecord = {}; // self
+      const otherSide = {}; // other
+      chessboard.forEach((board, x) => {
+        board.forEach((playerType, y) => {
+          selfRecord[`${x}-${y}`] = {};
+          otherSide[`${x}-${y}`] = {};
+          for (const { prev, next, key } of _directions2) {
+            const prevCount = getConnectCount(prev);
+            const nextCount = getConnectCount(next);
+
+            if (!playerType) {
+              selfRecord[`${x}-${y}`][key] = {
+                prev: prevCount,
+                next: nextCount,
+              };
+            } else if (playerType !== currentChessType) {
+              otherSide[`${x}-${y}`][key] = {
+                prev: prevCount,
+                next: nextCount,
+              };
+            }
+          }
+        });
+      });
     }
   </script>
 </html>
