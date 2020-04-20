@@ -93,21 +93,21 @@
   <!-- main script -->
   <script>
     /** constant  **/
-    const chessPlayerType = {
+    const chessPlayerTypes = {
       black: "_BLACK_",
       white: "_WHITE_",
     };
 
-    const chessColor = {
-      [chessPlayerType.black]: "black",
-      [chessPlayerType.white]: "white",
+    const chessColors = {
+      [chessPlayerTypes.black]: "black",
+      [chessPlayerTypes.white]: "white",
     };
 
     const I18n = {
       en: {},
       "zh-cn": {
-        [chessPlayerType.black]: "黑棋",
-        [chessPlayerType.white]: "白棋",
+        [chessPlayerTypes.black]: "黑棋",
+        [chessPlayerTypes.white]: "白棋",
         currentChessPlayer: "当前棋手",
         regret: "是否确定悔棋？",
         replay: "是否确定重新开始？",
@@ -162,13 +162,19 @@
         return;
       }
       const { layerX, layerY } = e;
-      // const xIndex = Math.floor((layerX + cellH / 2) / cellH);
-      // const yIndex = Math.floor((layerY + cellH / 2) / cellH);
       const chessCoord = getChessCoord(layerX, layerY);
+      handleDraw(chessCoord);
+    }
+
+    /**
+     * @desc handle draw chess
+     * @param{chessCoord} Coord
+     */
+    function handleDraw(chessCoord) {
       currentChess.playerType =
         currentChess.step % 2 === 0
-          ? chessPlayerType.black
-          : chessPlayerType.white;
+          ? chessPlayerTypes.black
+          : chessPlayerTypes.white;
       currentChess.x = chessCoord.x;
       currentChess.y = chessCoord.y;
 
@@ -176,15 +182,21 @@
         return;
       }
       // draw chess
-      drawChess(chessCoord, chessColor[currentChess.playerType], chessSize);
+      drawChess(chessCoord, chessColors[currentChess.playerType], chessSize);
       record();
       showPlayer();
+
       if (checkVictory()) {
         isVictory = true;
         showVictory();
       } else {
         // step ++
         currentChess.step++;
+        // test
+        if (currentChess.playerType === chessPlayerTypes.black) {
+          const nextCoord = getNextCoord(chessboard, chessPlayerTypes.white);
+          handleDraw(nextCoord);
+        }
       }
     }
 
@@ -206,7 +218,8 @@
       currentChess.playerType = null;
       isVictory = false;
       // chess board
-      chessboard = new Array(lines);
+      chessboard = new Array(lines).fill();
+      chessboard.forEach((_, i) => (chessboard[i] = new Array(lines)));
       chessHistory = [];
       /** main **/
       drawChessBoard();
@@ -257,7 +270,7 @@
         currentChess.x = chessCoord.x;
         currentChess.y = chessCoord.y;
         currentChess.playerType = chessboard[chessCoord.x][chessCoord.y];
-        drawChess(chessCoord, chessColor[currentChess.playerType], chessSize);
+        drawChess(chessCoord, chessColors[currentChess.playerType], chessSize);
       }
       // step --
       currentChess.step--;
@@ -297,9 +310,9 @@
         let innerTxt = `${local.currentChessPlayer}：-`;
         if (playerType) {
           playerType =
-            chessPlayerType.black === playerType
-              ? chessPlayerType.white
-              : chessPlayerType.black;
+            chessPlayerTypes.black === playerType
+              ? chessPlayerTypes.white
+              : chessPlayerTypes.black;
           innerTxt = `${local.currentChessPlayer}：${local[playerType]}`;
         }
         $("#currentPlayer").innerHTML(innerTxt);
@@ -337,7 +350,7 @@
      **/
     function drawChess(chessCoord, color, size) {
       // const { x, y, playerType } = currentChess;
-      // ctx.fillStyle = chessColor[playerType];
+      // ctx.fillStyle = chessColors[playerType];
       ctx.fillStyle = color;
       ctx.save();
       ctx.beginPath();
@@ -356,9 +369,6 @@
     /** record chess **/
     function record() {
       const { x, y, playerType } = currentChess;
-      if (!chessboard[x]) {
-        chessboard[x] = new Array(lines);
-      }
       chessboard[x][y] = playerType;
       chessHistory.push(new Coord(x, y));
     }
@@ -403,9 +413,15 @@
     ];
 
     // 计算棋子
-    function getConnectCount(offsetCoord) {
-      const { x, y, playerType } = currentChess;
-      let count = 0;
+    function getConnectCount(offsetCoord, checkChess) {
+      const { x, y, playerType } = checkChess || currentChess;
+      let count = 0, // count
+        isBlock = false; // 是否被阻拦
+      // TODO 阻拦逻辑
+      if (!playerType) {
+        return count;
+      }
+
       const check = (currentCoord) => {
         const cx = currentCoord.x + offsetCoord.x;
         const cy = currentCoord.y + offsetCoord.y;
@@ -420,6 +436,9 @@
             y: cy,
           });
         } else {
+          if (count > 0) {
+            isBlock = true;
+          }
           return;
         }
       };
@@ -444,31 +463,103 @@
   </script>
   <!-- robot script -->
   <script>
-    function getNextCoord(chessboard, currentChessType) {
+    function getNextCoord(chessboard, checkPlayerType) {
       const selfRecord = {}; // self
       const otherSide = {}; // other
-      chessboard.forEach((board, x) => {
-        board.forEach((playerType, y) => {
-          selfRecord[`${x}-${y}`] = {};
-          otherSide[`${x}-${y}`] = {};
+      const bestCoord = {
+        self: 0,
+        other: 0,
+      }; // best coord
+      let autoChessCoord;
+
+      // calc chess connect count
+      for (let x = 0; x < chessboard.length; x++) {
+        const board = chessboard[x];
+        for (let y = 0; y < board.length; y++) {
+          const playerType = board[y];
+          // check chess data
+          const checkChess = { x, y, playerType: checkPlayerType };
           for (const { prev, next, key } of _directions2) {
-            const prevCount = getConnectCount(prev);
-            const nextCount = getConnectCount(next);
+            const cCount =
+              getConnectCount(prev, checkChess) +
+              getConnectCount(next, checkChess) +
+              1;
+            const pKey = `${x}-${y}`;
+            if (cCount === 1) {
+              continue;
+            }
+            // set obj
+            if (!selfRecord[pKey]) {
+              selfRecord[pKey] = {};
+            }
+
+            if (!otherSide[pKey]) {
+              otherSide[pKey] = {};
+            }
 
             if (!playerType) {
-              selfRecord[`${x}-${y}`][key] = {
-                prev: prevCount,
-                next: nextCount,
+              // self
+              cCount > bestCoord.self ? (bestCoord.self = cCount) : null;
+              selfRecord[pKey][key] = {
+                count: cCount,
+                isBlock: false,
+                isDoubleBlock: false,
               };
-            } else if (playerType !== currentChessType) {
-              otherSide[`${x}-${y}`][key] = {
-                prev: prevCount,
-                next: nextCount,
-              };
+            } else if (playerType !== checkPlayerType) {
+              // other
+              cCount > bestCoord.other ? (bestCoord.other = cCount) : null;
+              otherSide[pKey][key] = cCount;
             }
           }
-        });
-      });
+        }
+      }
+
+      // if empty
+      if (!Object.keys(selfRecord).length) {
+        const offsetCoord = getRandomDirection();
+        autoChessCoord = new Coord(
+          currentChess.x + offsetCoord.x,
+          currentChess.y + offsetCoord.y
+        );
+      }
+      // not empty
+      else {
+        // TODO auto coord 
+        for (const key in otherSide) {
+          const cCount = otherSide[key];
+          const [x, y] = key.split("-").map((v) => Number(v));
+          switch (cCount) {
+            case 4:
+              break;
+            case 3:
+              break;
+            default:
+              break;
+          }
+        }
+      }
+
+      console.log("selfRecord", selfRecord);
+      console.log("otherSide", otherSide);
+
+      return autoChessCoord;
+    }
+
+    /*
+     * @desc get random direction
+     *
+     **/
+    function getRandomDirection() {
+      const r1 = getRandomNum(0, _directions2.length - 1);
+      const r2 = getRandomNum(0, 1);
+      return _directions2[r1][r2 === 0 ? "prev" : "next"];
+    }
+    /*
+     * @desc get random num
+     *
+     **/
+    function getRandomNum(min = 0, max = 10) {
+      return Math.floor(Math.random() * (max - min + 1) + min);
     }
   </script>
 </html>
