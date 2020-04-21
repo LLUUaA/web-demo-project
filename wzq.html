@@ -219,7 +219,9 @@
       isVictory = false;
       // chess board
       chessboard = new Array(lines).fill();
-      chessboard.forEach((_, i) => (chessboard[i] = new Array(lines)));
+      chessboard.forEach(
+        (_, i) => (chessboard[i] = new Array(lines).fill(null))
+      );
       chessHistory = [];
       /** main **/
       drawChessBoard();
@@ -412,21 +414,27 @@
       },
     ];
 
-    // 计算棋子
-    function getConnectCount(offsetCoord, checkChess) {
+    /**
+     * @desc 计算棋子相连数量
+     * @param {Coord} -offsetCoord
+     * @param {chess} -checkChess
+     * @returns {Object} -count -isBlock
+     */
+    function getChessConnect(offsetCoord, checkChess) {
       const { x, y, playerType } = checkChess || currentChess;
       let count = 0, // count
         isBlock = false; // 是否被阻拦
-      // TODO 阻拦逻辑
       if (!playerType) {
-        return count;
+        return { count, isBlock };
       }
 
       const check = (currentCoord) => {
         const cx = currentCoord.x + offsetCoord.x;
         const cy = currentCoord.y + offsetCoord.y;
-        if (!chessboard[cx]) {
-          return count;
+        // 超出范围
+        if (!chessboard[cx] || void(0) === chessboard[cx][cy]) {
+          isBlock = true;
+          return;
         }
         if (chessboard[cx][cy] === playerType) {
           count++;
@@ -443,7 +451,7 @@
         }
       };
       check({ x, y });
-      return count;
+      return { count, isBlock };
     }
 
     /**
@@ -453,7 +461,8 @@
     function checkVictory() {
       const { playerType } = currentChess;
       for (const { prev, next } of _directions2) {
-        const cCount = getConnectCount(prev) + getConnectCount(next) + 1;
+        const cCount =
+          getChessConnect(prev).count + getChessConnect(next).count + 1;
         if (cCount > 4) {
           return true;
         }
@@ -480,11 +489,13 @@
           // check chess data
           const checkChess = { x, y, playerType: checkPlayerType };
           for (const { prev, next, key } of _directions2) {
-            const cCount =
-              getConnectCount(prev, checkChess) +
-              getConnectCount(next, checkChess) +
-              1;
+            const prevConnect = getChessConnect(prev, checkChess);
+            const nextConnect = getChessConnect(next, checkChess);
+            const cCount = prevConnect.count + nextConnect.count + 1;
+            const isBlock = prevConnect.isBlock || nextConnect.isBlock;
+            const isDoubleBlock = prevConnect.isBlock && nextConnect.isBlock;
             const pKey = `${x}-${y}`;
+
             if (cCount === 1) {
               continue;
             }
@@ -502,8 +513,8 @@
               cCount > bestCoord.self ? (bestCoord.self = cCount) : null;
               selfRecord[pKey][key] = {
                 count: cCount,
-                isBlock: false,
-                isDoubleBlock: false,
+                isBlock: isBlock,
+                isDoubleBlock: isDoubleBlock,
               };
             } else if (playerType !== checkPlayerType) {
               // other
@@ -524,7 +535,7 @@
       }
       // not empty
       else {
-        // TODO auto coord 
+        // TODO auto coord
         for (const key in otherSide) {
           const cCount = otherSide[key];
           const [x, y] = key.split("-").map((v) => Number(v));
