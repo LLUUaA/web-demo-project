@@ -2,575 +2,609 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>WZQ</title>
-  </head>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<title>WZQ</title>
+	</head>
 
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      width: 100vw;
-      height: 100vh;
-      text-align: center;
-      background-color: #ececec;
-      overflow: hidden;
-    }
-    #wzq {
-      background-color: #e4c089;
-    }
-    button {
-      width: 150px;
-      text-align: center;
-      font-size: 1.3em;
-      cursor: pointer;
-    }
-  </style>
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+		}
+		.container {
+			width: 100vw;
+			height: 100vh;
+			text-align: center;
+			background-color: #ececec;
+			overflow: hidden;
+		}
+		#wzq {
+			background-color: #e4c089;
+		}
+		button {
+			width: 150px;
+			text-align: center;
+			font-size: 1.3em;
+			cursor: pointer;
+		}
+	</style>
 
-  <body>
-    <div class="container">
-      <h3 id="title">黑棋先手</h3>
-      <canvas id="wzq"></canvas>
-      <h4 id="currentPlayer"></h4>
-      <div>
-        <button id="regret">悔棋</button>
-        <button id="replay">重新开始</button>
-      </div>
-    </div>
-  </body>
-  <!-- common script -->
-  <script>
-    // class coord
-    class Coord {
-      constructor(x, y) {
-        this.x = x || 0;
-        this.y = y || 0;
-      }
+	<body>
+		<div class="container">
+			<h3 id="title">黑棋先手</h3>
+			<canvas id="wzq"></canvas>
+			<h4 id="currentPlayer"></h4>
+			<div>
+				<button id="regret">悔棋</button>
+				<button id="replay">重新开始</button>
+			</div>
+		</div>
+	</body>
+	<!-- common script -->
+	<script>
+		// class coord
+		class Coord {
+			constructor(x, y) {
+				this.x = x || 0
+				this.y = y || 0
+			}
 
-      inverseCoord() {
-        return {
-          x: ~this.x + 1,
-          y: ~this.y + 1,
-        };
-      }
-    }
+			inverseCoord() {
+				return {
+					x: ~this.x + 1,
+					y: ~this.y + 1,
+				}
+			}
+		}
 
-    class MyJQ {
-      constructor(selector) {
-        this.selector = selector;
-        this.el = document.querySelector(selector);
-      }
-      innerHTML(val) {
-        this.el.innerHTML = val;
-        return this;
-      }
+		class MyJQ {
+			constructor(selector) {
+				this.selector = selector
+				this.el = document.querySelector(selector)
+			}
+			innerHTML(val) {
+				this.el.innerHTML = val
+				return this
+			}
 
-      click(cb) {
-        if ("function" === typeof cb) {
-          this.el.addEventListener("click", cb);
-        }
-        return this;
-      }
-    }
+			click(cb) {
+				if ('function' === typeof cb) {
+					this.el.addEventListener('click', cb)
+				}
+				return this
+			}
+		}
 
-    // inject my JQ
-    function inject(selector) {
-      try {
-        return new MyJQ(selector);
-      } catch (error) {
-        console.log("Error", error);
-      }
-    }
+		// inject my JQ
+		function inject(selector) {
+			try {
+				return new MyJQ(selector)
+			} catch (error) {
+				console.log('Error', error)
+			}
+		}
 
-    // my JQ
-    const $ = inject;
-  </script>
-  <!-- main script -->
-  <script>
-    /** constant  **/
-    const chessPlayerTypes = {
-      black: "_BLACK_",
-      white: "_WHITE_",
-    };
+		// my JQ
+		const $ = inject
+	</script>
+	<!-- main script -->
+	<script>
+		/** constant  **/
+		const chessPlayerTypes = {
+			black: '_BLACK_',
+			white: '_WHITE_',
+		}
 
-    const chessColors = {
-      [chessPlayerTypes.black]: "black",
-      [chessPlayerTypes.white]: "white",
-    };
+		const chessColors = {
+			[chessPlayerTypes.black]: 'black',
+			[chessPlayerTypes.white]: 'white',
+		}
 
-    const I18n = {
-      en: {},
-      "zh-cn": {
-        [chessPlayerTypes.black]: "黑棋",
-        [chessPlayerTypes.white]: "白棋",
-        currentChessPlayer: "当前棋手",
-        regret: "是否确定悔棋？",
-        replay: "是否确定重新开始？",
-        emptyChessBoard: "没有可反悔的棋子！",
-        congrations: "胜利了，恭喜！！",
-        pleaseReplay: "请重新开始游戏。",
-      },
-    };
+		const I18n = {
+			en: {},
+			'zh-cn': {
+				[chessPlayerTypes.black]: '黑棋',
+				[chessPlayerTypes.white]: '白棋',
+				currentChessPlayer: '当前棋手',
+				regret: '是否确定悔棋？',
+				replay: '是否确定重新开始？',
+				emptyChessBoard: '没有可反悔的棋子！',
+				congrations: '胜利了，恭喜！！',
+				pleaseReplay: '请重新开始游戏。',
+			},
+		}
 
-    /** base **/
-    const canvas = document.getElementById("wzq");
-    const ctx = canvas.getContext("2d");
-    const lines = 30; // 棋盘线
-    const qSize = 550; // 棋盘大小
-    const chessSize = 14; // 棋子大小
-    const cellH = qSize / lines;
-    const currentChess = new Coord();
-    let chessboard, chessHistory, isVictory;
-    // i18n
-    const local = I18n["zh-cn"];
-    const canvasEl = document.querySelector("#wzq");
-    // reset
-    reset();
-    //tap
-    canvasEl.addEventListener("click", tap);
-    // regret
-    $("#regret").click(() => {
-      if (isVictory) {
-        alert(local.pleaseReplay);
-        return;
-      }
+		/** base **/
+		const canvas = document.getElementById('wzq')
+		const ctx = canvas.getContext('2d')
+		const lines = 30 // 棋盘线
+		const qSize = 550 // 棋盘大小
+		const chessSize = 14 // 棋子大小
+		const cellH = qSize / lines
+		const currentChess = new Coord()
+		let chessboard, chessHistory, isVictory
+		// i18n
+		const local = I18n['zh-cn']
+		const canvasEl = document.querySelector('#wzq')
+		// reset
+		reset()
+		//tap
+		canvasEl.addEventListener('click', tap)
+		// regret
+		$('#regret').click(() => {
+			if (isVictory) {
+				alert(local.pleaseReplay)
+				return
+			}
 
-      if (!chessHistory.length) {
-        alert(local.emptyChessBoard);
-        return;
-      }
+			if (!chessHistory.length) {
+				alert(local.emptyChessBoard)
+				return
+			}
 
-      if (confirm(local.regret)) {
-        handleRegret();
-      }
-    });
-    // replay
-    $("#replay").click(() => {
-      if (confirm(local.replay)) {
-        reset();
-      }
-    });
+			if (confirm(local.regret)) {
+				handleRegret()
+			}
+		})
+		// replay
+		$('#replay').click(() => {
+			if (confirm(local.replay)) {
+				reset()
+			}
+		})
 
-    function tap(e) {
-      // if victory
-      if (!!isVictory) {
-        return;
-      }
-      const { layerX, layerY } = e;
-      const chessCoord = getChessCoord(layerX, layerY);
-      handleDraw(chessCoord);
-    }
+		function tap(e) {
+			// if victory
+			if (!!isVictory) {
+				return
+			}
+			const { layerX, layerY } = e
+			const chessCoord = getChessCoord(layerX, layerY)
+			handleDraw(chessCoord)
+		}
 
-    /**
-     * @desc handle draw chess
-     * @param{chessCoord} Coord
-     */
-    function handleDraw(chessCoord) {
-      currentChess.playerType =
-        currentChess.step % 2 === 0
-          ? chessPlayerTypes.black
-          : chessPlayerTypes.white;
-      currentChess.x = chessCoord.x;
-      currentChess.y = chessCoord.y;
+		/**
+		 * @desc handle draw chess
+		 * @param{chessCoord} Coord
+		 */
+		function handleDraw(chessCoord) {
+			currentChess.playerType =
+				currentChess.step % 2 === 0
+					? chessPlayerTypes.black
+					: chessPlayerTypes.white
+			currentChess.x = chessCoord.x
+			currentChess.y = chessCoord.y
 
-      if (!canDrawChess()) {
-        return;
-      }
-      // draw chess
-      drawChess(chessCoord, chessColors[currentChess.playerType], chessSize);
-      record();
-      showPlayer();
+			if (!canDrawChess()) {
+				return
+			}
+			// draw chess
+			drawChess(
+				chessCoord,
+				chessColors[currentChess.playerType],
+				chessSize
+			)
+			record()
+			showPlayer()
 
-      if (checkVictory()) {
-        isVictory = true;
-        showVictory();
-      } else {
-        // step ++
-        currentChess.step++;
-        // test
-        if (currentChess.playerType === chessPlayerTypes.black) {
-          const nextCoord = getNextCoord(chessboard, chessPlayerTypes.white);
-          handleDraw(nextCoord);
-        }
-      }
-    }
+			if (checkVictory()) {
+				isVictory = true
+				showVictory()
+			} else {
+				// step ++
+				currentChess.step++
+				// test
+				if (currentChess.playerType === chessPlayerTypes.black) {
+					const nextCoord = getNextCoord(
+						chessboard,
+						chessPlayerTypes.white
+					)
+					handleDraw(nextCoord)
+				}
+			}
+		}
 
-    /**
-     * @desc get chess coord
-     * @desc 获取棋子的坐标（根据位置）
-     *
-     */
-    function getChessCoord(layerX, layerY) {
-      const x = Math.floor((layerX + cellH / 2) / cellH);
-      const y = Math.floor((layerY + cellH / 2) / cellH);
-      return new Coord(x, y);
-    }
+		/**
+		 * @desc get chess coord
+		 * @desc 获取棋子的坐标（根据位置）
+		 *
+		 */
+		function getChessCoord(layerX, layerY) {
+			const x = Math.floor((layerX + cellH / 2) / cellH)
+			const y = Math.floor((layerY + cellH / 2) / cellH)
+			return new Coord(x, y)
+		}
 
-    // reset
-    function reset() {
-      /** chess  current chess**/
-      currentChess.step = 0;
-      currentChess.playerType = null;
-      isVictory = false;
-      // chess board
-      chessboard = new Array(lines).fill();
-      chessboard.forEach(
-        (_, i) => (chessboard[i] = new Array(lines).fill(null))
-      );
-      chessHistory = [];
-      /** main **/
-      drawChessBoard();
-      drawChessBoardCenter();
-      showPlayer();
-    }
+		// reset
+		function reset() {
+			/** chess  current chess**/
+			currentChess.step = 0
+			currentChess.playerType = null
+			isVictory = false
+			// chess board
+			chessboard = new Array(lines).fill()
+			chessboard.forEach(
+				(_, i) => (chessboard[i] = new Array(lines).fill(null))
+			)
+			chessHistory = []
+			/** main **/
+			drawChessBoard()
+			drawChessBoardCenter()
+			showPlayer()
+		}
 
-    /**
-     * @desc draw center
-     * @desc 画棋盘中心点(5个位置)
-     *
-     */
-    function drawChessBoardCenter() {
-      const centerCoord = getChessCoord(qSize / 2, qSize / 2);
-      const offsetLeftTop = new Coord(-5, -5);
-      const offsetRightTop = new Coord(5, -5);
-      const fixedPoints = [
-        offsetLeftTop,
-        offsetLeftTop.inverseCoord(),
-        offsetRightTop,
-        offsetRightTop.inverseCoord(),
-      ];
+		/**
+		 * @desc draw center
+		 * @desc 画棋盘中心点(5个位置)
+		 *
+		 */
+		function drawChessBoardCenter() {
+			const centerCoord = getChessCoord(qSize / 2, qSize / 2)
+			const offsetLeftTop = new Coord(-5, -5)
+			const offsetRightTop = new Coord(5, -5)
+			const fixedPoints = [
+				offsetLeftTop,
+				offsetLeftTop.inverseCoord(),
+				offsetRightTop,
+				offsetRightTop.inverseCoord(),
+			]
 
-      for (const item of fixedPoints) {
-        const x = centerCoord.x + item.x;
-        const y = centerCoord.y + item.y;
-        drawChess(new Coord(x, y), "#333", 8);
-      }
+			for (const item of fixedPoints) {
+				const x = centerCoord.x + item.x
+				const y = centerCoord.y + item.y
+				drawChess(new Coord(x, y), '#333', 8)
+			}
 
-      drawChess(centerCoord, "#333", 8);
-    }
+			drawChess(centerCoord, '#333', 8)
+		}
 
-    /**
-     * @desc handle regret
-     * @desc 悔棋需要判断是哪方在悔棋
-     * @desc 由于现在没有做联机 所以不需要做太复杂，只能反悔当前这颗棋子(可连续悔棋)
-     */
-    function handleRegret() {
-      // delete history
-      chessboard[currentChess.x][currentChess.y] = null;
-      chessHistory.pop();
-      // repaint chess board
-      drawChessBoard();
-      // draw Center
-      drawChessBoardCenter();
-      // draw chess
-      for (const chessCoord of chessHistory) {
-        currentChess.x = chessCoord.x;
-        currentChess.y = chessCoord.y;
-        currentChess.playerType = chessboard[chessCoord.x][chessCoord.y];
-        drawChess(chessCoord, chessColors[currentChess.playerType], chessSize);
-      }
-      // step --
-      currentChess.step--;
-      // show player
-      showPlayer();
-    }
+		/**
+		 * @desc handle regret
+		 * @desc 悔棋需要判断是哪方在悔棋
+		 * @desc 由于现在没有做联机 所以不需要做太复杂，只能反悔当前这颗棋子(可连续悔棋)
+		 */
+		function handleRegret() {
+			// delete history
+			chessboard[currentChess.x][currentChess.y] = null
+			chessHistory.pop()
+			// repaint chess board
+			drawChessBoard()
+			// draw Center
+			drawChessBoardCenter()
+			// draw chess
+			for (const chessCoord of chessHistory) {
+				currentChess.x = chessCoord.x
+				currentChess.y = chessCoord.y
+				currentChess.playerType = chessboard[chessCoord.x][chessCoord.y]
+				drawChess(
+					chessCoord,
+					chessColors[currentChess.playerType],
+					chessSize
+				)
+			}
+			// step --
+			currentChess.step--
+			// show player
+			showPlayer()
+		}
 
-    // draw chess board
-    function drawChessBoard() {
-      canvas.width = qSize;
-      canvas.height = qSize;
-      ctx.fillStyle = "#000";
-      ctx.lineWidth = 1.0;
-      ctx.beginPath();
-      ctx.lineTo(0, 0);
-      ctx.lineTo(0, qSize);
-      ctx.lineTo(qSize, qSize);
-      ctx.lineTo(qSize, 0);
-      ctx.closePath();
-      for (let i = 0; i < lines; i++) {
-        const cellDx = cellH * i;
-        ctx.moveTo(0, cellDx);
-        ctx.lineTo(qSize, cellDx);
-        ctx.moveTo(cellDx, 0);
-        ctx.lineTo(cellDx, qSize);
-      }
-      ctx.stroke();
-    }
+		// draw chess board
+		function drawChessBoard() {
+			canvas.width = qSize
+			canvas.height = qSize
+			ctx.fillStyle = '#000'
+			ctx.lineWidth = 1.0
+			ctx.beginPath()
+			ctx.lineTo(0, 0)
+			ctx.lineTo(0, qSize)
+			ctx.lineTo(qSize, qSize)
+			ctx.lineTo(qSize, 0)
+			ctx.closePath()
+			for (let i = 0; i < lines; i++) {
+				const cellDx = cellH * i
+				ctx.moveTo(0, cellDx)
+				ctx.lineTo(qSize, cellDx)
+				ctx.moveTo(cellDx, 0)
+				ctx.lineTo(cellDx, qSize)
+			}
+			ctx.stroke()
+		}
 
-    /**
-     * @desc show page player
-     *
-     **/
-    function showPlayer() {
-      try {
-        let { playerType } = currentChess;
-        let innerTxt = `${local.currentChessPlayer}：-`;
-        if (playerType) {
-          playerType =
-            chessPlayerTypes.black === playerType
-              ? chessPlayerTypes.white
-              : chessPlayerTypes.black;
-          innerTxt = `${local.currentChessPlayer}：${local[playerType]}`;
-        }
-        $("#currentPlayer").innerHTML(innerTxt);
-      } catch (error) {}
-    }
+		/**
+		 * @desc show page player
+		 *
+		 **/
+		function showPlayer() {
+			try {
+				let { playerType } = currentChess
+				let innerTxt = `${local.currentChessPlayer}：-`
+				if (playerType) {
+					playerType =
+						chessPlayerTypes.black === playerType
+							? chessPlayerTypes.white
+							: chessPlayerTypes.black
+					innerTxt = `${local.currentChessPlayer}：${local[playerType]}`
+				}
+				$('#currentPlayer').innerHTML(innerTxt)
+			} catch (error) {}
+		}
 
-    /**
-     * @desc show victory
-     *
-     **/
-    function showVictory() {
-      const { playerType } = currentChess;
-      $("#title").innerHTML(`${local[playerType]}${local.congrations}`);
-    }
+		/**
+		 * @desc show victory
+		 *
+		 **/
+		function showVictory() {
+			const { playerType } = currentChess
+			$('#title').innerHTML(`${local[playerType]}${local.congrations}`)
+		}
 
-    /**
-     * @desc can draw
-     * @returns {Bool}
-     */
-    function canDrawChess() {
-      const { x, y } = currentChess;
-      // if draw
-      if (chessboard[x] && chessboard[x][y]) {
-        return false;
-      }
+		/**
+		 * @desc can draw
+		 * @returns {Bool}
+		 */
+		function canDrawChess() {
+			const { x, y } = currentChess
+			// if draw
+			if (chessboard[x] && chessboard[x][y]) {
+				return false
+			}
 
-      return true;
-    }
+			return true
+		}
 
-    /**
-     * @desc draw chess
-     * @params {Coord} chessCoord
-     * @params {Color} color
-     * @params {int} size
-     **/
-    function drawChess(chessCoord, color, size) {
-      // const { x, y, playerType } = currentChess;
-      // ctx.fillStyle = chessColors[playerType];
-      ctx.fillStyle = color;
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.arc(
-        cellH * chessCoord.x,
-        cellH * chessCoord.y,
-        size / 2,
-        0,
-        2 * Math.PI
-      );
-      ctx.fill();
-      ctx.restore();
-    }
+		/**
+		 * @desc draw chess
+		 * @params {Coord} chessCoord
+		 * @params {Color} color
+		 * @params {int} size
+		 **/
+		function drawChess(chessCoord, color, size) {
+			// const { x, y, playerType } = currentChess;
+			// ctx.fillStyle = chessColors[playerType];
+			ctx.fillStyle = color
+			ctx.save()
+			ctx.beginPath()
+			ctx.moveTo(0, 0)
+			ctx.arc(
+				cellH * chessCoord.x,
+				cellH * chessCoord.y,
+				size / 2,
+				0,
+				2 * Math.PI
+			)
+			ctx.fill()
+			ctx.restore()
+		}
 
-    /** record chess **/
-    function record() {
-      const { x, y, playerType } = currentChess;
-      chessboard[x][y] = playerType;
-      chessHistory.push(new Coord(x, y));
-    }
+		/** record chess **/
+		function record() {
+			const { x, y, playerType } = currentChess
+			chessboard[x][y] = playerType
+			chessHistory.push(new Coord(x, y))
+		}
 
-    /**
-     *
-     * @desciption direction 8
-     * @desciption 1.left 2.leftTop 3.top 4.rightTop 5.right 6.bottomRight 7.bottom 8.bottomLeft
-     *
-     **/
-    const directions = {
-      left: new Coord(-1, 0),
-      leftTop: new Coord(-1, -1),
-      top: new Coord(0, -1),
-      rightTop: new Coord(1, -1),
-      // right: new Coord(1, 0),
-      // bottomRight: new Coord(1, 1),
-      // bottom: new Coord(0, 1),
-      // bottomLeft: new Coord(-1, 1),
-    };
-    const _directions2 = [
-      {
-        prev: directions.left,
-        next: directions.left.inverseCoord(),
-        key: "left",
-      },
-      {
-        prev: directions.leftTop,
-        next: directions.leftTop.inverseCoord(),
-        key: "leftTop",
-      },
-      {
-        prev: directions.top,
-        next: directions.top.inverseCoord(),
-        key: "top",
-      },
-      {
-        prev: directions.rightTop,
-        next: directions.rightTop.inverseCoord(),
-        key: "rightTop",
-      },
-    ];
+		/**
+		 *
+		 * @desciption direction 8
+		 * @desciption 1.left 2.leftTop 3.top 4.rightTop 5.right 6.bottomRight 7.bottom 8.bottomLeft
+		 *
+		 **/
+		const directions = {
+			left: new Coord(-1, 0),
+			leftTop: new Coord(-1, -1),
+			top: new Coord(0, -1),
+			rightTop: new Coord(1, -1),
+			// right: new Coord(1, 0),
+			// bottomRight: new Coord(1, 1),
+			// bottom: new Coord(0, 1),
+			// bottomLeft: new Coord(-1, 1),
+		}
+		const _directions2 = [
+			{
+				prev: directions.left,
+				next: directions.left.inverseCoord(),
+				key: 'left',
+			},
+			{
+				prev: directions.leftTop,
+				next: directions.leftTop.inverseCoord(),
+				key: 'leftTop',
+			},
+			{
+				prev: directions.top,
+				next: directions.top.inverseCoord(),
+				key: 'top',
+			},
+			{
+				prev: directions.rightTop,
+				next: directions.rightTop.inverseCoord(),
+				key: 'rightTop',
+			},
+		]
 
-    /**
-     * @desc 计算棋子相连数量
-     * @param {Coord} -offsetCoord
-     * @param {chess} -checkChess
-     * @returns {Object} -count -isBlock
-     */
-    function getChessConnect(offsetCoord, checkChess) {
-      const { x, y, playerType } = checkChess || currentChess;
-      let count = 0, // count
-        isBlock = false; // 是否被阻拦
-      if (!playerType) {
-        return { count, isBlock };
-      }
+		/**
+		 * @desc 计算棋子相连数量
+		 * @param {Coord} -offsetCoord
+		 * @param {chess} -checkChess
+		 * @returns {Object} -count -isBlock
+		 */
+		function getChessConnect(offsetCoord, checkChess) {
+			const { x, y, playerType } = checkChess || currentChess
+			let count = 0, // count
+				isBlock = false // 是否被阻拦
+			if (!playerType) {
+				return { count, isBlock }
+			}
 
-      const check = (currentCoord) => {
-        const cx = currentCoord.x + offsetCoord.x;
-        const cy = currentCoord.y + offsetCoord.y;
-        // 超出范围
-        if (!chessboard[cx] || void(0) === chessboard[cx][cy]) {
-          isBlock = true;
-          return;
-        }
-        if (chessboard[cx][cy] === playerType) {
-          count++;
-          // tips x,y
-          check({
-            x: cx,
-            y: cy,
-          });
-        } else {
-          if (count > 0) {
-            isBlock = true;
-          }
-          return;
-        }
-      };
-      check({ x, y });
-      return { count, isBlock };
-    }
+			const check = (currentCoord) => {
+				const cx = currentCoord.x + offsetCoord.x
+				const cy = currentCoord.y + offsetCoord.y
 
-    /**
-     * @desc check victory
-     * @returns {Bool} true -> victory false-> continiue
-     */
-    function checkVictory() {
-      const { playerType } = currentChess;
-      for (const { prev, next } of _directions2) {
-        const cCount =
-          getChessConnect(prev).count + getChessConnect(next).count + 1;
-        if (cCount > 4) {
-          return true;
-        }
-      }
-      return false;
-    }
-  </script>
-  <!-- robot script -->
-  <script>
-    function getNextCoord(chessboard, checkPlayerType) {
-      const selfRecord = {}; // self
-      const otherSide = {}; // other
-      const bestCoord = {
-        self: 0,
-        other: 0,
-      }; // best coord
-      let autoChessCoord;
+				// 超出范围
+				if (!chessboard[cx] || void 0 === chessboard[cx][cy]) {
+					isBlock = true
+					return
+				}
 
-      // calc chess connect count
-      for (let x = 0; x < chessboard.length; x++) {
-        const board = chessboard[x];
-        for (let y = 0; y < board.length; y++) {
-          const playerType = board[y];
-          // check chess data
-          const checkChess = { x, y, playerType: checkPlayerType };
-          for (const { prev, next, key } of _directions2) {
-            const prevConnect = getChessConnect(prev, checkChess);
-            const nextConnect = getChessConnect(next, checkChess);
-            const cCount = prevConnect.count + nextConnect.count + 1;
-            const isBlock = prevConnect.isBlock || nextConnect.isBlock;
-            const isDoubleBlock = prevConnect.isBlock && nextConnect.isBlock;
-            const pKey = `${x}-${y}`;
+				// if()
 
-            if (cCount === 1) {
-              continue;
-            }
-            // set obj
-            if (!selfRecord[pKey]) {
-              selfRecord[pKey] = {};
-            }
+				if (chessboard[cx][cy] === playerType) {
+					count++
+					// tips x,y
+					check({
+						x: cx,
+						y: cy,
+					})
+				} else {
+					return
+				}
+			}
+			check({ x, y })
+			return { count, isBlock }
+		}
 
-            if (!otherSide[pKey]) {
-              otherSide[pKey] = {};
-            }
+		/**
+		 * @desc check victory
+		 * @returns {Bool} true -> victory false-> continiue
+		 */
+		function checkVictory() {
+			const { playerType } = currentChess
+			for (const { prev, next } of _directions2) {
+				const cCount =
+					getChessConnect(prev).count +
+					getChessConnect(next).count +
+					1
+				if (cCount > 4) {
+					return true
+				}
+			}
+			return false
+		}
+	</script>
+	<!-- robot script -->
+	<script>
+		function getNextCoord(chessboard, checkPlayerType) {
+			const selfRecord = {} // self
+			const otherSide = {} // other
+			const bestCoord = {
+				self: 0,
+				selfCoord: null,
+				other: 0,
+				otherCood: null,
+			} // best coord
+			let autoChessCoord
 
-            if (!playerType) {
-              // self
-              cCount > bestCoord.self ? (bestCoord.self = cCount) : null;
-              selfRecord[pKey][key] = {
-                count: cCount,
-                isBlock: isBlock,
-                isDoubleBlock: isDoubleBlock,
-              };
-            } else if (playerType !== checkPlayerType) {
-              // other
-              cCount > bestCoord.other ? (bestCoord.other = cCount) : null;
-              otherSide[pKey][key] = cCount;
-            }
-          }
-        }
-      }
+			// calc chess connect count
+			for (let x = 0; x < chessboard.length; x++) {
+				const board = chessboard[x]
+				for (let y = 0; y < board.length; y++) {
+					const playerType = board[y]
+					// check chess data
+					const checkChess = { x, y, playerType: checkPlayerType }
+					// 权重
+					let weights = 0
+					for (const { prev, next, key } of _directions2) {
+						const prevConnect = getChessConnect(prev, checkChess)
+						const nextConnect = getChessConnect(next, checkChess)
+						const cCount = prevConnect.count + nextConnect.count + 1
+						const isBlock =
+							prevConnect.isBlock || nextConnect.isBlock
+						const isDoubleBlock =
+							prevConnect.isBlock && nextConnect.isBlock
+						const pKey = `${x}-${y}`
 
-      // if empty
-      if (!Object.keys(selfRecord).length) {
-        const offsetCoord = getRandomDirection();
-        autoChessCoord = new Coord(
-          currentChess.x + offsetCoord.x,
-          currentChess.y + offsetCoord.y
-        );
-      }
-      // not empty
-      else {
-        // TODO auto coord
-        for (const key in otherSide) {
-          const cCount = otherSide[key];
-          const [x, y] = key.split("-").map((v) => Number(v));
-          switch (cCount) {
-            case 4:
-              break;
-            case 3:
-              break;
-            default:
-              break;
-          }
-        }
-      }
+						if (cCount === 1) {
+							continue
+						}
 
-      console.log("selfRecord", selfRecord);
-      console.log("otherSide", otherSide);
+						// set obj
 
-      return autoChessCoord;
-    }
+						// self
+						if (!selfRecord[pKey]) {
+							selfRecord[pKey] = {}
+						}
 
-    /*
-     * @desc get random direction
-     *
-     **/
-    function getRandomDirection() {
-      const r1 = getRandomNum(0, _directions2.length - 1);
-      const r2 = getRandomNum(0, 1);
-      return _directions2[r1][r2 === 0 ? "prev" : "next"];
-    }
-    /*
-     * @desc get random num
-     *
-     **/
-    function getRandomNum(min = 0, max = 10) {
-      return Math.floor(Math.random() * (max - min + 1) + min);
-    }
-  </script>
+						// other
+						if (!otherSide[pKey]) {
+							otherSide[pKey] = {}
+						}
+						// 权重
+						weights += cCount
+
+						// 空位置
+						if (!playerType) {
+							// 无阻挡
+							if (isDoubleBlock) {
+                                weights -= cCount;
+							} else if (isBlock) {
+								weights -= 1
+							}
+							// self
+							selfRecord[pKey][key] = {
+								count: cCount,
+								isBlock: isBlock,
+								isDoubleBlock: isDoubleBlock,
+							}
+						} else if (playerType !== checkPlayerType) {
+							// other
+							otherSide[pKey][key] = cCount
+						}
+					}
+
+					if (!playerType) {
+						// self
+						if (weights > bestCoord.self) {
+							bestCoord.self = weights
+							bestCoord.selfCoord = new Coord(x, y)
+						}
+					} else if (playerType !== checkPlayerType) {
+						// other
+						if (weights > bestCoord.other) {
+							bestCoord.other = weights
+							bestCoord.otherCood = new Coord(x, y)
+						}
+					}
+				}
+			}
+
+			// if empty
+			if (!Object.keys(selfRecord).length) {
+				const offsetCoord = getRandomDirection()
+				autoChessCoord = new Coord(
+					currentChess.x + offsetCoord.x,
+					currentChess.y + offsetCoord.y
+				)
+			}
+			// not empty
+			else {
+				autoChessCoord = bestCoord.selfCoord
+			}
+
+			console.log('selfRecord', selfRecord)
+			console.log('otherSide', otherSide)
+			console.log('bestCoord', bestCoord)
+
+			return autoChessCoord
+		}
+
+		/*
+		 * @desc get random direction
+		 *
+		 **/
+		function getRandomDirection() {
+			const r1 = getRandomNum(0, _directions2.length - 1)
+			const r2 = getRandomNum(0, 1)
+			return _directions2[r1][r2 === 0 ? 'prev' : 'next']
+		}
+		/*
+		 * @desc get random num
+		 *
+		 **/
+		function getRandomNum(min = 0, max = 10) {
+			return Math.floor(Math.random() * (max - min + 1) + min)
+		}
+	</script>
 </html>
