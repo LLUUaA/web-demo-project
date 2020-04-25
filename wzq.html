@@ -534,14 +534,15 @@
 						// 权重
 						weights += cCount
 
+						// 无阻挡
+						if (isDoubleBlock) {
+							weights -= cCount
+						} else if (isBlock) {
+							weights -= 1
+						}
+
 						// 空位置
 						if (!playerType) {
-							// 无阻挡
-							if (isDoubleBlock) {
-                                weights -= cCount;
-							} else if (isBlock) {
-								weights -= 1
-							}
 							// self
 							selfRecord[pKey][key] = {
 								count: cCount,
@@ -549,7 +550,8 @@
 								isDoubleBlock: isDoubleBlock,
 							}
 						} else if (playerType !== checkPlayerType) {
-							// other
+                            // other
+                            weights += 1;
 							otherSide[pKey][key] = cCount
 						}
 					}
