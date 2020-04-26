@@ -506,7 +506,11 @@
 				for (let y = 0; y < board.length; y++) {
 					const playerType = board[y]
 					// check chess data
-					const checkChess = { x, y, playerType: checkPlayerType }
+					const checkChess = {
+						x,
+						y,
+						playerType: playerType || checkPlayerType,
+					}
 					// 权重
 					const weights = []
 					let weight = 0
@@ -532,7 +536,7 @@
 							}
 							// 权重
 							weights.push(cCount)
-							// console.log('cCount', key, pKey, cCount)
+							console.log('cCount', key, pKey, cCount)
 						}
 					}
 
@@ -560,7 +564,12 @@
 					currentChess.y + offsetCoord.y
 				)
 			} else {
-				autoChessCoord = bestCoord.selfCoord
+				if (bestCoord.self > bestCoord.other) {
+					autoChessCoord = bestCoord.selfCoord
+				} else  {
+                    // TODO 阻拦对方棋子
+                    autoChessCoord = bestCoord.otherCood
+                }
 			}
 
 			console.log('bestCoord', bestCoord)
