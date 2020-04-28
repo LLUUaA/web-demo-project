@@ -53,10 +53,11 @@
       }
 
       inverseCoord() {
-        return {
-          x: ~this.x + 1,
-          y: ~this.y + 1,
-        };
+        // return {
+        //   x: ~this.x + 1,
+        //   y: ~this.y + 1,
+        // };
+        return new Coord(~this.x + 1, ~this.y + 1);
       }
     }
 
@@ -193,12 +194,12 @@
         // step ++
         currentChess.step++;
         // test
-        if (currentChess.playerType === chessPlayerTypes.black) {
-          setTimeout(() => {
-            const nextCoord = getNextCoord(chessPlayerTypes.white);
-            handleDraw(nextCoord);
-          }, 100);
-        }
+        // if (currentChess.playerType === chessPlayerTypes.black) {
+        //   setTimeout(() => {
+        //     const nextCoord = getNextCoord(chessPlayerTypes.white);
+        //     handleDraw(nextCoord);
+        //   }, 100);
+        // }
       }
     }
 
@@ -479,34 +480,27 @@
   <!-- robot script -->
   <script>
     function getNextCoord(checkPlayerType) {
-      const bestCoord = {
-        self: 0,
-        selfCoord: null,
-        other: 0,
-        otherCood: null,
-        blockDirct: null, // 阻拦方向
-      }; // best coord
-      let autoChessCoord;
+      // TODO 分别计算黑棋和白棋的最佳位置来确定下一步棋子
+      const bestCoords = [],
+        weights = []; // 最佳位置记录
+      let maxWeight = 0, // 最大权重值
+        weight = 0; // 权重计算值
 
       // calc chess connect count
       for (let x = 0; x < chessboard.length; x++) {
         const board = chessboard[x];
         for (let y = 0; y < board.length; y++) {
-          const playerType = board[y];
           // check chess data
           const checkChess = {
             x,
             y,
-            playerType: playerType || checkPlayerType,
+            playerType: checkPlayerType,
           };
           // 权重
-          const weights = [];
-          let weight = 0;
-          let blockDirct = null; // 阻拦对方棋子方向
+          weights = [];
+          weight = 0;
 
           for (const { prev, next, key } of _directions2) {
-            // pKey
-            const pKey = `${x}-${y}`;
             // count
             const prevConnect = getChessConnect(prev, checkChess);
             const nextConnect = getChessConnect(next, checkChess);
@@ -514,7 +508,6 @@
             // block
             const isBlock = prevConnect.isBlock || nextConnect.isBlock;
             const isDoubleBlock = prevConnect.isBlock && nextConnect.isBlock;
-            blockDirct = prevConnect.isBlock ? next : prev;
 
             if (cCount < 2) {
               continue;
@@ -524,47 +517,26 @@
               if (isBlock) {
                 cCount -= 1;
               }
+
               // 权重
               weights.push(cCount);
-              console.log("cCount", key, pKey, cCount);
+              console.log("cCount",`${x}-${y}`, key, cCount);
             }
           }
 
           weight = getWeight(weights);
-          if (playerType === null) {
-            // self
-            if (weight > bestCoord.self) {
-              bestCoord.self = weight;
-              bestCoord.selfCoord = new Coord(x, y);
-            }
-          } else if (playerType !== checkPlayerType) {
-            // other
-            if (weight > bestCoord.other) {
-              bestCoord.other = weight;
-              bestCoord.otherCood = new Coord(x, y);
-              bestCoord.blockDirct = ""
-            }
+
+          if (weight > maxWeight) {
+            maxWeight = weight;
+            bestCoords = [];
+            bestCoords.push(new Coord(x, y));
+          } else if (weight === maxWeight) {
+            bestCoords.push(new Coord(x, y));
           }
         }
       }
 
-      if (!bestCoord.selfCoord) {
-        const offsetCoord = getRandomDirection();
-        autoChessCoord = new Coord(
-          currentChess.x + offsetCoord.x,
-          currentChess.y + offsetCoord.y
-        );
-      } else {
-        if (bestCoord.self > bestCoord.other) {
-          autoChessCoord = bestCoord.selfCoord;
-        } else {
-          // TODO 阻拦对方棋子
-          autoChessCoord = bestCoord.otherCood;
-        }
-      }
-
-      console.log("bestCoord", bestCoord);
-      return autoChessCoord;
+      return bestCoords;
     }
 
     /*
