@@ -6,6 +6,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link
+      href="https://fonts.font.im/css?family=Source+Sans+Pro"
+      rel="stylesheet"
+    />
     <title>WZQ</title>
   </head>
 
@@ -13,13 +17,22 @@
     body {
       margin: 0;
       padding: 0;
+      font-size: 10px;
+      font-family: "Source Sans Pro", sans-serif;
+      color: #333;
+      user-select: none;
+    }
+    .flex {
+      display: flex;
     }
     .container {
       width: 100vw;
       height: 100vh;
       text-align: center;
-      background-color: #ececec;
+      padding: 20px;
+      background-color: white;
       overflow: hidden;
+      box-sizing: border-box;
     }
     #wzq {
       background-color: #e4c089;
@@ -27,19 +40,212 @@
     button {
       width: 150px;
       text-align: center;
-      font-size: 1.3em;
+      font-size: 2.2em;
       cursor: pointer;
+    }
+
+    .btn {
+      width: 98%;
+      height: 60px;
+      margin: 10px auto;
+      padding: 0 20px;
+      line-height: 60px;
+      text-align: center;
+      font-size: 1.6em;
+      color: white;
+      background-color: #2196f3;
+      box-sizing: border-box;
+      border-radius: 10px;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .btn:active {
+      background-color: #008eff;
+      transform: translateY(-2px);
+    }
+
+    .btn:hover {
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    .title-wrap {
+      justify-content: center;
+      align-items: center;
+    }
+
+    .title-wrap span {
+      font-size: 2em;
+    }
+
+    .switch {
+      display: inline-block;
+      font-size: 10px;
+      width: 10em;
+      height: 4em;
+      line-height: 4em;
+      border-radius: 2em;
+      transition-delay: 0.1s, 0s;
+      background: transparent;
+      box-shadow: inset 0 0 0 0.15em #eee;
+      /* box-shadow: inset 0 0 0 2.62857em #2196f3; */
+      transition: box-shadow 0.3s ease-in-out, padding 0.25s ease-in-out;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .switch::before {
+      content: "";
+      display: block;
+      position: absolute;
+      width: 4em;
+      height: 4em;
+      left: 0;
+      top: 0;
+      background-color: #fff;
+      border-radius: 2em;
+      box-shadow: 0 0.2em 0.4em 0 rgba(0, 0, 0, 0.2),
+        0 0 0.1em 0.1em rgba(0, 0, 0, 0.1);
+      transition: all 0.1s ease 0.1s;
+    }
+
+    .switch.checked {
+      box-shadow: inset 0 0 0 2.62857em #00c169;
+      /* box-shadow: inset 0 0 0 2.62857em #e91e63; */
+    }
+
+    .switch.checked::before {
+      left: 6em;
+      transition-delay: 0s, 0s;
+    }
+
+    .game-start-wrap,
+    .game-start-wrap .mask {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      right: 0;
+    }
+
+    .game-start-wrap.show {
+      opacity: 1;
+      transition-delay: 0;
+      transition: all 0.3s ease-in;
+    }
+
+    .game-start-wrap.hide {
+      opacity: 0;
+      transition: all 0.3s ease-out;
+      transition-delay: 0.3s;
+      z-index: -1;
+    }
+
+    .game-start-wrap.show {
+      opacity: 1;
+      z-index: 999;
+    }
+
+    .game-start-wrap .mask {
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+
+    .game-start-wrap .close {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      text-align: center;
+      top: 10px;
+      right: 10px;
+      font-size: 2em;
+      transition: transform 0.1s ease;
+      cursor: pointer;
+    }
+
+    .game-start-wrap .close:hover {
+      transform: scale(1.1);
+      transform-origin: center;
+    }
+
+    .game-start-wrap .content {
+      position: absolute;
+      min-height: 60vh;
+      padding: 20px;
+      left: 50%;
+      top: 200px;
+      width: 35vw;
+      background-color: rgba(255, 255, 255, 0.98);
+      border-radius: 1.5em;
+      transition: all 0.2s ease;
+      transform: translateX(-50%) translateY(-100px);
+      opacity: 0;
+      box-sizing: border-box;
+    }
+
+    .game-start-wrap.show .content {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .game-start-wrap .content p {
+      font-size: 1.4em;
+      margin: 5px 0;
+    }
+
+    .game-start-wrap .content .row {
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    .game-start-wrap .content .row span {
+      font-size: 1.6em;
+      margin-right: 20px;
+    }
+
+    .game-start-wrap .header {
+      font-size: 2.2em;
+      text-align: center;
+      font-weight: bold;
+    }
+    .game-start-wrap .footer {
+      margin-top: 15em;
     }
   </style>
 
   <body>
+    <div id="gameModal" class="game-start-wrap show">
+      <div class="mask"></div>
+      <div class="content">
+        <div id="close" class="close">x</div>
+        <div class="header">START</div>
+        <p>电脑下棋: 和电脑进行对战。</p>
+        <p>电脑先手: 电脑玩家先手。</p>
+        <div class="row flex">
+          <span>电脑下棋</span>
+          <div id="switch1" class="switch checked"></div>
+        </div>
+        <div class="row flex">
+          <span>电脑先手</span>
+          <div id="switch2" class="switch"></div>
+        </div>
+        <div class="footer">
+          <div class="btn" id="start">开始</div>
+          <!-- <div class="btn" id="replay">重新开始</div> -->
+        </div>
+      </div>
+    </div>
     <div class="container">
-      <h3 id="title">黑棋先手</h3>
+      <!-- <div class="title-wrap flex">
+        <span id="txt">黑棋先手</span>
+        <div class="switch"></div>
+        <span id="txt">白棋先手</span>
+      </div> -->
       <canvas id="wzq"></canvas>
       <h4 id="currentPlayer"></h4>
-      <div>
-        <button id="regret">悔棋</button>
-        <button id="replay">重新开始</button>
+      <div style="width: 500px; margin: 0 auto;">
+        <div id="regret" class="btn">悔棋</div>
+        <div id="openSetting" class="btn">打开设置</div>
       </div>
     </div>
   </body>
@@ -59,22 +265,66 @@
         // };
         return new Coord(~this.x + 1, ~this.y + 1);
       }
+
+      get key() {
+        return `${this.x}-${this.y}`;
+      }
     }
 
     class MyJQ {
       constructor(selector) {
         this.selector = selector;
-        this.el = document.querySelector(selector);
+        if (selector) {
+          this.el = document.querySelectorAll(selector);
+        } else {
+          this.el = null;
+        }
       }
+
+      _handle(fn) {
+        if (this.el.length) {
+          this.el.forEach((e) => {
+            fn && fn(e);
+          });
+          return;
+        }
+
+        fn && fn(this.el);
+      }
+
       innerHTML(val) {
-        this.el.innerHTML = val;
+        this._handle(function (e) {
+          e.innerHTML = val;
+        });
         return this;
       }
 
+      // click
       click(cb) {
         if ("function" === typeof cb) {
-          this.el.addEventListener("click", cb);
+          this._handle(function (e) {
+            e.addEventListener("click", cb);
+          });
+          return this;
         }
+      }
+
+      // add class
+      addClass(className) {
+        this._handle(function (e) {
+          if (e.className.indexOf(className) > -1) {
+            return;
+          }
+          e.className += ` ${className}`;
+        });
+        return this;
+      }
+
+      // remove class
+      removeClass(className) {
+        this._handle(function (e) {
+          e.className = e.className.replace(`${className}`, "").trim();
+        });
         return this;
       }
     }
@@ -91,6 +341,101 @@
     // my JQ
     const $ = inject;
   </script>
+
+  <!-- view handle -->
+  <script>
+    let robotPlayerType = null, // 电脑角色
+      isRobotPlayer = true, // 是否电脑棋手
+      startStatus = false; // 开始状态
+    (() => {
+      let checked1 = true,
+        checked2 = false;
+
+      document.addEventListener("keyup", function (e) {
+        e = e || window.event;
+        if (e && e.keyCode == 27) {
+          closeModal();
+        }
+      });
+
+      // close
+      $("#close").click(closeModal);
+      function closeModal() {
+        $("#gameModal").removeClass("show");
+        $("#gameModal").addClass("hide");
+      }
+
+      // open setting
+      $("#openSetting").click(openModal);
+      function openModal() {
+        $("#gameModal").removeClass("hide");
+        $("#gameModal").addClass("show");
+      }
+      // start
+      $("#start").click(() => {
+        if (!!startStatus && !confirm(local.replay)) {
+          return;
+        }
+        // reset
+        reset();
+        closeModal();
+        isRobotPlayer = checked1;
+
+        // 电脑先手状态
+        if (!!checked2) {
+          robotPlayerType = chessPlayerTypes.black;
+          handleDraw(getRandomCoord());
+        } else {
+          robotPlayerType = chessPlayerTypes.white;
+        }
+
+        setTimeout(() => {
+          $("#start").innerHTML("重新开始");
+        }, 300);
+        startStatus = true;
+      });
+
+      // regret
+      $("#regret").click(() => {
+        if (isVictory) {
+          alert(local.pleaseReplay);
+          return;
+        }
+
+        if (!chessHistory.length) {
+          alert(local.emptyChessBoard);
+          return;
+        }
+
+        if (confirm(local.regret)) {
+          handleRegret();
+        }
+      });
+
+      const switch1 = $("#switch1");
+      const switch2 = $("#switch2");
+      switch1.click(function () {
+        if (checked1) {
+          checked1 = false;
+          switch1.removeClass("checked");
+        } else {
+          checked1 = true;
+          switch1.addClass("checked");
+        }
+      });
+
+      switch2.click(function () {
+        if (checked2) {
+          checked2 = false;
+          switch2.removeClass("checked");
+        } else {
+          checked2 = true;
+          switch2.addClass("checked");
+        }
+      });
+    })();
+  </script>
+
   <!-- main script -->
   <script>
     /** constant  **/
@@ -126,7 +471,11 @@
     const chessSize = 14; // 棋子大小
     const cellH = qSize / lines;
     const currentChess = new Coord();
-    let chessboard, chessHistory, isVictory;
+    let chessboard, // 棋盘
+      chessHistory, // 下棋记录
+      isVictory, // 是否胜利
+      firstPlayerType; // 先手棋手
+
     // i18n
     const local = I18n["zh-cn"];
     const canvasEl = document.querySelector("#wzq");
@@ -134,28 +483,6 @@
     reset();
     //tap
     canvasEl.addEventListener("click", tap);
-    // regret
-    $("#regret").click(() => {
-      if (isVictory) {
-        alert(local.pleaseReplay);
-        return;
-      }
-
-      if (!chessHistory.length) {
-        alert(local.emptyChessBoard);
-        return;
-      }
-
-      if (confirm(local.regret)) {
-        handleRegret();
-      }
-    });
-    // replay
-    $("#replay").click(() => {
-      if (confirm(local.replay)) {
-        reset();
-      }
-    });
 
     function tap(e) {
       // if victory
@@ -194,12 +521,12 @@
         // step ++
         currentChess.step++;
         // test
-        // if (currentChess.playerType === chessPlayerTypes.black) {
-        //   setTimeout(() => {
-        //     const nextCoord = getNextCoord(chessPlayerTypes.white);
-        //     handleDraw(nextCoord);
-        //   }, 100);
-        // }
+        if (!!isRobotPlayer && currentChess.playerType !== robotPlayerType) {
+          setTimeout(() => {
+            const nextCoord = getNextCoord();
+            handleDraw(nextCoord);
+          }, 100);
+        }
       }
     }
 
@@ -479,8 +806,64 @@
   </script>
   <!-- robot script -->
   <script>
-    function getNextCoord(checkPlayerType) {
-      // TODO 分别计算黑棋和白棋的最佳位置来确定下一步棋子
+    /**
+     * @desc 随机获取坐标
+     * @params {Coord} coord -基于坐标点
+     * @returns {Coord}
+     **/
+    function getRandomCoord(coord) {
+      coord = coord || new Coord(lines / 2, lines / 2);
+      const dirct = getRandomDirection();
+      return new Coord(coord.x + dirct.x, coord.y + dirct.y);
+    }
+
+    /**
+     * @desc 自动获取下个棋子
+     * @returns {Coord}
+     **/
+    function getNextCoord() {
+      let nextCoord;
+      const self = getBestCoords(robotPlayerType);
+      const other = getBestCoords(
+        robotPlayerType === chessPlayerTypes.white
+          ? chessPlayerTypes.black
+          : chessPlayerTypes.white
+      );
+      // const otherCoordsMap = new Map(); // other map
+      const otherCoordsMap = {};
+      other.coords.forEach((c) => {
+        otherCoordsMap[c.key] = true;
+      });
+
+      const getSameCoord = () => {
+        const coords = self.coords;
+        // 遍历查找是否存在同一个点
+        for (const c of coords) {
+          if (otherCoordsMap[c.key]) {
+            return c;
+          }
+        }
+        return null;
+      };
+
+      // 对方棋子相连数小于4
+      if (other.weight < 40 || self.weight >= other.weight) {
+        if (self.weight > 0) {
+          nextCoord = getSameCoord() || self.coords[0];
+        } else {
+          nextCoord = getRandomCoord(currentChess);
+        }
+      } else {
+        nextCoord = getSameCoord() || other.coords[0];
+      }
+
+      // console.log("self", self);
+      // console.log("other", other);
+      // console.log("nextCoord", nextCoord);
+      return nextCoord;
+    }
+
+    function getBestCoords(checkPlayerType) {
       const bestCoords = [],
         weights = []; // 最佳位置记录
       let maxWeight = 0, // 最大权重值
@@ -490,16 +873,22 @@
       for (let x = 0; x < chessboard.length; x++) {
         const board = chessboard[x];
         for (let y = 0; y < board.length; y++) {
+          // 权重
+          weights.length = 0;
+          weight = 0;
           // check chess data
           const checkChess = {
             x,
             y,
             playerType: checkPlayerType,
           };
-          // 权重
-          weights = [];
-          weight = 0;
 
+          // 不是空位置
+          if (board[y] !== null) {
+            continue;
+          }
+
+          // 计算位置权重
           for (const { prev, next, key } of _directions2) {
             // count
             const prevConnect = getChessConnect(prev, checkChess);
@@ -518,17 +907,22 @@
                 cCount -= 1;
               }
 
-              // 权重
+              if (cCount > 4 && checkPlayerType === robotPlayerType) {
+                cCount *= 10;
+              }
+              // 权重数组
               weights.push(cCount);
-              console.log("cCount",`${x}-${y}`, key, cCount);
+              // console.log("cCount", `${x}-${y}`, key, cCount);
             }
           }
-
+          // 权重值
           weight = getWeight(weights);
-
+          if (weight < 1) {
+            continue;
+          }
           if (weight > maxWeight) {
             maxWeight = weight;
-            bestCoords = [];
+            bestCoords.length = 0;
             bestCoords.push(new Coord(x, y));
           } else if (weight === maxWeight) {
             bestCoords.push(new Coord(x, y));
@@ -536,11 +930,12 @@
         }
       }
 
-      return bestCoords;
+      return { coords: bestCoords, weight: maxWeight };
     }
 
     /*
      * @desc 获取权重值
+     *  - weight = maxWeight*10 + weight + weight+....
      * @params {Array} weights
      * @returns {Bool}
      *
