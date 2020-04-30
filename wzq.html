@@ -22,6 +22,9 @@
       color: #333;
       user-select: none;
     }
+    h4 {
+      font-size: 1.7em;
+    }
     .flex {
       display: flex;
     }
@@ -71,12 +74,14 @@
     }
 
     .title-wrap {
+      margin: 1em;
       justify-content: center;
       align-items: center;
     }
 
     .title-wrap span {
       font-size: 2em;
+      font-weight: bold;
     }
 
     .switch {
@@ -236,11 +241,9 @@
       </div>
     </div>
     <div class="container">
-      <!-- <div class="title-wrap flex">
-        <span id="txt">黑棋先手</span>
-        <div class="switch"></div>
-        <span id="txt">白棋先手</span>
-      </div> -->
+      <div class="title-wrap flex">
+        <span id="title">黑棋先手</span>
+      </div>
       <canvas id="wzq"></canvas>
       <h4 id="currentPlayer"></h4>
       <div style="width: 500px; margin: 0 auto;">
@@ -455,6 +458,7 @@
         [chessPlayerTypes.black]: "黑棋",
         [chessPlayerTypes.white]: "白棋",
         currentChessPlayer: "当前棋手",
+        startPlayer: "黑棋先手",
         regret: "是否确定悔棋？",
         replay: "是否确定重新开始？",
         emptyChessBoard: "没有可反悔的棋子！",
@@ -485,6 +489,11 @@
     canvasEl.addEventListener("click", tap);
 
     function tap(e) {
+      if (!startStatus) {
+        alert("还没有点击开始游戏哦~，通过打开设置开始游戏");
+        return;
+      }
+
       // if victory
       if (!!isVictory) {
         return;
@@ -557,6 +566,7 @@
       drawChessBoard();
       drawChessBoardCenter();
       showPlayer();
+      $("#title").innerHTML(local.startPlayer);
     }
 
     /**
@@ -590,9 +600,24 @@
      * @desc 由于现在没有做联机 所以不需要做太复杂，只能反悔当前这颗棋子(可连续悔棋)
      */
     function handleRegret() {
-      // delete history
-      chessboard[currentChess.x][currentChess.y] = null;
-      chessHistory.pop();
+      // back step
+      const back = (step = 1) => {
+        let coord;
+        for (let i = 0; i < step; i++) {
+          coord = chessHistory.pop();
+          // delete history
+          chessboard[coord.x][coord.y] = null;
+          // step --
+          currentChess.step--;
+        }
+      };
+
+      if (isRobotPlayer) {
+        back(2);
+      } else {
+        back();
+      }
+
       // repaint chess board
       drawChessBoard();
       // draw Center
@@ -604,8 +629,6 @@
         currentChess.playerType = chessboard[chessCoord.x][chessCoord.y];
         drawChess(chessCoord, chessColors[currentChess.playerType], chessSize);
       }
-      // step --
-      currentChess.step--;
       // show player
       showPlayer();
     }
@@ -907,6 +930,7 @@
                 cCount -= 1;
               }
 
+              // 棋子大于4个
               if (cCount > 4 && checkPlayerType === robotPlayerType) {
                 cCount *= 10;
               }
