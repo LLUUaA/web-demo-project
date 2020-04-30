@@ -869,12 +869,21 @@
         return null;
       };
 
-      // 对方棋子相连数小于4
-      if (other.weight < 40 || self.weight >= other.weight) {
+      // 对方棋子相连数小于3(阈值可以改成4 当三颗棋子相连时阻拦对方棋子)
+      if (other.weight < 30 || self.weight >= other.weight) {
         if (self.weight > 0) {
           nextCoord = getSameCoord() || self.coords[0];
         } else {
-          nextCoord = getRandomCoord(currentChess);
+          if (
+            currentChess.x > 10 &&
+            currentChess.x < 20 &&
+            currentChess.y > 10 &&
+            currentChess.y < 20
+          ) {
+            nextCoord = getRandomCoord(currentChess);
+          } else {
+            nextCoord = getRandomCoord();
+          }
         }
       } else {
         nextCoord = getSameCoord() || other.coords[0];
@@ -887,8 +896,8 @@
     }
 
     function getBestCoords(checkPlayerType) {
-      const bestCoords = [],
-        weights = []; // 最佳位置记录
+      const bestCoords = [], // 最佳位置记录
+        weights = []; // 权重数组
       let maxWeight = 0, // 最大权重值
         weight = 0; // 权重计算值
 
@@ -924,15 +933,17 @@
             if (cCount < 2) {
               continue;
             }
+
+            // 棋子大于4个
+            if (cCount > 4) {
+              checkPlayerType === robotPlayerType
+                ? (cCount *= 10)
+                : (cCount *= 4);
+            }
             // start
             if (!isDoubleBlock) {
               if (isBlock) {
                 cCount -= 1;
-              }
-
-              // 棋子大于4个
-              if (cCount > 4 && checkPlayerType === robotPlayerType) {
-                cCount *= 10;
               }
               // 权重数组
               weights.push(cCount);
