@@ -537,6 +537,10 @@
 			if (!canDrawChess()) {
 				return
 			}
+
+			if (!!robotPlayAgainst) {
+				robotPlayerType = getPlayerTypeByType(currentChess.playerType)
+			}
 			// draw chess
 			drawChess(
 				chessCoord,
@@ -694,10 +698,11 @@
 				let { playerType } = currentChess
 				let innerTxt = `${local.currentChessPlayer}：-`
 				if (playerType) {
-					playerType =
-						chessPlayerTypes.black === playerType
-							? chessPlayerTypes.white
-							: chessPlayerTypes.black
+					playerType = getPlayerTypeByType(playerType)
+					// playerType =
+					// 	chessPlayerTypes.black === playerType
+					// 		? chessPlayerTypes.white
+					// 		: chessPlayerTypes.black
 					innerTxt = `${local.currentChessPlayer}：${local[playerType]}`
 				}
 				$('#currentPlayer').innerHTML(innerTxt)
@@ -749,6 +754,12 @@
 			)
 			ctx.fill()
 			ctx.restore()
+		}
+
+		function getPlayerTypeByType(playerType) {
+			return playerType === chessPlayerTypes.white
+				? chessPlayerTypes.black
+				: chessPlayerTypes.white
 		}
 
 		/** record chess **/
@@ -882,11 +893,7 @@
 		function getNextCoord() {
 			let nextCoord
 			const self = getBestCoords(robotPlayerType)
-			const other = getBestCoords(
-				robotPlayerType === chessPlayerTypes.white
-					? chessPlayerTypes.black
-					: chessPlayerTypes.white
-			)
+			const other = getBestCoords(getPlayerTypeByType(robotPlayerType))
 			// const otherCoordsMap = new Map(); // other map
 			const otherCoordsMap = {}
 			other.coords.forEach((c) => {
