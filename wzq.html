@@ -228,11 +228,30 @@
 				<p>电脑先手: 电脑玩家先手。</p>
 				<div class="row flex">
 					<span>电脑下棋</span>
-					<div id="switch1" class="switch checked"></div>
+					<div
+						id="switch1"
+						class="switch checked"
+						data-id="switch1"
+						data-key="checked1"
+					></div>
 				</div>
 				<div class="row flex">
 					<span>电脑先手</span>
-					<div id="switch2" class="switch"></div>
+					<div
+						id="switch2"
+						class="switch"
+						data-id="switch2"
+						data-key="checked2"
+					></div>
+				</div>
+				<div class="row flex">
+					<span>电脑对下</span>
+					<div
+						id="switch3"
+						class="switch"
+						data-id="switch3"
+						data-key="checked3"
+					></div>
 				</div>
 				<div class="footer">
 					<div class="btn" id="start">开始</div>
@@ -349,10 +368,14 @@
 	<script>
 		let robotPlayerType = null, // 电脑角色
 			isRobotPlayer = true, // 是否电脑棋手
+			robotPlayAgainst = false, //是否电脑对下
 			startStatus = false // 开始状态
 		;(() => {
-			let checked1 = true,
-				checked2 = false
+			const checkedStatus = {
+				checked1: true,
+				checked2: false,
+				checked3: false,
+			}
 
 			document.addEventListener('keyup', function (e) {
 				e = e || window.event
@@ -376,15 +399,18 @@
 			}
 			// start
 			$('#start').click(() => {
+				const { checked1, checked2, checked3 } = checkedStatus
 				if (!!startStatus && !confirm(local.replay)) {
 					return
 				}
 				// reset
 				reset()
 				closeModal()
-				isRobotPlayer = checked1
-                // 如果启用电脑玩家
+				// 如果启用电脑玩家
 				if (checked1) {
+					isRobotPlayer = checked1
+					robotPlayAgainst = checked3
+
 					// 电脑先手状态
 					if (checked2) {
 						robotPlayerType = chessPlayerTypes.black
@@ -417,27 +443,18 @@
 				}
 			})
 
-			const switch1 = $('#switch1')
-			const switch2 = $('#switch2')
-			switch1.click(function () {
-				if (checked1) {
-					checked1 = false
-					switch1.removeClass('checked')
+			$('.switch').click(handleSwitch)
+			function handleSwitch(e) {
+				let { key, id } = e.target.dataset
+				id = `#${id}`
+				if (checkedStatus[key]) {
+					checkedStatus[key] = false
+					$(id).removeClass('checked')
 				} else {
-					checked1 = true
-					switch1.addClass('checked')
+					checkedStatus[key] = true
+					$(id).addClass('checked')
 				}
-			})
-
-			switch2.click(function () {
-				if (checked2) {
-					checked2 = false
-					switch2.removeClass('checked')
-				} else {
-					checked2 = true
-					switch2.addClass('checked')
-				}
-			})
+			}
 		})()
 	</script>
 
