@@ -369,6 +369,7 @@
 		let robotPlayerType = null, // 电脑角色
 			isRobotPlayer = true, // 是否电脑棋手
 			robotPlayAgainst = false, //是否电脑对下
+			isReplay = false, // 是否重开游戏（电脑对战时需要判断重开）
 			startStatus = false // 开始状态
 		;(() => {
 			const checkedStatus = {
@@ -410,20 +411,23 @@
 				if (checked1) {
 					isRobotPlayer = checked1
 					robotPlayAgainst = checked3
-
 					// 电脑先手状态
-					if (checked2) {
-						robotPlayerType = chessPlayerTypes.black
-						handleDraw(getRandomCoord())
-					} else {
-						robotPlayerType = chessPlayerTypes.white
-					}
+					robotPlayerType = checked2
+						? chessPlayerTypes.black
+						: chessPlayerTypes.white
+				} else {
+					isRobotPlayer = false
+					robotPlayAgainst = false
 				}
 
+				if (startStatus) {
+					isReplay = true
+				}
+				startStatus = true
 				setTimeout(() => {
 					$('#start').innerHTML('重新开始')
+					handleDraw(getRandomCoord())
 				}, 300)
-				startStatus = true
 			})
 
 			// regret
@@ -512,9 +516,8 @@
 				alert('还没有点击开始游戏哦~，通过打开设置开始游戏')
 				return
 			}
-
-			// if victory
-			if (!!isVictory) {
+			// if victory || robotPlayAgainst
+			if (!!isVictory || robotPlayAgainst) {
 				return
 			}
 			const { layerX, layerY } = e
@@ -726,6 +729,12 @@
 			const { x, y } = currentChess
 			// if draw
 			if (chessboard[x] && chessboard[x][y]) {
+				return false
+			}
+
+			// 如果是电脑对战并且是重开游戏状态则不进行后面操作并设置重开状态为false
+			if (isReplay) {
+				isReplay = false
 				return false
 			}
 
