@@ -2,1016 +2,1069 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link
-      href="https://fonts.font.im/css?family=Source+Sans+Pro"
-      rel="stylesheet"
-    />
-    <title>WZQ</title>
-  </head>
-
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-size: 10px;
-      font-family: "Source Sans Pro", sans-serif;
-      color: #333;
-      user-select: none;
-    }
-    h4 {
-      font-size: 1.7em;
-    }
-    .flex {
-      display: flex;
-    }
-    .container {
-      width: 100vw;
-      height: 100vh;
-      text-align: center;
-      padding: 20px;
-      background-color: white;
-      overflow: hidden;
-      box-sizing: border-box;
-    }
-    #wzq {
-      background-color: #e4c089;
-    }
-    button {
-      width: 150px;
-      text-align: center;
-      font-size: 2.2em;
-      cursor: pointer;
-    }
-
-    .btn {
-      width: 98%;
-      height: 60px;
-      margin: 10px auto;
-      padding: 0 20px;
-      line-height: 60px;
-      text-align: center;
-      font-size: 1.6em;
-      color: white;
-      background-color: #2196f3;
-      box-sizing: border-box;
-      border-radius: 10px;
-      transition: all 0.25s ease;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .btn:active {
-      background-color: #008eff;
-      transform: translateY(-2px);
-    }
-
-    .btn:hover {
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-    }
-
-    .title-wrap {
-      margin: 1em;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .title-wrap span {
-      font-size: 2em;
-      font-weight: bold;
-    }
-
-    .switch {
-      display: inline-block;
-      font-size: 10px;
-      width: 10em;
-      height: 4em;
-      line-height: 4em;
-      border-radius: 2em;
-      transition-delay: 0.1s, 0s;
-      background: transparent;
-      box-shadow: inset 0 0 0 0.15em #eee;
-      /* box-shadow: inset 0 0 0 2.62857em #2196f3; */
-      transition: box-shadow 0.3s ease-in-out, padding 0.25s ease-in-out;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .switch::before {
-      content: "";
-      display: block;
-      position: absolute;
-      width: 4em;
-      height: 4em;
-      left: 0;
-      top: 0;
-      background-color: #fff;
-      border-radius: 2em;
-      box-shadow: 0 0.2em 0.4em 0 rgba(0, 0, 0, 0.2),
-        0 0 0.1em 0.1em rgba(0, 0, 0, 0.1);
-      transition: all 0.1s ease 0.1s;
-    }
-
-    .switch.checked {
-      box-shadow: inset 0 0 0 2.62857em #00c169;
-      /* box-shadow: inset 0 0 0 2.62857em #e91e63; */
-    }
-
-    .switch.checked::before {
-      left: 6em;
-      transition-delay: 0s, 0s;
-    }
-
-    .game-start-wrap,
-    .game-start-wrap .mask {
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      right: 0;
-    }
-
-    .game-start-wrap.show {
-      opacity: 1;
-      transition-delay: 0;
-      transition: all 0.3s ease-in;
-    }
-
-    .game-start-wrap.hide {
-      opacity: 0;
-      transition: all 0.3s ease-out;
-      transition-delay: 0.3s;
-      z-index: -1;
-    }
-
-    .game-start-wrap.show {
-      opacity: 1;
-      z-index: 999;
-    }
-
-    .game-start-wrap .mask {
-      background-color: rgba(0, 0, 0, 0.3);
-    }
-
-    .game-start-wrap .close {
-      position: absolute;
-      width: 30px;
-      height: 30px;
-      text-align: center;
-      top: 10px;
-      right: 10px;
-      font-size: 2em;
-      transition: transform 0.1s ease;
-      cursor: pointer;
-    }
-
-    .game-start-wrap .close:hover {
-      transform: scale(1.1);
-      transform-origin: center;
-    }
-
-    .game-start-wrap .content {
-      position: absolute;
-      min-height: 60vh;
-      padding: 20px;
-      left: 50%;
-      top: 200px;
-      width: 35vw;
-      background-color: rgba(255, 255, 255, 0.98);
-      border-radius: 1.5em;
-      transition: all 0.2s ease;
-      transform: translateX(-50%) translateY(-100px);
-      opacity: 0;
-      box-sizing: border-box;
-    }
-
-    .game-start-wrap.show .content {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .game-start-wrap .content p {
-      font-size: 1.4em;
-      margin: 5px 0;
-    }
-
-    .game-start-wrap .content .row {
-      align-items: center;
-      margin: 20px 0;
-    }
-
-    .game-start-wrap .content .row span {
-      font-size: 1.6em;
-      margin-right: 20px;
-    }
-
-    .game-start-wrap .header {
-      font-size: 2.2em;
-      text-align: center;
-      font-weight: bold;
-    }
-    .game-start-wrap .footer {
-      margin-top: 15em;
-    }
-  </style>
-
-  <body>
-    <div id="gameModal" class="game-start-wrap show">
-      <div class="mask"></div>
-      <div class="content">
-        <div id="close" class="close">x</div>
-        <div class="header">START</div>
-        <p>电脑下棋: 和电脑进行对战。</p>
-        <p>电脑先手: 电脑玩家先手。</p>
-        <div class="row flex">
-          <span>电脑下棋</span>
-          <div id="switch1" class="switch checked"></div>
-        </div>
-        <div class="row flex">
-          <span>电脑先手</span>
-          <div id="switch2" class="switch"></div>
-        </div>
-        <div class="footer">
-          <div class="btn" id="start">开始</div>
-          <!-- <div class="btn" id="replay">重新开始</div> -->
-        </div>
-      </div>
-    </div>
-    <div class="container">
-      <div class="title-wrap flex">
-        <span id="title">黑棋先手</span>
-      </div>
-      <canvas id="wzq"></canvas>
-      <h4 id="currentPlayer"></h4>
-      <div style="width: 500px; margin: 0 auto;">
-        <div id="regret" class="btn">悔棋</div>
-        <div id="openSetting" class="btn">打开设置</div>
-      </div>
-    </div>
-  </body>
-  <!-- common script -->
-  <script>
-    // class coord
-    class Coord {
-      constructor(x, y) {
-        this.x = x || 0;
-        this.y = y || 0;
-      }
-
-      inverseCoord() {
-        // return {
-        //   x: ~this.x + 1,
-        //   y: ~this.y + 1,
-        // };
-        return new Coord(~this.x + 1, ~this.y + 1);
-      }
-
-      get key() {
-        return `${this.x}-${this.y}`;
-      }
-    }
-
-    class MyJQ {
-      constructor(selector) {
-        this.selector = selector;
-        if (selector) {
-          this.el = document.querySelectorAll(selector);
-        } else {
-          this.el = null;
-        }
-      }
-
-      _handle(fn) {
-        if (this.el.length) {
-          this.el.forEach((e) => {
-            fn && fn(e);
-          });
-          return;
-        }
-
-        fn && fn(this.el);
-      }
-
-      innerHTML(val) {
-        this._handle(function (e) {
-          e.innerHTML = val;
-        });
-        return this;
-      }
-
-      // click
-      click(cb) {
-        if ("function" === typeof cb) {
-          this._handle(function (e) {
-            e.addEventListener("click", cb);
-          });
-          return this;
-        }
-      }
-
-      // add class
-      addClass(className) {
-        this._handle(function (e) {
-          if (e.className.indexOf(className) > -1) {
-            return;
-          }
-          e.className += ` ${className}`;
-        });
-        return this;
-      }
-
-      // remove class
-      removeClass(className) {
-        this._handle(function (e) {
-          e.className = e.className.replace(`${className}`, "").trim();
-        });
-        return this;
-      }
-    }
-
-    // inject my JQ
-    function inject(selector) {
-      try {
-        return new MyJQ(selector);
-      } catch (error) {
-        console.log("Error", error);
-      }
-    }
-
-    // my JQ
-    const $ = inject;
-  </script>
-
-  <!-- view handle -->
-  <script>
-    let robotPlayerType = null, // 电脑角色
-      isRobotPlayer = true, // 是否电脑棋手
-      startStatus = false; // 开始状态
-    (() => {
-      let checked1 = true,
-        checked2 = false;
-
-      document.addEventListener("keyup", function (e) {
-        e = e || window.event;
-        if (e && e.keyCode == 27) {
-          closeModal();
-        }
-      });
-
-      // close
-      $("#close").click(closeModal);
-      function closeModal() {
-        $("#gameModal").removeClass("show");
-        $("#gameModal").addClass("hide");
-      }
-
-      // open setting
-      $("#openSetting").click(openModal);
-      function openModal() {
-        $("#gameModal").removeClass("hide");
-        $("#gameModal").addClass("show");
-      }
-      // start
-      $("#start").click(() => {
-        if (!!startStatus && !confirm(local.replay)) {
-          return;
-        }
-        // reset
-        reset();
-        closeModal();
-        isRobotPlayer = checked1;
-
-        // 电脑先手状态
-        if (!!checked2) {
-          robotPlayerType = chessPlayerTypes.black;
-          handleDraw(getRandomCoord());
-        } else {
-          robotPlayerType = chessPlayerTypes.white;
-        }
-
-        setTimeout(() => {
-          $("#start").innerHTML("重新开始");
-        }, 300);
-        startStatus = true;
-      });
-
-      // regret
-      $("#regret").click(() => {
-        if (isVictory) {
-          alert(local.pleaseReplay);
-          return;
-        }
-
-        if (!chessHistory.length) {
-          alert(local.emptyChessBoard);
-          return;
-        }
-
-        if (confirm(local.regret)) {
-          handleRegret();
-        }
-      });
-
-      const switch1 = $("#switch1");
-      const switch2 = $("#switch2");
-      switch1.click(function () {
-        if (checked1) {
-          checked1 = false;
-          switch1.removeClass("checked");
-        } else {
-          checked1 = true;
-          switch1.addClass("checked");
-        }
-      });
-
-      switch2.click(function () {
-        if (checked2) {
-          checked2 = false;
-          switch2.removeClass("checked");
-        } else {
-          checked2 = true;
-          switch2.addClass("checked");
-        }
-      });
-    })();
-  </script>
-
-  <!-- main script -->
-  <script>
-    /** constant  **/
-    const chessPlayerTypes = {
-      black: "_BLACK_",
-      white: "_WHITE_",
-    };
-
-    const chessColors = {
-      [chessPlayerTypes.black]: "black",
-      [chessPlayerTypes.white]: "white",
-    };
-
-    const I18n = {
-      en: {},
-      "zh-cn": {
-        [chessPlayerTypes.black]: "黑棋",
-        [chessPlayerTypes.white]: "白棋",
-        currentChessPlayer: "当前棋手",
-        startPlayer: "黑棋先手",
-        regret: "是否确定悔棋？",
-        replay: "是否确定重新开始？",
-        emptyChessBoard: "没有可反悔的棋子！",
-        congrations: "胜利了，恭喜！！",
-        pleaseReplay: "请重新开始游戏。",
-      },
-    };
-
-    /** base **/
-    const canvas = document.getElementById("wzq");
-    const ctx = canvas.getContext("2d");
-    const lines = 30; // 棋盘线
-    const qSize = 550; // 棋盘大小
-    const chessSize = 14; // 棋子大小
-    const cellH = qSize / lines;
-    const currentChess = new Coord();
-    let chessboard, // 棋盘
-      chessHistory, // 下棋记录
-      isVictory, // 是否胜利
-      firstPlayerType; // 先手棋手
-
-    // i18n
-    const local = I18n["zh-cn"];
-    const canvasEl = document.querySelector("#wzq");
-    // reset
-    reset();
-    //tap
-    canvasEl.addEventListener("click", tap);
-
-    function tap(e) {
-      if (!startStatus) {
-        alert("还没有点击开始游戏哦~，通过打开设置开始游戏");
-        return;
-      }
-
-      // if victory
-      if (!!isVictory) {
-        return;
-      }
-      const { layerX, layerY } = e;
-      const chessCoord = getChessCoord(layerX, layerY);
-      handleDraw(chessCoord);
-    }
-
-    /**
-     * @desc handle draw chess
-     * @param{chessCoord} Coord
-     */
-    function handleDraw(chessCoord) {
-      currentChess.playerType =
-        currentChess.step % 2 === 0
-          ? chessPlayerTypes.black
-          : chessPlayerTypes.white;
-      currentChess.x = chessCoord.x;
-      currentChess.y = chessCoord.y;
-
-      if (!canDrawChess()) {
-        return;
-      }
-      // draw chess
-      drawChess(chessCoord, chessColors[currentChess.playerType], chessSize);
-      record();
-      showPlayer();
-
-      if (checkVictory()) {
-        isVictory = true;
-        showVictory();
-      } else {
-        // step ++
-        currentChess.step++;
-        // test
-        if (!!isRobotPlayer && currentChess.playerType !== robotPlayerType) {
-          setTimeout(() => {
-            const nextCoord = getNextCoord();
-            handleDraw(nextCoord);
-          }, 100);
-        }
-      }
-    }
-
-    /**
-     * @desc get chess coord
-     * @desc 获取棋子的坐标（根据位置）
-     *
-     */
-    function getChessCoord(layerX, layerY) {
-      const x = Math.floor((layerX + cellH / 2) / cellH);
-      const y = Math.floor((layerY + cellH / 2) / cellH);
-      return new Coord(x, y);
-    }
-
-    // reset
-    function reset() {
-      /** chess  current chess**/
-      currentChess.step = 0;
-      currentChess.playerType = null;
-      isVictory = false;
-      // chess board
-      chessboard = new Array(lines).fill();
-      chessboard.forEach(
-        (_, i) => (chessboard[i] = new Array(lines).fill(null))
-      );
-      chessHistory = [];
-      /** main **/
-      drawChessBoard();
-      drawChessBoardCenter();
-      showPlayer();
-      $("#title").innerHTML(local.startPlayer);
-    }
-
-    /**
-     * @desc draw center
-     * @desc 画棋盘中心点(5个位置)
-     *
-     */
-    function drawChessBoardCenter() {
-      const centerCoord = getChessCoord(qSize / 2, qSize / 2);
-      const offsetLeftTop = new Coord(-5, -5);
-      const offsetRightTop = new Coord(5, -5);
-      const fixedPoints = [
-        offsetLeftTop,
-        offsetLeftTop.inverseCoord(),
-        offsetRightTop,
-        offsetRightTop.inverseCoord(),
-      ];
-
-      for (const item of fixedPoints) {
-        const x = centerCoord.x + item.x;
-        const y = centerCoord.y + item.y;
-        drawChess(new Coord(x, y), "#333", 8);
-      }
-
-      drawChess(centerCoord, "#333", 8);
-    }
-
-    /**
-     * @desc handle regret
-     * @desc 悔棋需要判断是哪方在悔棋
-     * @desc 由于现在没有做联机 所以不需要做太复杂，只能反悔当前这颗棋子(可连续悔棋)
-     */
-    function handleRegret() {
-      // back step
-      const back = (step = 1) => {
-        let coord;
-        for (let i = 0; i < step; i++) {
-          coord = chessHistory.pop();
-          // delete history
-          chessboard[coord.x][coord.y] = null;
-          // step --
-          currentChess.step--;
-        }
-      };
-
-      if (isRobotPlayer) {
-        back(2);
-      } else {
-        back();
-      }
-
-      // repaint chess board
-      drawChessBoard();
-      // draw Center
-      drawChessBoardCenter();
-      // draw chess
-      for (const chessCoord of chessHistory) {
-        currentChess.x = chessCoord.x;
-        currentChess.y = chessCoord.y;
-        currentChess.playerType = chessboard[chessCoord.x][chessCoord.y];
-        drawChess(chessCoord, chessColors[currentChess.playerType], chessSize);
-      }
-      // show player
-      showPlayer();
-    }
-
-    // draw chess board
-    function drawChessBoard() {
-      canvas.width = qSize;
-      canvas.height = qSize;
-      ctx.fillStyle = "#000";
-      ctx.lineWidth = 1.0;
-      ctx.beginPath();
-      ctx.lineTo(0, 0);
-      ctx.lineTo(0, qSize);
-      ctx.lineTo(qSize, qSize);
-      ctx.lineTo(qSize, 0);
-      ctx.closePath();
-      for (let i = 0; i < lines; i++) {
-        const cellDx = cellH * i;
-        ctx.moveTo(0, cellDx);
-        ctx.lineTo(qSize, cellDx);
-        ctx.moveTo(cellDx, 0);
-        ctx.lineTo(cellDx, qSize);
-      }
-      ctx.stroke();
-    }
-
-    /**
-     * @desc show page player
-     *
-     **/
-    function showPlayer() {
-      try {
-        let { playerType } = currentChess;
-        let innerTxt = `${local.currentChessPlayer}：-`;
-        if (playerType) {
-          playerType =
-            chessPlayerTypes.black === playerType
-              ? chessPlayerTypes.white
-              : chessPlayerTypes.black;
-          innerTxt = `${local.currentChessPlayer}：${local[playerType]}`;
-        }
-        $("#currentPlayer").innerHTML(innerTxt);
-      } catch (error) {}
-    }
-
-    /**
-     * @desc show victory
-     *
-     **/
-    function showVictory() {
-      const { playerType } = currentChess;
-      $("#title").innerHTML(`${local[playerType]}${local.congrations}`);
-    }
-
-    /**
-     * @desc can draw
-     * @returns {Bool}
-     */
-    function canDrawChess() {
-      const { x, y } = currentChess;
-      // if draw
-      if (chessboard[x] && chessboard[x][y]) {
-        return false;
-      }
-
-      return true;
-    }
-
-    /**
-     * @desc draw chess
-     * @params {Coord} chessCoord
-     * @params {Color} color
-     * @params {int} size
-     **/
-    function drawChess(chessCoord, color, size) {
-      // const { x, y, playerType } = currentChess;
-      // ctx.fillStyle = chessColors[playerType];
-      ctx.fillStyle = color;
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.arc(
-        cellH * chessCoord.x,
-        cellH * chessCoord.y,
-        size / 2,
-        0,
-        2 * Math.PI
-      );
-      ctx.fill();
-      ctx.restore();
-    }
-
-    /** record chess **/
-    function record() {
-      const { x, y, playerType } = currentChess;
-      chessboard[x][y] = playerType;
-      chessHistory.push(new Coord(x, y));
-    }
-
-    /**
-     *
-     * @desciption direction 8
-     * @desciption 1.left 2.leftTop 3.top 4.rightTop 5.right 6.bottomRight 7.bottom 8.bottomLeft
-     *
-     **/
-    const directions = {
-      left: new Coord(-1, 0),
-      leftTop: new Coord(-1, -1),
-      top: new Coord(0, -1),
-      rightTop: new Coord(1, -1),
-      // right: new Coord(1, 0),
-      // bottomRight: new Coord(1, 1),
-      // bottom: new Coord(0, 1),
-      // bottomLeft: new Coord(-1, 1),
-    };
-    const _directions2 = [
-      {
-        prev: directions.left,
-        next: directions.left.inverseCoord(),
-        key: "left",
-      },
-      {
-        prev: directions.leftTop,
-        next: directions.leftTop.inverseCoord(),
-        key: "leftTop",
-      },
-      {
-        prev: directions.top,
-        next: directions.top.inverseCoord(),
-        key: "top",
-      },
-      {
-        prev: directions.rightTop,
-        next: directions.rightTop.inverseCoord(),
-        key: "rightTop",
-      },
-    ];
-
-    /**
-     * @desc 计算棋子相连数量
-     * @param {Coord} -offsetCoord
-     * @param {chess} -checkChess
-     * @returns {Object} -count -isBlock
-     */
-    function getChessConnect(offsetCoord, checkChess) {
-      const { x, y, playerType } = checkChess || currentChess;
-      // test
-
-      let count = 0, // count
-        isBlock = false; // 是否被阻拦
-      if (!playerType) {
-        return { count, isBlock };
-      }
-
-      const check = (currentCoord) => {
-        const cx = currentCoord.x + offsetCoord.x;
-        const cy = currentCoord.y + offsetCoord.y;
-        // 超出范围
-        if (void 0 === chessboard[cx] || void 0 === chessboard[cx][cy]) {
-          isBlock = true;
-          return;
-        }
-
-        if (chessboard[cx][cy] === playerType) {
-          count++;
-          // tips x,y
-          check({
-            x: cx,
-            y: cy,
-          });
-        } else {
-          // 如果存在棋子 && count >0
-          if (!!chessboard[cx][cy] && count > 0) {
-            isBlock = true;
-          }
-          return;
-        }
-      };
-      check({ x, y });
-      return { count, isBlock };
-    }
-
-    /**
-     * @desc check victory
-     * @returns {Bool} true -> victory false-> continiue
-     */
-    function checkVictory() {
-      const { playerType } = currentChess;
-      for (const { prev, next } of _directions2) {
-        const cCount =
-          getChessConnect(prev).count + getChessConnect(next).count + 1;
-        if (cCount > 4) {
-          return true;
-        }
-      }
-      return false;
-    }
-  </script>
-  <!-- robot script -->
-  <script>
-    /**
-     * @desc 随机获取坐标
-     * @params {Coord} coord -基于坐标点
-     * @returns {Coord}
-     **/
-    function getRandomCoord(coord) {
-      coord = coord || new Coord(lines / 2, lines / 2);
-      const dirct = getRandomDirection();
-      return new Coord(coord.x + dirct.x, coord.y + dirct.y);
-    }
-
-    /**
-     * @desc 自动获取下个棋子
-     * @returns {Coord}
-     **/
-    function getNextCoord() {
-      let nextCoord;
-      const self = getBestCoords(robotPlayerType);
-      const other = getBestCoords(
-        robotPlayerType === chessPlayerTypes.white
-          ? chessPlayerTypes.black
-          : chessPlayerTypes.white
-      );
-      // const otherCoordsMap = new Map(); // other map
-      const otherCoordsMap = {};
-      other.coords.forEach((c) => {
-        otherCoordsMap[c.key] = true;
-      });
-
-      const getSameCoord = () => {
-        const coords = self.coords;
-        // 遍历查找是否存在同一个点
-        for (const c of coords) {
-          if (otherCoordsMap[c.key]) {
-            return c;
-          }
-        }
-        return null;
-      };
-
-      // 对方棋子相连数小于3(阈值可以改成4 当三颗棋子相连时阻拦对方棋子)
-      if (other.weight < 30 || self.weight >= other.weight) {
-        if (self.weight > 0) {
-          nextCoord = getSameCoord() || self.coords[0];
-        } else {
-          if (
-            currentChess.x > 10 &&
-            currentChess.x < 20 &&
-            currentChess.y > 10 &&
-            currentChess.y < 20
-          ) {
-            nextCoord = getRandomCoord(currentChess);
-          } else {
-            nextCoord = getRandomCoord();
-          }
-        }
-      } else {
-        nextCoord = getSameCoord() || other.coords[0];
-      }
-
-      // console.log("self", self);
-      // console.log("other", other);
-      // console.log("nextCoord", nextCoord);
-      return nextCoord;
-    }
-
-    function getBestCoords(checkPlayerType) {
-      const bestCoords = [], // 最佳位置记录
-        weights = []; // 权重数组
-      let maxWeight = 0, // 最大权重值
-        weight = 0; // 权重计算值
-
-      // calc chess connect count
-      for (let x = 0; x < chessboard.length; x++) {
-        const board = chessboard[x];
-        for (let y = 0; y < board.length; y++) {
-          // 权重
-          weights.length = 0;
-          weight = 0;
-          // check chess data
-          const checkChess = {
-            x,
-            y,
-            playerType: checkPlayerType,
-          };
-
-          // 不是空位置
-          if (board[y] !== null) {
-            continue;
-          }
-
-          // 计算位置权重
-          for (const { prev, next, key } of _directions2) {
-            // count
-            const prevConnect = getChessConnect(prev, checkChess);
-            const nextConnect = getChessConnect(next, checkChess);
-            let cCount = prevConnect.count + nextConnect.count + 1;
-            // block
-            const isBlock = prevConnect.isBlock || nextConnect.isBlock;
-            const isDoubleBlock = prevConnect.isBlock && nextConnect.isBlock;
-
-            if (cCount < 2) {
-              continue;
-            }
-
-            // 棋子大于4个
-            if (cCount > 4) {
-              checkPlayerType === robotPlayerType
-                ? (cCount *= 10)
-                : (cCount *= 4);
-            }
-            // start
-            if (!isDoubleBlock) {
-              if (isBlock) {
-                cCount -= 1;
-              }
-              // 权重数组
-              weights.push(cCount);
-              // console.log("cCount", `${x}-${y}`, key, cCount);
-            }
-          }
-          // 权重值
-          weight = getWeight(weights);
-          if (weight < 1) {
-            continue;
-          }
-          if (weight > maxWeight) {
-            maxWeight = weight;
-            bestCoords.length = 0;
-            bestCoords.push(new Coord(x, y));
-          } else if (weight === maxWeight) {
-            bestCoords.push(new Coord(x, y));
-          }
-        }
-      }
-
-      return { coords: bestCoords, weight: maxWeight };
-    }
-
-    /*
-     * @desc 获取权重值
-     *  - weight = maxWeight*10 + weight + weight+....
-     * @params {Array} weights
-     * @returns {Bool}
-     *
-     **/
-    function getWeight(weights = []) {
-      if (!weights.length) {
-        return 0;
-      }
-
-      if (weights.length === 1) {
-        return weights[0] * 10;
-      }
-
-      let maxIndex,
-        max = 0;
-      weights.forEach((wt, i) => {
-        if (wt > max) {
-          max = wt;
-          maxIndex = i;
-        }
-      });
-
-      weights.splice(maxIndex, 1);
-      return max * 10 + weights.reduce((sum, val) => sum + val);
-    }
-
-    /*
-     * @desc get random direction
-     *
-     **/
-    function getRandomDirection() {
-      const r1 = getRandomNum(0, _directions2.length - 1);
-      const r2 = getRandomNum(0, 1);
-      return _directions2[r1][r2 === 0 ? "prev" : "next"];
-    }
-    /*
-     * @desc get random num
-     *
-     **/
-    function getRandomNum(min = 0, max = 10) {
-      return Math.floor(Math.random() * (max - min + 1) + min);
-    }
-  </script>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<link
+			href="https://fonts.font.im/css?family=Source+Sans+Pro"
+			rel="stylesheet"
+		/>
+		<title>WZQ</title>
+	</head>
+
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			font-size: 10px;
+			font-family: 'Source Sans Pro', sans-serif;
+			color: #333;
+			user-select: none;
+		}
+		h4 {
+			font-size: 1.7em;
+		}
+		.flex {
+			display: flex;
+		}
+		.container {
+			width: 100vw;
+			height: 100vh;
+			text-align: center;
+			padding: 20px;
+			background-color: white;
+			overflow: hidden;
+			box-sizing: border-box;
+		}
+		#wzq {
+			background-color: #e4c089;
+		}
+		button {
+			width: 150px;
+			text-align: center;
+			font-size: 2.2em;
+			cursor: pointer;
+		}
+
+		.btn {
+			width: 98%;
+			height: 60px;
+			margin: 10px auto;
+			padding: 0 20px;
+			line-height: 60px;
+			text-align: center;
+			font-size: 1.6em;
+			color: white;
+			background-color: #2196f3;
+			box-sizing: border-box;
+			border-radius: 10px;
+			transition: all 0.25s ease;
+			cursor: pointer;
+			user-select: none;
+		}
+
+		.btn:active {
+			background-color: #008eff;
+			transform: translateY(-2px);
+		}
+
+		.btn:hover {
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+		}
+
+		.title-wrap {
+			margin: 1em;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.title-wrap span {
+			font-size: 2em;
+			font-weight: bold;
+		}
+
+		.switch {
+			display: inline-block;
+			font-size: 10px;
+			width: 10em;
+			height: 4em;
+			line-height: 4em;
+			border-radius: 2em;
+			transition-delay: 0.1s, 0s;
+			background: transparent;
+			box-shadow: inset 0 0 0 0.15em #eee;
+			/* box-shadow: inset 0 0 0 2.62857em #2196f3; */
+			transition: box-shadow 0.3s ease-in-out, padding 0.25s ease-in-out;
+			cursor: pointer;
+			position: relative;
+		}
+
+		.switch::before {
+			content: '';
+			display: block;
+			position: absolute;
+			width: 4em;
+			height: 4em;
+			left: 0;
+			top: 0;
+			background-color: #fff;
+			border-radius: 2em;
+			box-shadow: 0 0.2em 0.4em 0 rgba(0, 0, 0, 0.2),
+				0 0 0.1em 0.1em rgba(0, 0, 0, 0.1);
+			transition: all 0.1s ease 0.1s;
+		}
+
+		.switch.checked {
+			box-shadow: inset 0 0 0 2.62857em #00c169;
+			/* box-shadow: inset 0 0 0 2.62857em #e91e63; */
+		}
+
+		.switch.checked::before {
+			left: 6em;
+			transition-delay: 0s, 0s;
+		}
+
+		.game-start-wrap,
+		.game-start-wrap .mask {
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			right: 0;
+		}
+
+		.game-start-wrap.show {
+			opacity: 1;
+			transition-delay: 0;
+			transition: all 0.3s ease-in;
+		}
+
+		.game-start-wrap.hide {
+			opacity: 0;
+			transition: all 0.3s ease-out;
+			transition-delay: 0.3s;
+			z-index: -1;
+		}
+
+		.game-start-wrap.show {
+			opacity: 1;
+			z-index: 999;
+		}
+
+		.game-start-wrap .mask {
+			background-color: rgba(0, 0, 0, 0.3);
+		}
+
+		.game-start-wrap .close {
+			position: absolute;
+			width: 30px;
+			height: 30px;
+			text-align: center;
+			top: 10px;
+			right: 10px;
+			font-size: 2em;
+			transition: transform 0.1s ease;
+			cursor: pointer;
+		}
+
+		.game-start-wrap .close:hover {
+			transform: scale(1.1);
+			transform-origin: center;
+		}
+
+		.game-start-wrap .content {
+			position: absolute;
+			min-height: 60vh;
+			padding: 20px;
+			left: 50%;
+			top: 200px;
+			width: 35vw;
+			background-color: rgba(255, 255, 255, 0.98);
+			border-radius: 1.5em;
+			transition: all 0.2s ease;
+			transform: translateX(-50%) translateY(-100px);
+			opacity: 0;
+			box-sizing: border-box;
+		}
+
+		.game-start-wrap.show .content {
+			opacity: 1;
+			transform: translateX(-50%) translateY(0);
+		}
+
+		.game-start-wrap .content p {
+			font-size: 1.4em;
+			margin: 5px 0;
+		}
+
+		.game-start-wrap .content .row {
+			align-items: center;
+			margin: 20px 0;
+		}
+
+		.game-start-wrap .content .row span {
+			font-size: 1.6em;
+			margin-right: 20px;
+		}
+
+		.game-start-wrap .header {
+			font-size: 2.2em;
+			text-align: center;
+			font-weight: bold;
+		}
+		.game-start-wrap .footer {
+			margin-top: 15em;
+		}
+	</style>
+
+	<body>
+		<div id="gameModal" class="game-start-wrap show">
+			<div class="mask"></div>
+			<div class="content">
+				<div id="close" class="close">x</div>
+				<div class="header">START</div>
+				<p>电脑下棋: 和电脑进行对战。</p>
+				<p>电脑先手: 电脑玩家先手。</p>
+				<div class="row flex">
+					<span>电脑下棋</span>
+					<div
+						id="switch1"
+						class="switch checked"
+						data-id="switch1"
+						data-key="checked1"
+					></div>
+				</div>
+				<div class="row flex">
+					<span>电脑先手</span>
+					<div
+						id="switch2"
+						class="switch"
+						data-id="switch2"
+						data-key="checked2"
+					></div>
+				</div>
+				<div class="row flex">
+					<span>电脑对下</span>
+					<div
+						id="switch3"
+						class="switch"
+						data-id="switch3"
+						data-key="checked3"
+					></div>
+				</div>
+				<div class="footer">
+					<div class="btn" id="start">开始</div>
+					<!-- <div class="btn" id="replay">重新开始</div> -->
+				</div>
+			</div>
+		</div>
+		<div class="container">
+			<div class="title-wrap flex">
+				<span id="title">黑棋先手</span>
+			</div>
+			<canvas id="wzq"></canvas>
+			<h4 id="currentPlayer"></h4>
+			<div style="width: 500px; margin: 0 auto;">
+				<div id="regret" class="btn">悔棋</div>
+				<div id="openSetting" class="btn">打开设置</div>
+			</div>
+		</div>
+	</body>
+	<!-- common script -->
+	<script>
+		// class coord
+		class Coord {
+			constructor(x, y) {
+				this.x = x || 0
+				this.y = y || 0
+			}
+
+			inverseCoord() {
+				// return {
+				//   x: ~this.x + 1,
+				//   y: ~this.y + 1,
+				// };
+				return new Coord(~this.x + 1, ~this.y + 1)
+			}
+
+			get key() {
+				return `${this.x}-${this.y}`
+			}
+		}
+
+		class MyJQ {
+			constructor(selector) {
+				this.selector = selector
+				if (selector) {
+					this.el = document.querySelectorAll(selector)
+				} else {
+					this.el = null
+				}
+			}
+
+			_handle(fn) {
+				if (this.el.length) {
+					this.el.forEach((e) => {
+						fn && fn(e)
+					})
+					return
+				}
+
+				fn && fn(this.el)
+			}
+
+			innerHTML(val) {
+				this._handle(function (e) {
+					e.innerHTML = val
+				})
+				return this
+			}
+
+			// click
+			click(cb) {
+				if ('function' === typeof cb) {
+					this._handle(function (e) {
+						e.addEventListener('click', cb)
+					})
+					return this
+				}
+			}
+
+			// add class
+			addClass(className) {
+				this._handle(function (e) {
+					if (e.className.indexOf(className) > -1) {
+						return
+					}
+					e.className += ` ${className}`
+				})
+				return this
+			}
+
+			// remove class
+			removeClass(className) {
+				this._handle(function (e) {
+					e.className = e.className.replace(`${className}`, '').trim()
+				})
+				return this
+			}
+		}
+
+		// inject my JQ
+		function inject(selector) {
+			try {
+				return new MyJQ(selector)
+			} catch (error) {
+				console.log('Error', error)
+			}
+		}
+
+		// my JQ
+		const $ = inject
+	</script>
+
+	<!-- view handle -->
+	<script>
+		let robotPlayerType = null, // 电脑角色
+			isRobotPlayer = true, // 是否电脑棋手
+			robotPlayAgainst = false, //是否电脑对下
+			isReplay = false, // 是否重开游戏（电脑对战时需要判断重开）
+			startStatus = false // 开始状态
+		;(() => {
+			const checkedStatus = {
+				checked1: true,
+				checked2: false,
+				checked3: false,
+			}
+
+			document.addEventListener('keyup', function (e) {
+				e = e || window.event
+				if (e && e.keyCode == 27) {
+					closeModal()
+				}
+			})
+
+			// close
+			$('#close').click(closeModal)
+			function closeModal() {
+				$('#gameModal').removeClass('show')
+				$('#gameModal').addClass('hide')
+			}
+
+			// open setting
+			$('#openSetting').click(openModal)
+			function openModal() {
+				$('#gameModal').removeClass('hide')
+				$('#gameModal').addClass('show')
+			}
+			// start
+			$('#start').click(() => {
+				const { checked1, checked2, checked3 } = checkedStatus
+				if (!!startStatus && !confirm(local.replay)) {
+					return
+				}
+				// reset
+				reset()
+				closeModal()
+				// 如果启用电脑玩家
+				if (checked1) {
+					isRobotPlayer = checked1
+					robotPlayAgainst = checked3
+					// 电脑先手状态
+					robotPlayerType = checked2
+						? chessPlayerTypes.black
+						: chessPlayerTypes.white
+				} else {
+					isRobotPlayer = false
+					robotPlayAgainst = false
+				}
+
+				if (startStatus) {
+					isReplay = true
+				}
+				startStatus = true
+				setTimeout(() => {
+					$('#start').innerHTML('重新开始')
+					handleDraw(getRandomCoord())
+				}, 300)
+			})
+
+			// regret
+			$('#regret').click(() => {
+				if (isVictory) {
+					alert(local.pleaseReplay)
+					return
+				}
+
+				if (!chessHistory.length) {
+					alert(local.emptyChessBoard)
+					return
+				}
+
+				if (confirm(local.regret)) {
+					handleRegret()
+				}
+			})
+
+			$('.switch').click(handleSwitch)
+			function handleSwitch(e) {
+				let { key, id } = e.target.dataset
+				id = `#${id}`
+				if (checkedStatus[key]) {
+					checkedStatus[key] = false
+					$(id).removeClass('checked')
+				} else {
+					checkedStatus[key] = true
+					$(id).addClass('checked')
+				}
+			}
+		})()
+	</script>
+
+	<!-- main script -->
+	<script>
+		/** constant  **/
+		const chessPlayerTypes = {
+			black: '_BLACK_',
+			white: '_WHITE_',
+		}
+
+		const chessColors = {
+			[chessPlayerTypes.black]: 'black',
+			[chessPlayerTypes.white]: 'white',
+		}
+
+		const I18n = {
+			en: {},
+			'zh-cn': {
+				[chessPlayerTypes.black]: '黑棋',
+				[chessPlayerTypes.white]: '白棋',
+				currentChessPlayer: '当前棋手',
+				startPlayer: '黑棋先手',
+				regret: '是否确定悔棋？',
+				replay: '是否确定重新开始？',
+				emptyChessBoard: '没有可反悔的棋子！',
+				congrations: '胜利了，恭喜！！',
+				pleaseReplay: '请重新开始游戏。',
+			},
+		}
+
+		/** base **/
+		const canvas = document.getElementById('wzq')
+		const ctx = canvas.getContext('2d')
+		const lines = 30 // 棋盘线
+		const qSize = 550 // 棋盘大小
+		const chessSize = 14 // 棋子大小
+		const cellH = qSize / lines
+		const currentChess = new Coord()
+		let chessboard, // 棋盘
+			chessHistory, // 下棋记录
+			isVictory, // 是否胜利
+			firstPlayerType // 先手棋手
+
+		// i18n
+		const local = I18n['zh-cn']
+		const canvasEl = document.querySelector('#wzq')
+		// reset
+		reset()
+		//tap
+		canvasEl.addEventListener('click', tap)
+
+		function tap(e) {
+			if (!startStatus) {
+				alert('还没有点击开始游戏哦~，通过打开设置开始游戏')
+				return
+			}
+			// if victory || robotPlayAgainst
+			if (!!isVictory || robotPlayAgainst) {
+				return
+			}
+			const { layerX, layerY } = e
+			const chessCoord = getChessCoord(layerX, layerY)
+			handleDraw(chessCoord)
+		}
+
+		/**
+		 * @desc handle draw chess
+		 * @param{chessCoord} Coord
+		 */
+		function handleDraw(chessCoord) {
+			currentChess.playerType =
+				currentChess.step % 2 === 0
+					? chessPlayerTypes.black
+					: chessPlayerTypes.white
+			currentChess.x = chessCoord.x
+			currentChess.y = chessCoord.y
+
+			if (!canDrawChess()) {
+				return
+			}
+
+			if (!!robotPlayAgainst) {
+				robotPlayerType = getPlayerTypeByType(currentChess.playerType)
+			}
+			// draw chess
+			drawChess(
+				chessCoord,
+				chessColors[currentChess.playerType],
+				chessSize
+			)
+			record()
+			showPlayer()
+
+			if (checkVictory()) {
+				isVictory = true
+				showVictory()
+			} else {
+				// step ++
+				currentChess.step++
+				// test
+				if (
+					!!isRobotPlayer &&
+					currentChess.playerType !== robotPlayerType
+				) {
+					setTimeout(() => {
+						const nextCoord = getNextCoord()
+						handleDraw(nextCoord)
+					}, 100)
+				}
+			}
+		}
+
+		/**
+		 * @desc get chess coord
+		 * @desc 获取棋子的坐标（根据位置）
+		 *
+		 */
+		function getChessCoord(layerX, layerY) {
+			const x = Math.floor((layerX + cellH / 2) / cellH)
+			const y = Math.floor((layerY + cellH / 2) / cellH)
+			return new Coord(x, y)
+		}
+
+		// reset
+		function reset() {
+			/** chess  current chess**/
+			currentChess.step = 0
+			currentChess.playerType = null
+			isVictory = false
+			// chess board
+			chessboard = new Array(lines).fill()
+			chessboard.forEach(
+				(_, i) => (chessboard[i] = new Array(lines).fill(null))
+			)
+			chessHistory = []
+			/** main **/
+			drawChessBoard()
+			drawChessBoardCenter()
+			showPlayer()
+			$('#title').innerHTML(local.startPlayer)
+		}
+
+		/**
+		 * @desc draw center
+		 * @desc 画棋盘中心点(5个位置)
+		 *
+		 */
+		function drawChessBoardCenter() {
+			const centerCoord = getChessCoord(qSize / 2, qSize / 2)
+			const offsetLeftTop = new Coord(-5, -5)
+			const offsetRightTop = new Coord(5, -5)
+			const fixedPoints = [
+				offsetLeftTop,
+				offsetLeftTop.inverseCoord(),
+				offsetRightTop,
+				offsetRightTop.inverseCoord(),
+			]
+
+			for (const item of fixedPoints) {
+				const x = centerCoord.x + item.x
+				const y = centerCoord.y + item.y
+				drawChess(new Coord(x, y), '#333', 8)
+			}
+
+			drawChess(centerCoord, '#333', 8)
+		}
+
+		/**
+		 * @desc handle regret
+		 * @desc 悔棋需要判断是哪方在悔棋
+		 * @desc 由于现在没有做联机 所以不需要做太复杂，只能反悔当前这颗棋子(可连续悔棋)
+		 */
+		function handleRegret() {
+			// back step
+			const back = (step = 1) => {
+				let coord
+				for (let i = 0; i < step; i++) {
+					coord = chessHistory.pop()
+					// delete history
+					chessboard[coord.x][coord.y] = null
+					// step --
+					currentChess.step--
+				}
+			}
+
+			if (isRobotPlayer) {
+				back(2)
+			} else {
+				back()
+			}
+
+			// repaint chess board
+			drawChessBoard()
+			// draw Center
+			drawChessBoardCenter()
+			// draw chess
+			for (const chessCoord of chessHistory) {
+				currentChess.x = chessCoord.x
+				currentChess.y = chessCoord.y
+				currentChess.playerType = chessboard[chessCoord.x][chessCoord.y]
+				drawChess(
+					chessCoord,
+					chessColors[currentChess.playerType],
+					chessSize
+				)
+			}
+			// show player
+			showPlayer()
+		}
+
+		// draw chess board
+		function drawChessBoard() {
+			canvas.width = qSize
+			canvas.height = qSize
+			ctx.fillStyle = '#000'
+			ctx.lineWidth = 1.0
+			ctx.beginPath()
+			ctx.lineTo(0, 0)
+			ctx.lineTo(0, qSize)
+			ctx.lineTo(qSize, qSize)
+			ctx.lineTo(qSize, 0)
+			ctx.closePath()
+			for (let i = 0; i < lines; i++) {
+				const cellDx = cellH * i
+				ctx.moveTo(0, cellDx)
+				ctx.lineTo(qSize, cellDx)
+				ctx.moveTo(cellDx, 0)
+				ctx.lineTo(cellDx, qSize)
+			}
+			ctx.stroke()
+		}
+
+		/**
+		 * @desc show page player
+		 *
+		 **/
+		function showPlayer() {
+			try {
+				let { playerType } = currentChess
+				let innerTxt = `${local.currentChessPlayer}：-`
+				if (playerType) {
+					playerType = getPlayerTypeByType(playerType)
+					// playerType =
+					// 	chessPlayerTypes.black === playerType
+					// 		? chessPlayerTypes.white
+					// 		: chessPlayerTypes.black
+					innerTxt = `${local.currentChessPlayer}：${local[playerType]}`
+				}
+				$('#currentPlayer').innerHTML(innerTxt)
+			} catch (error) {}
+		}
+
+		/**
+		 * @desc show victory
+		 *
+		 **/
+		function showVictory() {
+			const { playerType } = currentChess
+			$('#title').innerHTML(`${local[playerType]}${local.congrations}`)
+		}
+
+		/**
+		 * @desc can draw
+		 * @returns {Bool}
+		 */
+		function canDrawChess() {
+			const { x, y } = currentChess
+			// if draw
+			if (chessboard[x] && chessboard[x][y]) {
+				return false
+			}
+
+			// 如果是电脑对战并且是重开游戏状态则不进行后面操作并设置重开状态为false
+			if (isReplay) {
+				isReplay = false
+				return false
+			}
+
+			return true
+		}
+
+		/**
+		 * @desc draw chess
+		 * @params {Coord} chessCoord
+		 * @params {Color} color
+		 * @params {int} size
+		 **/
+		function drawChess(chessCoord, color, size) {
+			// const { x, y, playerType } = currentChess;
+			// ctx.fillStyle = chessColors[playerType];
+			ctx.fillStyle = color
+			ctx.save()
+			ctx.beginPath()
+			ctx.moveTo(0, 0)
+			ctx.arc(
+				cellH * chessCoord.x,
+				cellH * chessCoord.y,
+				size / 2,
+				0,
+				2 * Math.PI
+			)
+			ctx.fill()
+			ctx.restore()
+		}
+
+		function getPlayerTypeByType(playerType) {
+			return playerType === chessPlayerTypes.white
+				? chessPlayerTypes.black
+				: chessPlayerTypes.white
+		}
+
+		/** record chess **/
+		function record() {
+			const { x, y, playerType } = currentChess
+			chessboard[x][y] = playerType
+			chessHistory.push(new Coord(x, y))
+		}
+
+		/**
+		 *
+		 * @desciption direction 8
+		 * @desciption 1.left 2.leftTop 3.top 4.rightTop 5.right 6.bottomRight 7.bottom 8.bottomLeft
+		 *
+		 **/
+		const directions = {
+			left: new Coord(-1, 0),
+			leftTop: new Coord(-1, -1),
+			top: new Coord(0, -1),
+			rightTop: new Coord(1, -1),
+			// right: new Coord(1, 0),
+			// bottomRight: new Coord(1, 1),
+			// bottom: new Coord(0, 1),
+			// bottomLeft: new Coord(-1, 1),
+		}
+		const _directions2 = [
+			{
+				prev: directions.left,
+				next: directions.left.inverseCoord(),
+				key: 'left',
+			},
+			{
+				prev: directions.leftTop,
+				next: directions.leftTop.inverseCoord(),
+				key: 'leftTop',
+			},
+			{
+				prev: directions.top,
+				next: directions.top.inverseCoord(),
+				key: 'top',
+			},
+			{
+				prev: directions.rightTop,
+				next: directions.rightTop.inverseCoord(),
+				key: 'rightTop',
+			},
+		]
+
+		/**
+		 * @desc 计算棋子相连数量
+		 * @param {Coord} -offsetCoord
+		 * @param {chess} -checkChess
+		 * @returns {Object} -count -isBlock
+		 */
+		function getChessConnect(offsetCoord, checkChess) {
+			const { x, y, playerType } = checkChess || currentChess
+			// test
+
+			let count = 0, // count
+				isBlock = false // 是否被阻拦
+			if (!playerType) {
+				return { count, isBlock }
+			}
+
+			const check = (currentCoord) => {
+				const cx = currentCoord.x + offsetCoord.x
+				const cy = currentCoord.y + offsetCoord.y
+				// 超出范围
+				if (
+					void 0 === chessboard[cx] ||
+					void 0 === chessboard[cx][cy]
+				) {
+					isBlock = true
+					return
+				}
+
+				if (chessboard[cx][cy] === playerType) {
+					count++
+					// tips x,y
+					check({
+						x: cx,
+						y: cy,
+					})
+				} else {
+					// 如果存在棋子 && count >0
+					if (!!chessboard[cx][cy] && count > 0) {
+						isBlock = true
+					}
+					return
+				}
+			}
+			check({ x, y })
+			return { count, isBlock }
+		}
+
+		/**
+		 * @desc check victory
+		 * @returns {Bool} true -> victory false-> continiue
+		 */
+		function checkVictory() {
+			const { playerType } = currentChess
+			for (const { prev, next } of _directions2) {
+				const cCount =
+					getChessConnect(prev).count +
+					getChessConnect(next).count +
+					1
+				if (cCount > 4) {
+					return true
+				}
+			}
+			return false
+		}
+	</script>
+	<!-- robot script -->
+	<script>
+		/**
+		 * @desc 随机获取坐标
+		 * @params {Coord} coord -基于坐标点
+		 * @returns {Coord}
+		 **/
+		function getRandomCoord(coord) {
+			coord = coord || new Coord(lines / 2, lines / 2)
+			const dirct = getRandomDirection()
+			return new Coord(coord.x + dirct.x, coord.y + dirct.y)
+		}
+
+		/**
+		 * @desc 自动获取下个棋子
+		 * @returns {Coord}
+		 **/
+		function getNextCoord() {
+			let nextCoord
+			const self = getBestCoords(robotPlayerType)
+			const other = getBestCoords(getPlayerTypeByType(robotPlayerType))
+			// const otherCoordsMap = new Map(); // other map
+			const otherCoordsMap = {}
+			other.coords.forEach((c) => {
+				otherCoordsMap[c.key] = true
+			})
+
+			const getSameCoord = () => {
+				const coords = self.coords
+				// 遍历查找是否存在同一个点
+				for (const c of coords) {
+					if (otherCoordsMap[c.key]) {
+						return c
+					}
+				}
+				return null
+			}
+
+			// 对方棋子相连数小于3(阈值可以改成4 当三颗棋子相连时阻拦对方棋子)
+			if (other.weight < 30 || self.weight >= other.weight) {
+				if (self.weight > 0) {
+					nextCoord = getSameCoord() || self.coords[0]
+				} else {
+					if (
+						currentChess.x > 10 &&
+						currentChess.x < 20 &&
+						currentChess.y > 10 &&
+						currentChess.y < 20
+					) {
+						nextCoord = getRandomCoord(currentChess)
+					} else {
+						nextCoord = getRandomCoord()
+					}
+				}
+			} else {
+				nextCoord = getSameCoord() || other.coords[0]
+			}
+
+			// console.log("self", self);
+			// console.log("other", other);
+			// console.log("nextCoord", nextCoord);
+			return nextCoord
+		}
+
+		function getBestCoords(checkPlayerType) {
+			const bestCoords = [], // 最佳位置记录
+				weights = [] // 权重数组
+			let maxWeight = 0, // 最大权重值
+				weight = 0 // 权重计算值
+
+			// calc chess connect count
+			for (let x = 0; x < chessboard.length; x++) {
+				const board = chessboard[x]
+				for (let y = 0; y < board.length; y++) {
+					// 权重
+					weights.length = 0
+					weight = 0
+					// check chess data
+					const checkChess = {
+						x,
+						y,
+						playerType: checkPlayerType,
+					}
+
+					// 不是空位置
+					if (board[y] !== null) {
+						continue
+					}
+
+					// 计算位置权重
+					for (const { prev, next, key } of _directions2) {
+						// count
+						const prevConnect = getChessConnect(prev, checkChess)
+						const nextConnect = getChessConnect(next, checkChess)
+						let cCount = prevConnect.count + nextConnect.count + 1
+						// block
+						const isBlock =
+							prevConnect.isBlock || nextConnect.isBlock
+						const isDoubleBlock =
+							prevConnect.isBlock && nextConnect.isBlock
+
+						if (cCount < 2) {
+							continue
+						}
+
+						// 棋子大于4个
+						if (cCount > 4) {
+							checkPlayerType === robotPlayerType
+								? (cCount *= 10)
+								: (cCount *= 4)
+						}
+						// start
+						if (!isDoubleBlock) {
+							if (isBlock) {
+								cCount -= 1
+							}
+							// 权重数组
+							weights.push(cCount)
+							// console.log("cCount", `${x}-${y}`, key, cCount);
+						}
+					}
+					// 权重值
+					weight = getWeight(weights)
+					if (weight < 1) {
+						continue
+					}
+					if (weight > maxWeight) {
+						maxWeight = weight
+						bestCoords.length = 0
+						bestCoords.push(new Coord(x, y))
+					} else if (weight === maxWeight) {
+						bestCoords.push(new Coord(x, y))
+					}
+				}
+			}
+
+			return { coords: bestCoords, weight: maxWeight }
+		}
+
+		/*
+		 * @desc 获取权重值
+		 *  - weight = maxWeight*10 + weight + weight+....
+		 * @params {Array} weights
+		 * @returns {Bool}
+		 *
+		 **/
+		function getWeight(weights = []) {
+			if (!weights.length) {
+				return 0
+			}
+
+			if (weights.length === 1) {
+				return weights[0] * 10
+			}
+
+			let maxIndex,
+				max = 0
+			weights.forEach((wt, i) => {
+				if (wt > max) {
+					max = wt
+					maxIndex = i
+				}
+			})
+
+			weights.splice(maxIndex, 1)
+			return max * 10 + weights.reduce((sum, val) => sum + val)
+		}
+
+		/*
+		 * @desc get random direction
+		 *
+		 **/
+		function getRandomDirection() {
+			const r1 = getRandomNum(0, _directions2.length - 1)
+			const r2 = getRandomNum(0, 1)
+			return _directions2[r1][r2 === 0 ? 'prev' : 'next']
+		}
+		/*
+		 * @desc get random num
+		 *
+		 **/
+		function getRandomNum(min = 0, max = 10) {
+			return Math.floor(Math.random() * (max - min + 1) + min)
+		}
+	</script>
 </html>
