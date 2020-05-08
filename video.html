@@ -5,22 +5,166 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://at.alicdn.com/t/font_1805033_dzqd0ryrki9.css"
+    />
     <title>Video</title>
   </head>
+  <style>
+    body,
+    html,
+    ul,
+    li {
+      padding: 0;
+      margin: 0;
+    }
+
+    ul,
+    li {
+      line-height: 0;
+    }
+
+    .flex {
+      display: flex;
+      display: -webkit-flex;
+    }
+
+    .video-area {
+      width: 650px;
+      max-width: 100%;
+      height: auto;
+      position: relative;
+      margin: 10px 0;
+    }
+
+    .video-area video {
+      width: 100%;
+    }
+
+    .video-controls {
+      position: absolute;
+      width: 100%;
+      height: 48px;
+      left: 0;
+      bottom: 0;
+      padding: 0 15px;
+      font-size: 13px;
+      color: white;
+      /* background-color: rgba(0, 0, 0, 0.25);   */
+      /* box-shadow: inset 0px -10px 10px 0px #333; */
+      box-sizing: border-box;
+      /* visibility: hidden; */
+    }
+
+    .video-area:hover .video-controls {
+      visibility: visible;
+    }
+
+    .video-controls .controls {
+      width: 100%;
+      align-items: center;
+    }
+
+    .video-controls .controls .time {
+      flex: 1;
+    }
+
+    .video-controls .progress {
+      position: relative;
+      width: 100%;
+      height: 8px;
+      margin: 6px 0;
+      background-color: rgb(173, 173, 173, 0.65);
+      border-radius: 4px;
+      /* overflow: hidden; */
+      cursor: pointer;
+    }
+    .video-controls .progress:hover .anchor {
+      visibility: visible;
+    }
+
+    .video-controls .progress .anchor {
+      position: absolute;
+      padding: 2px 6px;
+      left: 250px;
+      bottom: 10px;
+      font-size: 13px;
+      color: transparent;
+      user-select: none;
+      visibility: hidden;
+    }
+
+    .video-controls .progress .bar {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      right: 100%;
+      top: 0;
+      border-radius: 4px;
+      background-color: rgba(255, 255, 255, 1);
+    }
+
+    .video-controls .progress .anchor::after {
+      content: attr(title);
+      display: inline-block;
+      position: absolute;
+      bottom: 9px;
+      left: 0;
+      padding: 2px 6px;
+      background-color: rgba(255, 255, 255, 0.8);
+      color: #333;
+      border-radius: 3px;
+    }
+
+    .video-controls .progress .anchor::before {
+      content: "";
+      position: absolute;
+      width: 0;
+      height: 0;
+      bottom: -3px;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid;
+      border-color: rgba(255, 255, 255, 0.8) transparent transparent;
+    }
+
+    .video-controls .iconfont {
+      margin: 0 10px;
+      font-size: 20px;
+    }
+  </style>
+
   <body>
-    <video
-      id="video"
-      controls
-      autoplay
-      src="http://hls.cntv.lxdns.com/asp/hls/main/0303000a/3/default/978a64ddd3a1caa85ae70a23414e6540/main.m3u8"
-    ></video>
+    <div class="video-area">
+      <video
+        id="video"
+        src="http://hls.cntv.lxdns.com/asp/hls/main/0303000a/3/default/978a64ddd3a1caa85ae70a23414e6540/main.m3u8"
+      ></video>
+      <div class="video-controls">
+        <div class="controls flex">
+          <i id="play" class="iconfont iconplay"></i>
+          <div class="time">
+            <span id="current-time">0:00</span>
+            <span id="total-time">0:00</span>
+          </div>
+          <i class="iconfont iconvolume-up"></i>
+          <i class="iconfont iconFullScreen" style="font-weight: bold;"></i>
+        </div>
+        <div class="progress">
+          <div class="anchor" title="0:00">0:00</div>
+          <div class="bar"></div>
+        </div>
+      </div>
+    </div>
   </body>
 
   <script src="./utils/mux.min.js"></script>
+  <!-- util -->
   <script>
     const util = {
       // 是否是url
-      isUrl: (url) => {
+      isUrl: function (url) {
         try {
           new URL(url);
           return true;
@@ -29,7 +173,7 @@
         }
       },
       // 获取url相关信息
-      getUrlInfos: (url) => {
+      getUrlInfos: function (url) {
         try {
           return new URL(url);
         } catch (error) {
@@ -37,165 +181,172 @@
         }
       },
     };
-    // 定义通用的事件回调处理函数，只做打印事件类型
-    function logevent(event) {
-      console.log(event);
-    }
   </script>
-
+  <!-- main -->
   <script>
     const M3U = "m3u";
     const M3U8 = "m3u8";
     const videoEl = document.querySelector("#video");
-
-    // 播放配置
-    const playConfig = {
-      combined: true,
+    const PLAY_CONFIG = {
+      loadTime: 5, // 单位秒
+      loadAll: false, // 是否全部加载
     };
 
-    let vjsParsed, video, mediaSource;
-    // init
-    const init = function () {
+    let totalTimes = 0;
+
+    // _init
+    function _init() {
       const currentSrc = videoEl.currentSrc;
       const srcExt = getSrcExt(currentSrc);
       if (srcExt === M3U || srcExt === M3U8) {
         getM3uResource(currentSrc)
           .then((sourceUrls) => {
-            console.log(sourceUrls);
+            // console.log({ ...sourceUrls });
             handlePlay(sourceUrls);
           })
           .catch(console.warn);
       }
-    };
+    }
 
     /**
      * @desc 视频播放
-     * @params {Array} playList
-     * @params {Element} videoEl
+     * @params {Array} segments
+     *
      */
-    function handlePlay(playList) {
-      let buffer, // MediaSource buffer
-        offset = 0,
-        totalBytesLen = 0, // 字节大小
-        playBytes, // 播放bytes
-        bytesList = []; // 字节list
-      // 转换后mp4的音频格式 视频格式
-      const codecsArray = ["avc1.64001f", "mp4a.40.5"];
+    function handlePlay(segments = []) {
+      if (!segments || !segments.length) {
+        return;
+      }
+      // source append lock
+      let _appendLock = false,
+        // load next segment lock
+        _loadLock = false,
+        // video totalTimes
+        _totalTimes = 0;
+      // segments buffer queue
+      const bufferQueue = [];
+      // 流文件时间区间
+      const timeinterval = segments.map((v) => v.duration);
+      timeinterval.map((_, i) => {
+        timeinterval[i] = timeinterval[i] + (timeinterval[i - 1] || 0);
+      });
 
-      // MediaSource Web API: https://developer.mozilla.org/zh-CN/docs/Web/API/MediaSource
-      // mediaSource = new MediaSource();
-      mediaSource = new MediaSource();
+      totalTimes = _totalTimes = timeinterval.slice(-1)[0];
+
+      /** 更新播放组件相关 **/
+      setVideoTotalTime(_totalTimes);
+
+      // Replace this value with your files codec info
+      const mime = 'video/mp4; codecs="mp4a.40.2,avc1.64001f"';
+      const mediaSource = new MediaSource();
+      const transmuxer = new muxjs.mp4.Transmuxer();
+
       videoEl.src = URL.createObjectURL(mediaSource);
-      mediaSource.addEventListener("sourceopen", function () {
-        const play = () => {
-          // MediaSource 实例默认的duration属性为NaN
-          mediaSource.duration = 0;
-          // 转换为带音频、视频的mp4
-          if (playConfig.combined) {
-            buffer = mediaSource.addSourceBuffer(
-              'video/mp4;codecs="' + "avc1.64001f,mp4a.40.5" + '"'
-            );
-          } else if (outputType === "video") {
-            // 转换为只含视频的mp4
-            buffer = mediaSource.addSourceBuffer(
-              'video/mp4;codecs="' + codecsArray[0] + '"'
-            );
-          } else if (outputType === "audio") {
-            // 转换为只含音频的mp4
-            buffer = mediaSource.addSourceBuffer(
-              'audio/mp4;codecs="' + (codecsArray[1] || codecsArray[0]) + '"'
-            );
-          }
+      mediaSource.addEventListener("sourceopen", appendFirstSegment);
+      // MediaElement相关事件 https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLMediaElement
+      videoEl.addEventListener("timeupdate", handleVideoTimeUpdate);
 
-          // buffer.addEventListener("updatestart", logevent);
-          // buffer.addEventListener("updateend", logevent);
-          // buffer.addEventListener("error", logevent);
-          
-          // init playBytes;
-          playBytes = new Uint8Array(totalBytesLen);
-          offset = 0;
-          // set data
-          for (let i = 0; i < bytesList.length; i++) {
-            playBytes.set(bytesList[i], offset);
-            offset += bytesList[i].byteLength;
-          }
+      function handleVideoTimeUpdate() {
+        const currentTime = videoEl.currentTime;
+        const duration = videoEl.duration;
+        const canLoad = duration - currentTime < PLAY_CONFIG.loadTime;
+        /** 更新视频播放时间 **/
+        updateVideoCurrentTime(currentTime);
+        /** 更新进度 **/
+        updateVideoProgress(currentTime, _totalTimes);
 
-          // mp4 buffer 准备完毕，传入转换后的数据
-          buffer.appendBuffer(playBytes);
-        };
-
-        // test
-        // playList.splice(0, 15);
-        while (playList.length) {
-          fetch(playList.splice(0, 1)[0].sourceUrl)
-            .then((resp) => resp.arrayBuffer())
-            .then(transferFormat)
-            .then((bytes) => {
-              // console.log('bytes', bytes)
-              totalBytesLen += bytes.byteLength;
-              bytesList.push(bytes);
-              play();
-            });
+        /** load lock **/
+        if (_loadLock) {
+          return;
         }
 
-        // 将 bytes 放入 MediaSource 创建的sourceBuffer中
-        // https://developer.mozilla.org/en-US/docs/Web/API/SourceBuffer/appendBuffer
-        // 自动播放
-        // videoEl.play();
-      });
-    }
+        if (canLoad) {
+          _loadLock = true;
+          appendNextSegment();
+        }
+      }
 
-    function transferFormat(data) {
-      return new Promise((resolve, reject) => {
-        // 将源数据从ArrayBuffer格式保存为可操作的Uint8Array格式
-        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer
-        var segment = new Uint8Array(data);
-        var combined = playConfig.combined;
-        // 接收无音频ts文件，OutputType设置为'video'，带音频ts设置为'combined'
-        var outputType = "video";
-        var combinedType = "combined";
-        var remuxedSegments = [];
-        var remuxedBytesLength = 0;
-        var remuxedInitSegment = null;
-
-        // remux选项默认为true，将源数据的音频视频混合为mp4，设为false则不混合
-        var transmuxer = new muxjs.mp4.Transmuxer({ remux: combined });
-
-        // 监听data事件，开始转换流
-        transmuxer.on("data", function (event) {
-          console.log("[transmuxer data:]", event);
-          if (event.type === outputType || event.type === combinedType) {
-            remuxedSegments.push(event);
-            remuxedBytesLength += event.data.byteLength;
-            remuxedInitSegment = event.initSegment;
+      /**
+       * @desc 处理sourceBuffer append
+       **/
+      function handleSourceBufferAppend() {
+        // console.log("[_appendLock]:", _appendLock);
+        while (bufferQueue.length) {
+          try {
+            if (_appendLock) {
+              return;
+            }
+            sourceBuffer.appendBuffer(new Uint8Array(bufferQueue[0]));
+            bufferQueue.shift();
+          } catch (error) {
+            console.warn("[error]:", error);
+            break;
           }
-        });
-        // 监听转换完成事件，拼接最后结果并传入MediaSource
-        transmuxer.on("done", function () {
-          var offset = 0;
-          var bytes = new Uint8Array(
-            remuxedInitSegment.byteLength + remuxedBytesLength
+        }
+      }
+
+      /**
+       * @desc 添加第一个节点
+       **/
+      function appendFirstSegment() {
+        // 释放一个之前已经存在的、通过调用
+        URL.revokeObjectURL(videoEl.src);
+        // 设置媒体duration为0 否则后面视频获取duration会出现Infinity
+        mediaSource.duration = 0;
+        // addSourceBuffer  mime
+        sourceBuffer = mediaSource.addSourceBuffer(mime);
+        // sourceBuffer.addEventListener("updateend", appendNextSegment);
+
+        transmuxer.on("data", (segment) => {
+          let data = new Uint8Array(
+            segment.initSegment.byteLength + segment.data.byteLength
           );
-          bytes.set(remuxedInitSegment, offset);
-          offset += remuxedInitSegment.byteLength;
-
-          for (var j = 0, i = offset; j < remuxedSegments.length; j++) {
-            bytes.set(remuxedSegments[j].data, i);
-            i += remuxedSegments[j].byteLength;
-          }
-          remuxedSegments = [];
-          remuxedBytesLength = 0;
-          // 解析出转换后的mp4相关信息，与最终转换结果无关
-          // vjsParsed = muxjs.mp4.tools.inspect(bytes);
-          // console.log("transmuxed", vjsParsed);
-          resolve(bytes);
+          data.set(segment.initSegment, 0);
+          data.set(segment.data, segment.initSegment.byteLength);
+          // debug inspect
+          // console.log(muxjs.mp4.tools.inspect(data));
+          sourceBuffer.appendBuffer(data);
         });
 
-        // push方法可能会触发'data'事件，因此要在事件注册完成后调用
-        transmuxer.push(segment); // 传入源二进制数据，分割为m2ts包，依次调用上图中的流程
-        // flush的调用会直接触发'done'事件，因此要事件注册完成后调用
-        transmuxer.flush(); // 将所有数据从缓存区清出来
-      });
+        fetch(segments.shift().sourceUrl)
+          .then((response) => {
+            return response.arrayBuffer();
+          })
+          .then((response) => {
+            transmuxer.push(new Uint8Array(response));
+            transmuxer.flush();
+          });
+        // play
+        // videoEl.play();
+      }
+
+      /**
+       * @desc 添加下一个节点
+       **/
+      function appendNextSegment() {
+        // reset the 'data' event listener to just append (moof/mdat) boxes to the Source Buffer
+        transmuxer.off("data");
+        transmuxer.on("data", (segment) => {
+          bufferQueue.push(segment.data);
+          _appendLock = sourceBuffer.updating;
+          _loadLock = false;
+          handleSourceBufferAppend();
+        });
+
+        if (segments.length === 0) {
+          // notify MSE that we have no more segments to append.
+          mediaSource.endOfStream();
+          return;
+        }
+
+        // fetch the next segment from the segments array and pass it into the transmuxer.push method
+        fetch(segments.shift().sourceUrl)
+          .then((response) => response.arrayBuffer())
+          .then((response) => {
+            transmuxer.push(new Uint8Array(response));
+            transmuxer.flush();
+          });
+      }
     }
 
     /**
@@ -228,7 +379,7 @@
                   if (util.isUrl(p.url)) {
                     p.sourceUrl = p.url;
                   } else {
-                    p.sourceUrl = sourceUrl.replace(/\d+.m3u8/, p.url); // soruce url
+                    p.sourceUrl = sourceUrl.replace(/\w+.m3u8/, p.url); // soruce url
                   }
                   return p;
                 });
@@ -236,7 +387,8 @@
               } else {
                 const sources = parseM3uTxt(t);
                 let sUrl;
-                const playUrl = sources[1].url;
+                // TODO: 根据当前带宽自动播放,如果只有一条播放源则不用选择
+                const playUrl = sources[4].url;
                 if (util.isUrl(playUrl)) {
                   sUrl = playUrl;
                 } else {
@@ -313,7 +465,96 @@
     }
 
     window.addEventListener("load", function () {
-      init();
+      _init();
     });
+  </script>
+
+  <!-- view -->
+  <script>
+    const playEl = document.querySelector(".video-controls #play");
+    const totalTimeEl = document.querySelector(".video-controls #total-time");
+    const currentTimeEl = document.querySelector(
+      ".video-controls #current-time"
+    );
+    const progressEl = document.querySelector(".video-controls .progress");
+    const progressBarEl = document.querySelector(
+      ".video-controls .progress .bar"
+    );
+    const progressAnchorEl = document.querySelector(
+      ".video-controls .progress .anchor"
+    );
+
+    /** event start **/
+    progressEl.addEventListener("mousemove", handleProgressMousemove);
+    progressEl.addEventListener("click", handleProgressClick);
+    playEl.addEventListener("click", togglePlay);
+
+    /** 播放按钮 **/
+    function togglePlay() {
+      const className = playEl.className;
+      const iconPlay = "iconplay";
+      const iconPause = "iconpause";
+      if (className.indexOf("iconplay") >= 0) {
+        playEl.className = className.replace(iconPlay, iconPause);
+        videoEl.play();
+      } else {
+        playEl.className = className.replace(iconPause, iconPlay);
+        videoEl.pause();
+      }
+    }
+
+    /** 进度条移动时间 **/
+    function handleProgressMousemove(e) {
+      const { layerX } = e;
+      const time = getTime((layerX / progressEl.clientWidth) * totalTimes);
+      progressAnchorEl.title = time;
+      progressAnchorEl.innerHTML = time;
+      progressAnchorEl.style.left =
+        layerX - progressAnchorEl.clientWidth / 2 + "px";
+    }
+
+    /** 点击进度条 执行进度操作**/
+    function handleProgressClick(e) {
+      const { layerX } = e;
+      const jumpTimes = (layerX / progressEl.clientWidth) * totalTimes;
+      // 如果跳转的失常大于视频总时长则需要获取视频流
+      if (jumpTimes > videoEl.duration) {
+        // TODO: 跳转市场大于当前时长时获取视频流
+      } else {
+        videoEl.currentTime = jumpTimes;
+      }
+      // 如果点击后处于暂停状态则播放
+      if (videoEl.paused) {
+        videoEl.play();
+      }
+    }
+
+    /** 视频总时长 **/
+    function setVideoTotalTime(time) {
+      totalTimeEl.innerHTML = getTime(time);
+    }
+    /** 更新视频播放时间 **/
+    function updateVideoCurrentTime(time) {
+      if (videoEl.ended) {
+        togglePlay();
+      }
+      currentTimeEl.innerHTML = getTime(time);
+    }
+    /** 更新播放进度 **/
+    function updateVideoProgress(currtTime, totalTimes) {
+      let progress = 1 - currtTime / totalTimes;
+      progress = progress > 0 ? progress : 0;
+      progressBarEl.style.right = `${progress * 100}%`;
+    }
+
+    /** 获取时间 格式 mm:ss **/
+    function getTime(time) {
+      time = time || 0;
+      let m, s;
+      m = Math.floor(time / 60);
+      s = Math.ceil(time % 60);
+
+      return `${m}:${s > 9 ? s : "0" + s}`;
+    }
   </script>
 </html>
