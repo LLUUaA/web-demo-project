@@ -747,17 +747,26 @@
       // 跳转进度width
       let _jumpWidth = 0;
 
+      /** 进度条事件监听**/
       progressEl.addEventListener("mousemove", progressMove);
       progressEl.addEventListener("mousedown", progressMousedown);
-      progressEl.addEventListener("mouseleave", function () {
+      progressEl.addEventListener("mouseleave", progressLeave);
+
+      /** 进度条移出事件**/
+      function progressLeave() {
         // remove
         progressEl.removeEventListener("mousemove", progressMove);
+        progressEl.removeEventListener("mousedown", progressMousedown);
+        progressEl.removeEventListener("mouseleave", progressLeave);
         progressAnchorEl.style.visibility = "hidden";
-      });
+      }
 
+      /** 进度条移动事件**/
       function progressMove(e) {
         updateProgressAnchorPosition(e.layerX);
       }
+
+      /** 进度条按压事件**/
       function progressMousedown(e) {
         // remove progressMove
         progressEl.removeEventListener("mousemove", progressMove);
@@ -765,6 +774,7 @@
         document.addEventListener("mouseup", handleMouseUp);
       }
 
+      /** 全局鼠标抬起事件**/
       function handleMouseUp() {
         progressAnchorEl.style.visibility = "hidden";
         handleVideoJump(_jumpWidth);
@@ -772,11 +782,13 @@
         document.removeEventListener("mouseup", handleMouseUp);
       }
 
+      /** 全局鼠标移动事件**/
       function handleMove(e) {
         const { clientX } = e;
         updateProgressAnchorPosition(layerX - (clientXStartX - clientX));
       }
-
+      
+      /** 更新进度锚点位置**/
       function updateProgressAnchorPosition(width) {
         width = width < 0 ? 0 : width;
         width = width < progressW ? width : progressW;
@@ -788,21 +800,21 @@
         progressAnchorEl.style.visibility = "visible";
         progressAnchorEl.style.left = width - fixAnchorW + "px";
       }
-    }
 
-    /** 执行进度操作**/
-    function handleVideoJump(width) {
-      const jumpTimes = (width / progressEl.clientWidth) * totalTimes;
-      // 如果跳转的失常大于视频总时长则需要获取视频流
-      if (jumpTimes > videoEl.duration) {
-        // TODO: 跳转时长大于当前时长时获取视频流
-      } else {
-        videoEl.currentTime = jumpTimes;
-      }
+      /** 执行进度操作**/
+      function handleVideoJump(width) {
+        const jumpTimes = (width / progressEl.clientWidth) * totalTimes;
+        // 如果跳转的失常大于视频总时长则需要获取视频流
+        if (jumpTimes > videoEl.duration) {
+          // TODO: 跳转时长大于当前时长时获取视频流
+        } else {
+          videoEl.currentTime = jumpTimes;
+        }
 
-      // 如果点击后处于暂停状态则播放
-      if (videoEl.paused) {
-        videoEl.play();
+        // 如果点击后处于暂停状态则播放
+        if (videoEl.paused) {
+          videoEl.play();
+        }
       }
     }
 
