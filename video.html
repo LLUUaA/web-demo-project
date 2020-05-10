@@ -608,9 +608,9 @@
 		const volumeEl = videoControlsEl.querySelector('.volume')
 
 		/** event start **/
-		progressEl.addEventListener('mouseenter', handleProgress)
 		playEl.addEventListener('click', togglePlay)
 		fullScreenEl.addEventListener('click', toggleFullScreen)
+		progressEl.addEventListener('mouseenter', handleProgress)
 		volumeEl.addEventListener('mouseenter', handleVolume)
 
 		/** 播放按钮 **/
@@ -627,10 +627,11 @@
 			}
 		}
 
-        let _handleVolumeLock = false;
 		function handleVolume() {
-            if(_handleVolumeLock) {return}
-            _handleVolumeLock = true;
+			if (handleVolume._lock) {
+				return
+			}
+			handleVolume._lock = true
 			const volumeBarWrapEl = volumeEl.querySelector('.bar-warp')
 			const volumeBarEl = volumeEl.querySelector('.bar-warp>.bar')
 			const volumeAnchorEl = volumeEl.querySelector('.bar-warp>.anchor')
@@ -639,7 +640,7 @@
 			const hoverClassName = ' hover'
 			// 视频音量
 			let volume = videoEl.volume,
-				mouseleaveLock = false // 锁住不让事件继续
+				_isDrag = false // 锁住不让事件继续
 
 			mouseenter()
 			volumeEl.addEventListener('mouseleave', mouseleave)
@@ -658,12 +659,12 @@
 				updateVolumeAnchorPositionByVolume(videoEl.volume)
 			}
 
-            /** 鼠标离开 **/
+			/** 鼠标离开 **/
 			function mouseleave() {
-				if (mouseleaveLock) {
+				if (_isDrag) {
 					return
-                }
-                _handleVolumeLock = false;
+				}
+				handleVolume._lock = false
 				volumeBarWrapEl.style.width = 0
 				volumeBarWrapEl.className = volumeBarWrapEl.className.replace(
 					hoverClassName,
@@ -673,13 +674,16 @@
 					hoverClassName,
 					''
 				)
-            }
-            
+
+				// removeEventListener
+				volumeEl.removeEventListener('mouseleave', mouseleave)
+				volumeBarEl.removeEventListener('mousedown', handleMouseDown)
+			}
 
 			function handleMouseDown(e) {
 				const { layerX, type } = e
 				const clientXStartX = e.clientX
-                mouseleaveLock = true;
+				_isDrag = true
 				// 设置音量
 				volume = layerX / volumeBarW
 				updateVolumeAnchorPosition(layerX)
@@ -696,17 +700,20 @@
 				}
 
 				function handleMouseUp() {
-                    mouseleaveLock = false;
+					_isDrag = false
 					updateVolumeAnchorPositionByVolume(volume)
 					document.removeEventListener('mousemove', handleMove)
-                    document.removeEventListener('mouseup', handleMouseUp)
-                    mouseleave();
+					document.removeEventListener('mouseup', handleMouseUp)
+					mouseleave()
 				}
 			}
 
 			/** 设置音量并更新锚点 **/
 			function updateVolumeAnchorPositionByVolume(volume) {
-				videoEl.volume = volume > 0 ? volume : 0
+				// volume => [0-1]
+				volume = volume > 0 ? volume : 0
+				volume = volume < 1 ? volume : 1
+				videoEl.volume = volume
 				updateVolumeAnchorPosition(volumeBarW * volume)
 			}
 
@@ -771,6 +778,11 @@
 
 		/** 进度条事件 **/
 		function handleProgress(e) {
+			if (handleProgress._lock) {
+				return
+			}
+			handleProgress._lock = true
+
 			const { layerX, type } = e
 			// 点击start clientX(后续继续位置需要)
 			const clientXStartX = e.clientX
@@ -779,7 +791,8 @@
 			// 锚点修订宽度
 			const fixAnchorW = progressAnchorEl.clientWidth / 2
 			// 跳转进度width
-			let _jumpWidth = 0
+			let _jumpWidth = 0,
+				_isDrag = false
 
 			/** 进度条事件监听**/
 			progressEl.addEventListener('mousemove', progressMove)
@@ -788,6 +801,9 @@
 
 			/** 进度条移出事件**/
 			function progressLeave() {
+				if (!_isDrag) {
+					handleProgress._lock = false
+				}
 				// remove
 				progressEl.removeEventListener('mousemove', progressMove)
 				progressEl.removeEventListener('mousedown', progressMousedown)
@@ -802,6 +818,8 @@
 
 			/** 进度条按压事件**/
 			function progressMousedown(e) {
+				// 拖拽进度
+				_isDrag = true
 				// remove progressMove
 				progressEl.removeEventListener('mousemove', progressMove)
 				document.addEventListener('mousemove', handleMove)
@@ -814,6 +832,7 @@
 				handleVideoJump(_jumpWidth)
 				document.removeEventListener('mousemove', handleMove)
 				document.removeEventListener('mouseup', handleMouseUp)
+				handleProgress._lock = false
 			}
 
 			/** 全局鼠标移动事件**/
