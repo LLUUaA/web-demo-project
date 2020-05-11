@@ -2,902 +2,959 @@
 
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link
-			rel="stylesheet"
-			href="https://at.alicdn.com/t/font_1805033_dzqd0ryrki9.css"
-		/>
-		<title>Video</title>
-	</head>
-	<style>
-		body,
-		html,
-		ul,
-		li {
-			padding: 0;
-			margin: 0;
-		}
-		/* 
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://at.alicdn.com/t/font_1805033_dzqd0ryrki9.css"
+    />
+    <title>Video</title>
+  </head>
+  <style>
+    body,
+    html,
+    ul,
+    li {
+      padding: 0;
+      margin: 0;
+    }
+    /* 
     video::-webkit-media-controls {
       display: none;
     } */
 
-		ul,
-		li {
-			line-height: 0;
-		}
-
-		.flex {
-			display: flex;
-			display: -webkit-flex;
-		}
-
-		.video-area {
-			width: 650px;
-			max-width: 100%;
-			height: auto;
-			position: relative;
-			margin: 10px 0;
-			--icon-transition-time: 0.3s;
-			--icon-background-color: rgba(23, 23, 26, 0.94);
-		}
-
-		.video-area video {
-			width: 100%;
-		}
-
-		.video-controls {
-			position: absolute;
-			width: 100%;
-			height: 48px;
-			left: 0;
-			bottom: 20px;
-			padding: 0 15px;
-			font-size: 13px;
-			color: white;
-			/* background-color: rgba(0, 0, 0, 0.25);   */
-			/* box-shadow: inset 0px -10px 10px 0px #333; */
-			box-sizing: border-box;
-			/* visibility: hidden; */
-		}
-
-		.video-area:hover .video-controls {
-			visibility: visible;
-			user-select: none;
-		}
-
-		.video-controls > .controls {
-			width: 100%;
-			align-items: center;
-		}
-
-		.video-controls > .controls > .icon {
-			width: 32px;
-			height: 32px;
-			line-height: 32px;
-			text-align: center;
-			border-radius: 16px;
-			background-color: transparent;
-			transition: background-color var(--icon-transition-time) ease;
-			cursor: pointer;
-		}
-
-		/*  icon.volume start */
-		.video-controls > .controls > .icon.volume {
-			border-radius: 0 16px 16px 0;
-		}
-
-		.video-controls > .controls > .icon.hover,
-		.video-controls > .controls > .icon:hover {
-			background-color: var(--icon-background-color);
-		}
-
-		.video-controls .controls .time {
-			flex: 1;
-		}
-
-		.video-controls .controls > .volume {
-			position: relative;
-			margin-right: 15px;
-		}
-
-		.video-controls .controls > .volume::after {
-			content: '';
-			position: absolute;
-			left: 50%;
-			top: 50%;
-			width: 88%;
-			height: 2px;
-			background-color: rgba(255, 255, 255, 1);
-			transform: rotate(40deg) translate(-50%, -50%);
-			transform-origin: left top;
-			box-shadow: 0 -1px 0 0 rgba(0, 0, 0, 1);
-			border-radius: 5px;
-			visibility: hidden;
-		}
-
-		.video-controls .controls > .volume > .bar-warp {
-			position: absolute;
-			/* width: 100px; */
-			width: 0;
-			height: 100%;
-			right: 100%;
-			bottom: 0;
-			/* background-color: var(--icon-background-color); */
-			background-color: transparent;
-			border-radius: 16px 0 0 16px;
-			transition: width var(--icon-transition-time),
-				background-color var(--icon-transition-time) ease;
-			overflow: hidden;
-		}
-
-		.video-controls .controls > .volume > .bar-warp.hover {
-			background-color: var(--icon-background-color);
-		}
-
-		.video-controls .controls > .volume > .bar-warp > .bar {
-			position: absolute;
-			height: 4px;
-			top: 50%;
-			left: 15px;
-			right: 10px;
-			transform: translateY(-50%);
-			border-radius: 2px;
-			background-color: rgba(255, 255, 255, 0.45);
-			transition: width var(--icon-transition-time) ease;
-			transition-delay: 0.1s;
-		}
-
-		.video-controls .controls > .volume > .bar-warp > .anchor {
-			position: absolute;
-			height: 4px;
-			left: 15px;
-			top: 50%;
-			transform: translateY(-50%);
-			border-radius: 2px;
-			background-color: rgba(255, 255, 255, 0.65);
-		}
-
-		.video-controls .controls > .volume > .bar-warp > .anchor::after {
-			content: '';
-			position: absolute;
-			width: 10px;
-			height: 10px;
-			right: 0;
-			top: 50%;
-			transform: translateY(-50%);
-			border-radius: 50%;
-			background-color: rgba(255, 255, 255, 0.95);
-		}
-		/*  icon.volume end */
-
-		/*  progress start */
-		.video-controls .progress {
-			position: relative;
-			width: 100%;
-			height: 8px;
-			margin: 6px 0;
-			background-color: rgb(173, 173, 173, 0.55);
-			border-radius: 4px;
-			/* overflow: hidden; */
-			cursor: pointer;
-		}
-
-		.video-controls .progress > .anchor {
-			position: absolute;
-			padding: 2px 6px;
-			left: 250px;
-			bottom: 10px;
-			font-size: 13px;
-			color: transparent;
-			user-select: none;
-			visibility: hidden;
-		}
-
-		.video-controls .progress .bar {
-			position: absolute;
-			left: 0;
-			bottom: 0;
-			right: 100%;
-			top: 0;
-			border-radius: 4px;
-			background-color: rgba(255, 255, 255, 1);
-		}
-
-		.video-controls .progress > .anchor::after {
-			content: attr(title);
-			display: inline-block;
-			position: absolute;
-			bottom: 9px;
-			left: 0;
-			padding: 2px 6px;
-			background-color: rgba(255, 255, 255, 0.8);
-			color: #333;
-			border-radius: 3px;
-		}
-
-		.video-controls .progress .anchor::before {
-			content: '';
-			position: absolute;
-			width: 0;
-			height: 0;
-			bottom: -3px;
-			left: 50%;
-			transform: translateX(-50%);
-			border: 6px solid;
-			border-color: rgba(255, 255, 255, 0.8) transparent transparent;
-		}
-
-		/*  progress end */
-
-		.video-controls .iconfont {
-			font-size: 20px;
-		}
-	</style>
-
-	<body>
-		<div class="video-area">
-			<video
-				id="video"
-				src="http://hls.cntv.lxdns.com/asp/hls/main/0303000a/3/default/978a64ddd3a1caa85ae70a23414e6540/main.m3u8"
-			></video>
-			<div class="video-controls">
-				<div class="controls flex">
-					<div class="icon">
-						<i id="play" class="iconfont iconplay"></i>
-					</div>
-					<div class="time">
-						<span id="current-time">0:00</span>
-						<span id="total-time">0:00</span>
-					</div>
-					<div class="volume icon">
-						<i class="iconfont iconvolume-up"></i>
-						<div class="bar-warp">
-							<div class="anchor"></div>
-							<div class="bar"></div>
-						</div>
-					</div>
-					<div class="icon">
-						<i
-							class="iconfont iconFullScreen"
-							style="font-weight: bold;"
-						></i>
-					</div>
-				</div>
-				<div class="progress">
-					<div class="anchor" title="0:00">0:00</div>
-					<div class="bar"></div>
-				</div>
-			</div>
-		</div>
-	</body>
-
-	<script src="./utils/mux.min.js"></script>
-	<!-- util -->
-	<script>
-		const util = {
-			// 是否是url
-			isUrl: function (url) {
-				try {
-					new URL(url)
-					return true
-				} catch (error) {
-					return false
-				}
-			},
-			// 获取url相关信息
-			getUrlInfos: function (url) {
-				try {
-					return new URL(url)
-				} catch (error) {
-					return null
-				}
-			},
-		}
-	</script>
-	<!-- main -->
-	<script>
-		const M3U = 'm3u'
-		const M3U8 = 'm3u8'
-		const videoEl = document.querySelector('#video')
-		const PLAY_CONFIG = {
-			loadTime: 5, // 单位秒
-			loadAll: false, // 是否全部加载
-		}
-
-		let totalTimes = 0
-
-		// _init
-		function _init() {
-			const currentSrc = videoEl.currentSrc
-			const srcExt = getSrcExt(currentSrc)
-			if (srcExt === M3U || srcExt === M3U8) {
-				getM3uResource(currentSrc)
-					.then((sourceUrls) => {
-						// console.log({ ...sourceUrls });
-						handlePlay(sourceUrls)
-					})
-					.catch(console.warn)
-			}
-		}
-
-		/**
-		 * @desc 视频播放
-		 * @params {Array} segments
-		 *
-		 */
-		function handlePlay(segments = []) {
-			if (!segments || !segments.length) {
-				return
-			}
-			// source append lock
-			let _appendLock = false,
-				// load next segment lock
-				_loadLock = false,
-				// video totalTimes
-				_totalTimes = 0
-			// segments buffer queue
-			const bufferQueue = []
-			// 流文件时间区间
-			const timeinterval = segments.map((v) => v.duration)
-			timeinterval.map((_, i) => {
-				timeinterval[i] = timeinterval[i] + (timeinterval[i - 1] || 0)
-			})
-
-			totalTimes = _totalTimes = timeinterval.slice(-1)[0]
-
-			/** 更新播放组件相关 **/
-			setVideoTotalTime(_totalTimes)
-
-			// Replace this value with your files codec info
-			const mime = 'video/mp4; codecs="mp4a.40.2,avc1.64001f"'
-			const mediaSource = new MediaSource()
-			const transmuxer = new muxjs.mp4.Transmuxer()
-
-			videoEl.src = URL.createObjectURL(mediaSource)
-			mediaSource.addEventListener('sourceopen', appendFirstSegment)
-			// MediaElement相关事件 https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLMediaElement
-			videoEl.addEventListener('timeupdate', handleVideoTimeUpdate)
-
-			function handleVideoTimeUpdate() {
-				const currentTime = videoEl.currentTime
-				const duration = videoEl.duration
-				const canLoad = duration - currentTime < PLAY_CONFIG.loadTime
-				/** 更新视频播放时间 **/
-				updateVideoCurrentTime(currentTime)
-				/** 更新进度 **/
-				updateVideoProgress(currentTime, _totalTimes)
-
-				/** load lock **/
-				if (_loadLock) {
-					return
-				}
-
-				if (canLoad) {
-					_loadLock = true
-					appendNextSegment()
-				}
-			}
-
-			/**
-			 * @desc 处理sourceBuffer append
-			 **/
-			function handleSourceBufferAppend() {
-				// console.log("[_appendLock]:", _appendLock);
-				while (bufferQueue.length) {
-					try {
-						if (_appendLock) {
-							return
-						}
-						sourceBuffer.appendBuffer(
-							new Uint8Array(bufferQueue[0])
-						)
-						bufferQueue.shift()
-					} catch (error) {
-						console.warn('[error]:', error)
-						break
-					}
-				}
-			}
-
-			/**
-			 * @desc 添加第一个节点
-			 **/
-			function appendFirstSegment() {
-				// 释放一个之前已经存在的、通过调用
-				URL.revokeObjectURL(videoEl.src)
-				// 设置媒体duration为0 否则后面视频获取duration会出现Infinity
-				mediaSource.duration = 0
-				// addSourceBuffer  mime
-				sourceBuffer = mediaSource.addSourceBuffer(mime)
-				// sourceBuffer.addEventListener("updateend", appendNextSegment);
-
-				transmuxer.on('data', (segment) => {
-					let data = new Uint8Array(
-						segment.initSegment.byteLength + segment.data.byteLength
-					)
-					data.set(segment.initSegment, 0)
-					data.set(segment.data, segment.initSegment.byteLength)
-					// debug inspect
-					// console.log(muxjs.mp4.tools.inspect(data));
-					sourceBuffer.appendBuffer(data)
-				})
-
-				fetch(segments.shift().sourceUrl)
-					.then((response) => {
-						return response.arrayBuffer()
-					})
-					.then((response) => {
-						transmuxer.push(new Uint8Array(response))
-						transmuxer.flush()
-					})
-				// play
-				// videoEl.play();
-			}
-
-			/**
-			 * @desc 添加下一个节点
-			 **/
-			function appendNextSegment() {
-				// reset the 'data' event listener to just append (moof/mdat) boxes to the Source Buffer
-				transmuxer.off('data')
-				transmuxer.on('data', (segment) => {
-					bufferQueue.push(segment.data)
-					_appendLock = sourceBuffer.updating
-					_loadLock = false
-					handleSourceBufferAppend()
-				})
-
-				if (segments.length === 0) {
-					// notify MSE that we have no more segments to append.
-					mediaSource.endOfStream()
-					return
-				}
-
-				// fetch the next segment from the segments array and pass it into the transmuxer.push method
-				fetch(segments.shift().sourceUrl)
-					.then((response) => response.arrayBuffer())
-					.then((response) => {
-						transmuxer.push(new Uint8Array(response))
-						transmuxer.flush()
-					})
-			}
-		}
-
-		/**
-		 * @desc 获取资源
-		 * @params {String} txt
-		 */
-		function sourceCanPlay(txt) {
-			if (
-				txt.indexOf('#EXTINF') !== -1 &&
-				txt.indexOf('#EXT-X-ENDLIST') !== -1
-			) {
-				return true
-			}
-			return false
-		}
-
-		/**
-		 * @desc 获取资源
-		 * @params {String} sourceUrl
-		 */
-		function getM3uResource(sourceUrl) {
-			return new Promise((resolve, reject) => {
-				fetch(sourceUrl)
-					.then((response) => {
-						// console.log(response);
-						response.text().then((t) => {
-							if (sourceCanPlay(t)) {
-								const playList = parseM3uPlayListTxt(t)
-								;(playList || []).map((p) => {
-									if (util.isUrl(p.url)) {
-										p.sourceUrl = p.url
-									} else {
-										p.sourceUrl = sourceUrl.replace(
-											/\w+.m3u8/,
-											p.url
-										) // soruce url
-									}
-									return p
-								})
-								resolve(playList)
-							} else {
-								const sources = parseM3uTxt(t)
-								let sUrl
-								// TODO: 根据当前带宽自动播放,如果只有一条播放源则不用选择
-								const playUrl = sources[4].url
-								if (util.isUrl(playUrl)) {
-									sUrl = playUrl
-								} else {
-									sUrl =
-										util.getUrlInfos(sourceUrl).origin +
-										playUrl
-								}
-								getM3uResource(sUrl).then(resolve, reject)
-							}
-						})
-					})
-					.catch(reject)
-			})
-		}
-
-		/**
-		 * @desc 解析m3u播放列表
-		 * @params {String} txt
-		 * @retrns {Array}
-		 */
-		function parseM3uPlayListTxt(txt) {
-			const txts = txt.split('\n').filter((v) => !!v)
-			const playList = []
-			let i = 0,
-				step = 1
-			while (i < txts.length) {
-				const str1 = txts[i]
-				const str2 = txts[i + 1]
-				if (str1.indexOf('#EXTINF') >= 0) {
-					playList.push({
-						duration: Number(str1.split(':')[1].replace(',', '')),
-						url: str2,
-					})
-					i += step
-				}
-				i += step
-			}
-			return playList
-		}
-
-		/**
-		 * @desc 解析m3u txt
-		 * @params {String} txt
-		 * @retrns {Array}
-		 */
-		function parseM3uTxt(txt) {
-			const txts = txt.split('\n').filter((v) => !!v)
-			const tExt = txts.splice(0, 1)
-			const sourceUrls = []
-			let i = 0
-			while (i < txts.length) {
-				const [PROGRAMID, BANDWIDTH, RESOLUTION] = txts[i]
-					.split(',')
-					.map((v) => v.substring(v.indexOf('=') + 1))
-				sourceUrls.push({
-					url: txts[i + 1],
-					id: Number(PROGRAMID),
-					bandwidth: Number(BANDWIDTH),
-					resolution: RESOLUTION,
-				})
-				i += 2
-			}
-			return sourceUrls
-		}
-
-		/**
-		 * @desc 获取链接扩展名 会转为小写字符
-		 * @params {String} str
-		 * @retrns {String}
-		 */
-		function getSrcExt(str) {
-			if (!str) {
-				return ''
-			}
-			return (str.split('.').slice(-2)[1] || '').toLowerCase()
-		}
-
-		window.addEventListener('load', function () {
-			_init()
-		})
-	</script>
-
-	<!-- view -->
-	<script>
-		const videoAreaEl = document.querySelector('.video-area')
-		const videoControlsEl = videoAreaEl.querySelector('.video-controls')
-		const playEl = videoControlsEl.querySelector('#play')
-		const totalTimeEl = videoControlsEl.querySelector('#total-time')
-		const currentTimeEl = videoControlsEl.querySelector('#current-time')
-		const progressEl = videoControlsEl.querySelector('.progress')
-		const progressBarEl = videoControlsEl.querySelector('.progress>.bar')
-		const progressAnchorEl = videoControlsEl.querySelector(
-			'.progress>.anchor'
-		)
-		const fullScreenEl = videoControlsEl.querySelector('.iconFullScreen')
-		/** 音量相关按钮 **/
-		const volumeEl = videoControlsEl.querySelector('.volume')
-
-		/** event start **/
-		playEl.addEventListener('click', togglePlay)
-		fullScreenEl.addEventListener('click', toggleFullScreen)
-		progressEl.addEventListener('mouseenter', handleProgress)
-		volumeEl.addEventListener('mouseenter', handleVolume)
-
-		/** 播放按钮 **/
-		function togglePlay() {
-			const className = playEl.className
-			const iconPlay = 'iconplay'
-			const iconPause = 'iconpause'
-			if (className.indexOf('iconplay') >= 0) {
-				playEl.className = className.replace(iconPlay, iconPause)
-				videoEl.play()
-			} else {
-				playEl.className = className.replace(iconPause, iconPlay)
-				videoEl.pause()
-			}
-		}
-
-		function handleVolume() {
-			if (handleVolume._lock) {
-				return
-			}
-			handleVolume._lock = true
-			const volumeBarWrapEl = volumeEl.querySelector('.bar-warp')
-			const volumeBarEl = volumeEl.querySelector('.bar-warp>.bar')
-			const volumeAnchorEl = volumeEl.querySelector('.bar-warp>.anchor')
-			// 音量bar宽度
-			const volumeBarW = 80
-			const hoverClassName = ' hover'
-			// 视频音量
-			let volume = videoEl.volume,
-				_isDrag = false // 锁住不让事件继续
-
-			mouseenter()
-			volumeEl.addEventListener('mouseleave', mouseleave)
-			// 音量进度点击（拖动改变音量）
-			volumeBarEl.addEventListener('mousedown', handleMouseDown)
-
-			function mouseenter() {
-				// bar padding
-				const padding = 10
-
-				volumeEl.className += hoverClassName // 简单做法
-				volumeBarWrapEl.className += hoverClassName
-				volumeBarWrapEl.style.width = `${2 * padding + volumeBarW}px`
-				volumeBarEl.style.left = `${padding}px`
-				volumeAnchorEl.style.left = `${padding}px`
-				updateVolumeAnchorPositionByVolume(videoEl.volume)
-			}
-
-			/** 鼠标离开 **/
-			function mouseleave() {
-				if (_isDrag) {
-					return
-				}
-				handleVolume._lock = false
-				volumeBarWrapEl.style.width = 0
-				volumeBarWrapEl.className = volumeBarWrapEl.className.replace(
-					hoverClassName,
-					''
-				)
-				volumeEl.className = volumeEl.className.replace(
-					hoverClassName,
-					''
-				)
-
-				// removeEventListener
-				volumeEl.removeEventListener('mouseleave', mouseleave)
-				volumeBarEl.removeEventListener('mousedown', handleMouseDown)
-			}
-
-			function handleMouseDown(e) {
-				const { layerX, type } = e
-				const clientXStartX = e.clientX
-				_isDrag = true
-				// 设置音量
-				volume = layerX / volumeBarW
-				updateVolumeAnchorPosition(layerX)
-				document.addEventListener('mousemove', handleMove)
-				document.addEventListener('mouseup', handleMouseUp)
-
-				/** 鼠标移动 **/
-				function handleMove(e) {
-					const { clientX } = e
-					const width = layerX - (clientXStartX - clientX)
-					// 设置音量
-					volume = width / volumeBarW
-					updateVolumeAnchorPosition(width)
-				}
-
-				function handleMouseUp() {
-					_isDrag = false
-					updateVolumeAnchorPositionByVolume(volume)
-					document.removeEventListener('mousemove', handleMove)
-					document.removeEventListener('mouseup', handleMouseUp)
-					mouseleave()
-				}
-			}
-
-			/** 设置音量并更新锚点 **/
-			function updateVolumeAnchorPositionByVolume(volume) {
-				// volume => [0-1]
-				volume = volume > 0 ? volume : 0
-				volume = volume < 1 ? volume : 1
-				videoEl.volume = volume
-				updateVolumeAnchorPosition(volumeBarW * volume)
-			}
-
-			/** 更新音量锚点位置 **/
-			function updateVolumeAnchorPosition(width) {
-				width = width < 0 ? 0 : width
-				width = width < volumeBarW ? width : volumeBarW
-				// 设置锚点
-				volumeAnchorEl.style.width = `${width + 5}px` // 5px为锚点宽度一半
-			}
-		}
-
-		/** 全屏按钮 **/
-		function toggleFullScreen() {
-			/** 全屏**/
-			function requestFullscreen(docEl) {
-				//W3C
-				if (docEl.requestFullscreen) {
-					return docEl.requestFullscreen()
-				}
-				//FireFox
-				else if (docEl.mozRequestFullScreen) {
-					return docEl.mozRequestFullScreen()
-				}
-				//Chrome等
-				else if (docEl.webkitRequestFullScreen) {
-					return docEl.webkitRequestFullScreen()
-				}
-				//IE11
-				else if (docEl.msRequestFullscreen) {
-					return docEl.msRequestFullscreen()
-				}
-			}
-			/** 退出全屏 **/
-			function cancelFullScreen(docEl) {
-				if (docEl.exitFullscreen) {
-					docEl.exitFullscreen()
-				} else if (docEl.mozCancelFullScreen) {
-					docEl.mozCancelFullScreen()
-				} else if (docEl.webkitCancelFullScreen) {
-					docEl.webkitCancelFullScreen()
-				} else if (docEl.msExitFullscreen) {
-					docEl.msExitFullscreen()
-				}
-			}
-
-			if (isInFullscreen()) {
-				cancelFullScreen(document)
-			} else {
-				requestFullscreen(videoAreaEl)
-			}
-		}
-
-		/** 视频处于全屏状态 **/
-		function isInFullscreen() {
-			const fullscreenEl =
-				document.fullscreenElement ||
-				document.webkitFullscreenElement ||
-				document.mozFullScreenElement
-			return fullscreenEl === videoAreaEl
-		}
-
-		/** 进度条事件 **/
-		function handleProgress(e) {
-			if (handleProgress._lock) {
-				return
-			}
-			handleProgress._lock = true
-
-			const { layerX, type } = e
-			// 点击start clientX(后续继续位置需要)
-			const clientXStartX = e.clientX
-			// 进度条总宽度
-			const progressW = progressEl.clientWidth
-			// 锚点修订宽度
-			const fixAnchorW = progressAnchorEl.clientWidth / 2
-			// 跳转进度width
-			let _jumpWidth = 0,
-				_isDrag = false
-
-			/** 进度条事件监听**/
-			progressEl.addEventListener('mousemove', progressMove)
-			progressEl.addEventListener('mousedown', progressMousedown)
-			progressEl.addEventListener('mouseleave', progressLeave)
-
-			/** 进度条移出事件**/
-			function progressLeave() {
-				if (!_isDrag) {
-					handleProgress._lock = false
-				}
-				// remove
-				progressEl.removeEventListener('mousemove', progressMove)
-				progressEl.removeEventListener('mousedown', progressMousedown)
-				progressEl.removeEventListener('mouseleave', progressLeave)
-				progressAnchorEl.style.visibility = 'hidden'
-			}
-
-			/** 进度条移动事件**/
-			function progressMove(e) {
-				updateProgressAnchorPosition(e.layerX)
-			}
-
-			/** 进度条按压事件**/
-			function progressMousedown(e) {
-				// 拖拽进度
-				_isDrag = true
-				// remove progressMove
-				progressEl.removeEventListener('mousemove', progressMove)
-				document.addEventListener('mousemove', handleMove)
-				document.addEventListener('mouseup', handleMouseUp)
-			}
-
-			/** 全局鼠标抬起事件**/
-			function handleMouseUp() {
-				progressAnchorEl.style.visibility = 'hidden'
-				handleVideoJump(_jumpWidth)
-				document.removeEventListener('mousemove', handleMove)
-				document.removeEventListener('mouseup', handleMouseUp)
-				handleProgress._lock = false
-			}
-
-			/** 全局鼠标移动事件**/
-			function handleMove(e) {
-				const { clientX } = e
-				updateProgressAnchorPosition(layerX - (clientXStartX - clientX))
-			}
-
-			/** 更新进度锚点位置**/
-			function updateProgressAnchorPosition(width) {
-				width = width < 0 ? 0 : width
-				width = width < progressW ? width : progressW
-				_jumpWidth = width
-
-				const time = getTime(
-					(width / progressEl.clientWidth) * totalTimes
-				)
-				progressAnchorEl.title = time
-				progressAnchorEl.innerHTML = time
-				progressAnchorEl.style.visibility = 'visible'
-				progressAnchorEl.style.left = width - fixAnchorW + 'px'
-			}
-
-			/** 执行进度操作**/
-			function handleVideoJump(width) {
-				const jumpTimes = (width / progressEl.clientWidth) * totalTimes
-				// 如果跳转的失常大于视频总时长则需要获取视频流
-				if (jumpTimes > videoEl.duration) {
-					// TODO: 跳转时长大于当前时长时获取视频流
-				} else {
-					videoEl.currentTime = jumpTimes
-				}
-
-				// 如果点击后处于暂停状态则播放
-				if (videoEl.paused) {
-					videoEl.play()
-				}
-			}
-		}
-
-		/** 视频总时长 **/
-		function setVideoTotalTime(time) {
-			totalTimeEl.innerHTML = getTime(time)
-		}
-		/** 更新视频播放时间 **/
-		function updateVideoCurrentTime(time) {
-			if (videoEl.ended) {
-				togglePlay()
-			}
-			currentTimeEl.innerHTML = getTime(time)
-		}
-		/** 更新播放进度 **/
-		function updateVideoProgress(currtTime, totalTimes) {
-			let progress = 1 - currtTime / totalTimes
-			progress = progress > 0 ? progress : 0
-			progressBarEl.style.right = `${progress * 100}%`
-		}
-
-		/** 获取时间 格式 mm:ss **/
-		function getTime(time) {
-			time = time || 0
-			let m, s
-			m = Math.floor(time / 60)
-			s = Math.ceil(time % 60)
-			return `${m}:${s > 9 ? s : '0' + s}`
-		}
-	</script>
+    ul,
+    li {
+      line-height: 0;
+    }
+
+    .flex {
+      display: flex;
+      display: -webkit-flex;
+    }
+
+    .video-area {
+      width: 650px;
+      max-width: 100%;
+      height: auto;
+      position: relative;
+      margin: 10px 0;
+      --icon-transition-time: 0.3s;
+      --icon-background-color: rgba(23, 23, 26, 0.94);
+    }
+
+    .video-area video {
+      width: 100%;
+    }
+
+    .video-controls {
+      position: absolute;
+      width: 100%;
+      height: 48px;
+      left: 0;
+      bottom: 20px;
+      padding: 0 15px;
+      font-size: 13px;
+      color: white;
+      /* background-color: rgba(0, 0, 0, 0.25);   */
+      /* box-shadow: inset 0px -10px 10px 0px #333; */
+      box-sizing: border-box;
+      /* visibility: hidden; */
+    }
+
+    .video-area:hover .video-controls {
+      visibility: visible;
+      user-select: none;
+    }
+
+    .video-controls > .controls {
+      width: 100%;
+      align-items: center;
+    }
+
+    .video-controls > .controls > .icon {
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+      text-align: center;
+      border-radius: 16px;
+      background-color: transparent;
+      transition: background-color var(--icon-transition-time) ease;
+      cursor: pointer;
+    }
+
+    /*  icon.volume start */
+    .video-controls > .controls > .icon.volume {
+      border-radius: 0 16px 16px 0;
+    }
+
+    .video-controls > .controls > .icon.hover,
+    .video-controls > .controls > .icon:hover {
+      background-color: var(--icon-background-color);
+    }
+
+    .video-controls .controls .time {
+      flex: 1;
+    }
+
+    .video-controls .controls > .volume {
+      position: relative;
+      margin-right: 15px;
+    }
+
+    .video-controls .controls > .volume::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 88%;
+      height: 2px;
+      background-color: rgba(255, 255, 255, 1);
+      transform: rotate(40deg) translate(-50%, -50%);
+      transform-origin: left top;
+      box-shadow: 0 -1px 0 0 rgba(0, 0, 0, 1);
+      border-radius: 5px;
+      visibility: hidden;
+    }
+
+    .video-controls .controls > .volume > .bar-warp {
+      position: absolute;
+      /* width: 100px; */
+      width: 0;
+      height: 100%;
+      right: 100%;
+      bottom: 0;
+      /* background-color: var(--icon-background-color); */
+      background-color: transparent;
+      border-radius: 16px 0 0 16px;
+      transition: width var(--icon-transition-time),
+        background-color var(--icon-transition-time) ease;
+      overflow: hidden;
+    }
+
+    .video-controls .controls > .volume > .bar-warp.hover {
+      background-color: var(--icon-background-color);
+    }
+
+    .video-controls .controls > .volume > .bar-warp > .bar {
+      position: absolute;
+      height: 4px;
+      top: 50%;
+      left: 15px;
+      right: 10px;
+      transform: translateY(-50%);
+      border-radius: 2px;
+      background-color: rgba(255, 255, 255, 0.45);
+      transition: width var(--icon-transition-time) ease;
+      transition-delay: 0.1s;
+    }
+
+    .video-controls .controls > .volume > .bar-warp > .anchor {
+      position: absolute;
+      height: 4px;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-radius: 2px;
+      background-color: rgba(255, 255, 255, 0.65);
+    }
+
+    .video-controls .controls > .volume > .bar-warp > .anchor::after {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.95);
+    }
+    /*  icon.volume end */
+
+    /*  progress start */
+    .video-controls .progress {
+      position: relative;
+      width: 100%;
+      height: 8px;
+      margin: 6px 0;
+      background-color: rgb(173, 173, 173, 0.55);
+      border-radius: 4px;
+      /* overflow: hidden; */
+      cursor: pointer;
+    }
+
+    .video-controls .progress > .anchor {
+      position: absolute;
+      padding: 2px 6px;
+      left: 250px;
+      bottom: 10px;
+      font-size: 13px;
+      color: transparent;
+      user-select: none;
+      visibility: hidden;
+    }
+
+    .video-controls .progress .bar {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      right: 100%;
+      top: 0;
+      border-radius: 4px;
+      background-color: rgba(255, 255, 255, 1);
+    }
+
+    .video-controls .progress > .anchor::after {
+      content: attr(title);
+      display: inline-block;
+      position: absolute;
+      bottom: 9px;
+      left: 0;
+      padding: 2px 6px;
+      background-color: rgba(255, 255, 255, 0.8);
+      color: #333;
+      border-radius: 3px;
+    }
+
+    .video-controls .progress .anchor::before {
+      content: "";
+      position: absolute;
+      width: 0;
+      height: 0;
+      bottom: -3px;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid;
+      border-color: rgba(255, 255, 255, 0.8) transparent transparent;
+    }
+
+    /*  progress end */
+
+    .video-controls .iconfont {
+      font-size: 20px;
+    }
+  </style>
+
+  <body>
+    <div class="video-area">
+      <video
+        id="video"
+        src="http://hls.cntv.lxdns.com/asp/hls/main/0303000a/3/default/978a64ddd3a1caa85ae70a23414e6540/main.m3u8"
+      ></video>
+      <div class="video-controls">
+        <div class="controls flex">
+          <div class="icon">
+            <i id="play" class="iconfont iconplay"></i>
+          </div>
+          <div class="time">
+            <span id="current-time">0:00</span>
+            <span id="total-time">0:00</span>
+          </div>
+          <div class="volume icon">
+            <i class="iconfont iconvolume-up"></i>
+            <div class="bar-warp">
+              <div class="anchor"></div>
+              <div class="bar"></div>
+            </div>
+          </div>
+          <div class="icon">
+            <i class="iconfont iconFullScreen" style="font-weight: bold;"></i>
+          </div>
+        </div>
+        <div class="progress">
+          <div class="anchor" title="0:00">0:00</div>
+          <div class="bar"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script src="./utils/mux.min.js"></script>
+  <!-- util -->
+  <script>
+    const util = {
+      // 是否是url
+      isUrl: function (url) {
+        try {
+          new URL(url);
+          return true;
+        } catch (error) {
+          return false;
+        }
+      },
+      // 获取url相关信息
+      getUrlInfos: function (url) {
+        try {
+          return new URL(url);
+        } catch (error) {
+          return null;
+        }
+      },
+    };
+  </script>
+  <!-- main -->
+  <script>
+    const M3U = "m3u";
+    const M3U8 = "m3u8";
+    const videoEl = document.querySelector("#video");
+    const PLAY_CONFIG = {
+      loadTime: 5, // 单位秒
+      loadAll: false, // 是否全部加载
+    };
+
+    // 添加订阅模式
+    const Subscriber = {
+      removeVideoListener: null,
+      videoLoad: null,
+    };
+
+    let totalTimes = 0, // 视频总时长
+      videoTimeinterval, // 播放时间区间
+      playOffsetTime = 0, // 视频偏移时间
+      videoSourceUrls; // 解析出来的视频地址list
+
+    // _init
+    function _init() {
+      const currentSrc = videoEl.currentSrc;
+      const srcExt = getSrcExt(currentSrc);
+      videoEl.loop = false;
+      videoEl.controls = false;
+      if (srcExt === M3U || srcExt === M3U8) {
+        _initTsPlayer();
+
+        getM3uResource(currentSrc)
+          .then((sourceUrls) => {
+            // console.log({ ...sourceUrls });
+            initPlay(sourceUrls);
+          })
+          .catch(console.warn);
+      }
+
+      // 初始播放
+      function initPlay(sourceUrls) {
+        if (!sourceUrls || !sourceUrls.length) {
+          throw new Error("sourceUrls not null");
+          return;
+        }
+        videoSourceUrls = sourceUrls;
+        // 流文件播放时间区间
+        const timeinterval = sourceUrls.map((v) => v.duration);
+        timeinterval.map((_, i) => {
+          timeinterval[i] = timeinterval[i] + (timeinterval[i - 1] || 0);
+        });
+        videoTimeinterval = timeinterval;
+        totalTimes = timeinterval.slice(-1)[0];
+        /** 更新播放组件总时长 **/
+        setVideoTotalTime(totalTimes);
+        Subscriber.videoLoad(sourceUrls);
+        setTimeout(() => {
+          Subscriber.videoLoad(sourceUrls.slice(0, 1));
+        }, 500);
+      }
+    }
+
+    /**
+     *
+     * @desc 初始化播放器
+     *
+     */
+    function _initTsPlayer() {
+      let _appendLock = false, // source append lock
+        _loadLock = false, // load next segment lock
+        segments; // segments
+      // segments buffer queue
+      const bufferQueue = [];
+      // Replace this value with your files codec info
+      const mime = 'video/mp4; codecs="mp4a.40.2,avc1.64001f"';
+
+      let transmuxer; // transmuxer
+      let mediaSource; // mediaSource
+
+      // video Load
+      Subscriber.videoLoad = function (_segments) {
+        // console.log("[videoLoad segments]:", _segments);
+        if (!_segments || !_segments.length) {
+          return;
+        }
+        segments = _segments;
+        load();
+      };
+
+      // removeVideoListener
+      Subscriber.removeVideoListener = function () {
+        bufferQueue.length = 0;
+        // endOfStream();
+        transmuxer.off("data");
+        mediaSource.removeEventListener("sourceopen", appendFirstSegment);
+        videoEl.removeEventListener("timeupdate", handleVideoTimeUpdate);
+      };
+
+      /**
+       * @desc load
+       **/
+      function load() {
+        mediaSource = new MediaSource();
+        transmuxer = new muxjs.mp4.Transmuxer();
+        // video createObjectURL
+        videoEl.src = URL.createObjectURL(mediaSource);
+        mediaSource.addEventListener("sourceopen", appendFirstSegment);
+        // MediaElement相关事件 https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLMediaElement
+        videoEl.addEventListener("timeupdate", handleVideoTimeUpdate);
+      }
+
+      /**
+       * @desc Video time update
+       **/
+      function handleVideoTimeUpdate() {
+        const currentTime = videoEl.currentTime;
+        const duration = videoEl.duration;
+        const canLoad = duration - currentTime < PLAY_CONFIG.loadTime;
+        /** 更新视频播放时间 **/
+        updateVideoCurrentTime(currentTime);
+        /** 更新进度 **/
+        updateVideoProgress(currentTime);
+
+        /** load lock **/
+        if (_loadLock) {
+          return;
+        }
+
+        if (canLoad) {
+          _loadLock = true;
+          appendNextSegment();
+        }
+      }
+
+      function endOfStream() {
+        // console.log(mediaSource.readyState);
+        // notify MSE that we have no more segments to append.
+        console.log("endOfStream", mediaSource.readyState);
+        if (mediaSource.readyState === "open") {
+          mediaSource.endOfStream();
+        }
+      }
+
+      /**
+       * @desc 处理sourceBuffer append
+       **/
+      function handleSourceBufferAppend() {
+        while (bufferQueue.length) {
+          try {
+            if (_appendLock) {
+              return;
+            }
+            sourceBuffer.appendBuffer(new Uint8Array(bufferQueue[0]));
+            bufferQueue.shift();
+          } catch (error) {
+            console.warn("[error]:", error);
+            break;
+          }
+        }
+      }
+
+      /**
+       * @desc 添加第一个节点
+       **/
+      function appendFirstSegment() {
+        // 释放一个之前已经存在的、通过调用
+        URL.revokeObjectURL(videoEl.src);
+        /**
+         * 设置媒体duration为0 否则后面视频获取duration会出现Infinity
+         **/
+        mediaSource.duration = 0;
+        // addSourceBuffer  mime
+        sourceBuffer = mediaSource.addSourceBuffer(mime);
+        transmuxer.off("data");
+        transmuxer.on("data", (segment) => {
+          // TODO: initSegment set
+          const initSegment = segment.initSegment;
+          const data = new Uint8Array(
+            initSegment.byteLength + segment.data.byteLength
+          );
+          data.set(initSegment, 0);
+          data.set(segment.data, initSegment.byteLength);
+          // debug inspect
+          // console.log(muxjs.mp4.tools.inspect(data));
+          sourceBuffer.appendBuffer(data);
+        });
+
+        fetch(segments.shift().sourceUrl)
+          .then((response) => {
+            return response.arrayBuffer();
+          })
+          .then((response) => {
+            transmuxer.push(new Uint8Array(response));
+            transmuxer.flush();
+          });
+        // play
+        // videoEl.play();
+      }
+
+      /**
+       * @desc 添加下一个节点
+       **/
+      function appendNextSegment() {
+        // console.log("[appendNextSegment]", segments);
+        if (segments.length === 0) {
+          // mediaSource.endOfStream();
+          endOfStream();
+          return;
+        }
+
+        // reset the 'data' event listener to just append (moof/mdat) boxes to the Source Buffer
+        transmuxer.off("data");
+        transmuxer.on("data", (segment) => {
+          bufferQueue.push(segment.data);
+          _appendLock = sourceBuffer.updating;
+          _loadLock = false;
+          handleSourceBufferAppend();
+        });
+
+        // fetch the next segment from the segments array and pass it into the transmuxer.push method
+        const segment = segments.shift();
+        fetch(segment.sourceUrl)
+          .then((response) => response.arrayBuffer())
+          .then((response) => {
+            transmuxer.push(new Uint8Array(response));
+            transmuxer.flush();
+          });
+      }
+    }
+
+    /**
+     * @desc 获取资源
+     * @params {String} txt
+     */
+    function sourceCanPlay(txt) {
+      if (
+        txt.indexOf("#EXTINF") !== -1 &&
+        txt.indexOf("#EXT-X-ENDLIST") !== -1
+      ) {
+        return true;
+      }
+      return false;
+    }
+
+    /**
+     * @desc 获取资源
+     * @params {String} sourceUrl
+     */
+    function getM3uResource(sourceUrl) {
+      return new Promise((resolve, reject) => {
+        fetch(sourceUrl)
+          .then((response) => {
+            // console.log(response);
+            response.text().then((t) => {
+              if (sourceCanPlay(t)) {
+                const playList = parseM3uPlayListTxt(t);
+                (playList || []).map((p) => {
+                  if (util.isUrl(p.url)) {
+                    p.sourceUrl = p.url;
+                  } else {
+                    p.sourceUrl = sourceUrl.replace(/\w+.m3u8/, p.url); // soruce url
+                  }
+                  return p;
+                });
+                resolve(playList);
+              } else {
+                const sources = parseM3uTxt(t);
+                let sUrl;
+                // TODO: 根据当前带宽自动播放,如果只有一条播放源则不用选择
+                const playUrl = sources[4].url;
+                if (util.isUrl(playUrl)) {
+                  sUrl = playUrl;
+                } else {
+                  sUrl = util.getUrlInfos(sourceUrl).origin + playUrl;
+                }
+                getM3uResource(sUrl).then(resolve, reject);
+              }
+            });
+          })
+          .catch(reject);
+      });
+    }
+
+    /**
+     * @desc 解析m3u播放列表
+     * @params {String} txt
+     * @retrns {Array}
+     */
+    function parseM3uPlayListTxt(txt) {
+      const txts = txt.split("\n").filter((v) => !!v);
+      const playList = [];
+      let i = 0,
+        step = 1;
+      while (i < txts.length) {
+        const str1 = txts[i];
+        const str2 = txts[i + 1];
+        if (str1.indexOf("#EXTINF") >= 0) {
+          playList.push({
+            duration: Number(str1.split(":")[1].replace(",", "")),
+            url: str2,
+          });
+          i += step;
+        }
+        i += step;
+      }
+      return playList;
+    }
+
+    /**
+     * @desc 解析m3u txt
+     * @params {String} txt
+     * @retrns {Array}
+     */
+    function parseM3uTxt(txt) {
+      const txts = txt.split("\n").filter((v) => !!v);
+      const tExt = txts.splice(0, 1);
+      const sourceUrls = [];
+      let i = 0;
+      while (i < txts.length) {
+        const [PROGRAMID, BANDWIDTH, RESOLUTION] = txts[i]
+          .split(",")
+          .map((v) => v.substring(v.indexOf("=") + 1));
+        sourceUrls.push({
+          url: txts[i + 1],
+          id: Number(PROGRAMID),
+          bandwidth: Number(BANDWIDTH),
+          resolution: RESOLUTION,
+        });
+        i += 2;
+      }
+      return sourceUrls;
+    }
+
+    /**
+     * @desc 获取链接扩展名 会转为小写字符
+     * @params {String} str
+     * @retrns {String}
+     */
+    function getSrcExt(str) {
+      if (!str) {
+        return "";
+      }
+      return (str.split(".").slice(-2)[1] || "").toLowerCase();
+    }
+
+    window.addEventListener("load", function () {
+      _init();
+    });
+  </script>
+
+  <!-- view -->
+  <script>
+    const videoAreaEl = document.querySelector(".video-area");
+    const videoControlsEl = videoAreaEl.querySelector(".video-controls");
+    const playEl = videoControlsEl.querySelector("#play");
+    const totalTimeEl = videoControlsEl.querySelector("#total-time");
+    const currentTimeEl = videoControlsEl.querySelector("#current-time");
+    const progressEl = videoControlsEl.querySelector(".progress");
+    const progressBarEl = videoControlsEl.querySelector(".progress>.bar");
+    const progressAnchorEl = videoControlsEl.querySelector(".progress>.anchor");
+    const fullScreenEl = videoControlsEl.querySelector(".iconFullScreen");
+    /** 音量相关按钮 **/
+    const volumeEl = videoControlsEl.querySelector(".volume");
+
+    /** event start **/
+    playEl.addEventListener("click", togglePlay);
+    fullScreenEl.addEventListener("click", toggleFullScreen);
+    progressEl.addEventListener("mouseenter", handleProgress);
+    volumeEl.addEventListener("mouseenter", handleVolume);
+
+    /** 播放按钮 **/
+    function togglePlay() {
+      const className = playEl.className;
+      const iconPlay = "iconplay";
+      const iconPause = "iconpause";
+      if (className.indexOf("iconplay") >= 0) {
+        playEl.className = className.replace(iconPlay, iconPause);
+        videoEl.play();
+      } else {
+        playEl.className = className.replace(iconPause, iconPlay);
+        videoEl.pause();
+      }
+    }
+
+    function handleVolume() {
+      if (handleVolume._lock) {
+        return;
+      }
+      handleVolume._lock = true;
+      const volumeBarWrapEl = volumeEl.querySelector(".bar-warp");
+      const volumeBarEl = volumeEl.querySelector(".bar-warp>.bar");
+      const volumeAnchorEl = volumeEl.querySelector(".bar-warp>.anchor");
+      // 音量bar宽度
+      const volumeBarW = 80;
+      const hoverClassName = " hover";
+      // 视频音量
+      let volume = videoEl.volume,
+        _isDrag = false; // 拖拽
+
+      mouseenter();
+      volumeEl.addEventListener("mouseleave", mouseleave);
+      // 音量进度点击（拖动改变音量）
+      volumeBarEl.addEventListener("mousedown", handleMouseDown);
+
+      function mouseenter() {
+        // bar padding
+        const padding = 10;
+
+        volumeEl.className += hoverClassName; // 简单做法
+        volumeBarWrapEl.className += hoverClassName;
+        volumeBarWrapEl.style.width = `${2 * padding + volumeBarW}px`;
+        volumeBarEl.style.left = `${padding}px`;
+        volumeAnchorEl.style.left = `${padding}px`;
+        updateVolumeAnchorPositionByVolume(videoEl.volume);
+      }
+
+      /** 鼠标离开 **/
+      function mouseleave() {
+        if (_isDrag) {
+          return;
+        }
+        handleVolume._lock = false;
+        volumeBarWrapEl.style.width = 0;
+        volumeBarWrapEl.className = volumeBarWrapEl.className.replace(
+          hoverClassName,
+          ""
+        );
+        volumeEl.className = volumeEl.className.replace(hoverClassName, "");
+
+        // removeEventListener
+        volumeEl.removeEventListener("mouseleave", mouseleave);
+        volumeBarEl.removeEventListener("mousedown", handleMouseDown);
+      }
+
+      function handleMouseDown(e) {
+        const { layerX, type } = e;
+        const clientXStartX = e.clientX;
+        _isDrag = true;
+        // 设置音量
+        volume = layerX / volumeBarW;
+        updateVolumeAnchorPosition(layerX);
+        document.addEventListener("mousemove", handleMove);
+        document.addEventListener("mouseup", handleMouseUp);
+
+        /** 鼠标移动 **/
+        function handleMove(e) {
+          const { clientX } = e;
+          const width = layerX - (clientXStartX - clientX);
+          // 设置音量
+          volume = width / volumeBarW;
+          updateVolumeAnchorPosition(width);
+        }
+
+        function handleMouseUp() {
+          _isDrag = false;
+          updateVolumeAnchorPositionByVolume(volume);
+          document.removeEventListener("mousemove", handleMove);
+          document.removeEventListener("mouseup", handleMouseUp);
+          mouseleave();
+        }
+      }
+
+      /** 设置音量并更新锚点 **/
+      function updateVolumeAnchorPositionByVolume(volume) {
+        // volume => [0-1]
+        volume = volume > 0 ? volume : 0;
+        volume = volume < 1 ? volume : 1;
+        videoEl.volume = volume;
+        updateVolumeAnchorPosition(volumeBarW * volume);
+      }
+
+      /** 更新音量锚点位置 **/
+      function updateVolumeAnchorPosition(width) {
+        width = width < 0 ? 0 : width;
+        width = width < volumeBarW ? width : volumeBarW;
+        // 设置锚点
+        volumeAnchorEl.style.width = `${width + 5}px`; // 5px为锚点宽度一半
+      }
+    }
+
+    /** 全屏按钮 **/
+    function toggleFullScreen() {
+      /** 全屏**/
+      function requestFullscreen(docEl) {
+        //W3C
+        if (docEl.requestFullscreen) {
+          return docEl.requestFullscreen();
+        }
+        //FireFox
+        else if (docEl.mozRequestFullScreen) {
+          return docEl.mozRequestFullScreen();
+        }
+        //Chrome等
+        else if (docEl.webkitRequestFullScreen) {
+          return docEl.webkitRequestFullScreen();
+        }
+        //IE11
+        else if (docEl.msRequestFullscreen) {
+          return docEl.msRequestFullscreen();
+        }
+      }
+      /** 退出全屏 **/
+      function cancelFullScreen(docEl) {
+        if (docEl.exitFullscreen) {
+          docEl.exitFullscreen();
+        } else if (docEl.mozCancelFullScreen) {
+          docEl.mozCancelFullScreen();
+        } else if (docEl.webkitCancelFullScreen) {
+          docEl.webkitCancelFullScreen();
+        } else if (docEl.msExitFullscreen) {
+          docEl.msExitFullscreen();
+        }
+      }
+
+      if (isInFullscreen()) {
+        cancelFullScreen(document);
+      } else {
+        requestFullscreen(videoAreaEl);
+      }
+    }
+
+    /** 视频处于全屏状态 **/
+    function isInFullscreen() {
+      const fullscreenEl =
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement;
+      return fullscreenEl === videoAreaEl;
+    }
+
+    /** 进度条事件 **/
+    function handleProgress(e) {
+      if (handleProgress._lock) {
+        return;
+      }
+      handleProgress._lock = true;
+
+      const { layerX, type } = e;
+      // 点击start clientX(后续继续位置需要)
+      const clientXStartX = e.clientX;
+      // 进度条总宽度
+      const progressW = progressEl.clientWidth;
+      // 锚点修订宽度
+      const fixAnchorW = progressAnchorEl.clientWidth / 2;
+      // 跳转进度width
+      let _jumpWidth = 0,
+        _isDrag = false;
+
+      /** 进度条事件监听**/
+      progressEl.addEventListener("mousemove", progressMove);
+      progressEl.addEventListener("mousedown", progressMousedown);
+      progressEl.addEventListener("mouseleave", progressLeave);
+
+      /** 进度条移出事件**/
+      function progressLeave() {
+        if (!_isDrag) {
+          handleProgress._lock = false;
+        }
+        // remove
+        progressEl.removeEventListener("mousemove", progressMove);
+        progressEl.removeEventListener("mousedown", progressMousedown);
+        progressEl.removeEventListener("mouseleave", progressLeave);
+        progressAnchorEl.style.visibility = "hidden";
+      }
+
+      /** 进度条移动事件**/
+      function progressMove(e) {
+        updateProgressAnchorPosition(e.layerX);
+      }
+
+      /** 进度条按压事件**/
+      function progressMousedown(e) {
+        // 拖拽进度
+        _isDrag = true;
+        // remove progressMove
+        progressEl.removeEventListener("mousemove", progressMove);
+        document.addEventListener("mousemove", handleMove);
+        document.addEventListener("mouseup", handleMouseUp);
+      }
+
+      /** 全局鼠标抬起事件**/
+      function handleMouseUp() {
+        progressAnchorEl.style.visibility = "hidden";
+        handleVideoJump(_jumpWidth);
+        document.removeEventListener("mousemove", handleMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+        handleProgress._lock = false;
+      }
+
+      /** 全局鼠标移动事件**/
+      function handleMove(e) {
+        const { clientX } = e;
+        updateProgressAnchorPosition(layerX - (clientXStartX - clientX));
+      }
+
+      /** 更新进度锚点位置**/
+      function updateProgressAnchorPosition(width) {
+        width = width < 0 ? 0 : width;
+        width = width < progressW ? width : progressW;
+        _jumpWidth = width;
+
+        const time = getTime((width / progressEl.clientWidth) * totalTimes);
+        progressAnchorEl.title = time;
+        progressAnchorEl.innerHTML = time;
+        progressAnchorEl.style.visibility = "visible";
+        progressAnchorEl.style.left = width - fixAnchorW + "px";
+      }
+
+      /** 执行进度操作**/
+      function handleVideoJump(width) {
+        const jumpTimes = (width / progressEl.clientWidth) * totalTimes;
+        // 如果跳转的失常大于视频总时长则需要获取视频流
+        if (jumpTimes > videoEl.duration) {
+          // TODO: 跳转时长大于当前时长时获取视频流
+
+          for (let i = 0; i < videoTimeinterval.length; i++) {
+            if (videoTimeinterval[i] > jumpTimes) {
+              playOffsetTime = videoTimeinterval[i];
+              // remove listener
+              Subscriber.removeVideoListener();
+              // load
+              Subscriber.videoLoad(videoSourceUrls.slice(i));
+              break;
+            }
+          }
+        } else {
+          playOffsetTime = 0;
+          videoEl.currentTime = jumpTimes;
+        }
+
+        // 如果点击后处于暂停状态则播放
+        if (videoEl.paused) {
+          videoEl.play();
+        }
+      }
+    }
+
+    /** 视频总时长 **/
+    function setVideoTotalTime(time) {
+      totalTimeEl.innerHTML = getTime(time);
+    }
+    /** 更新视频播放时间 **/
+    function updateVideoCurrentTime(time) {
+      if (videoEl.ended) {
+        togglePlay();
+      }
+      currentTimeEl.innerHTML = getTime(time + playOffsetTime);
+    }
+    /** 更新播放进度 **/
+    function updateVideoProgress(currtTime) {
+      let progress = 1 - (currtTime + playOffsetTime) / totalTimes;
+      progress = progress > 0 ? progress : 0;
+      progressBarEl.style.right = `${progress * 100}%`;
+    }
+
+    /** 获取时间 格式 mm:ss **/
+    function getTime(time) {
+      time = time || 0;
+      let m, s;
+      m = Math.floor(time / 60);
+      s = Math.ceil(time % 60);
+      return `${m}:${s > 9 ? s : "0" + s}`;
+    }
+  </script>
 </html>
