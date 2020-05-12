@@ -46,6 +46,7 @@
 
     .video-area video {
       width: 100%;
+      background-color: black;
     }
 
     .video-controls {
@@ -306,13 +307,12 @@
 
     // 添加订阅模式
     const Subscriber = {
-      removeVideoListener: null,
       videoLoad: null,
     };
 
     let totalTimes = 0, // 视频总时长
       videoTimeinterval, // 播放时间区间
-      playOffsetTime = 0, // 视频偏移时间
+      segmentoffsetIndex = 0, // 视频偏移时间
       videoSourceUrls; // 解析出来的视频地址list
 
     // _init
@@ -348,10 +348,7 @@
         totalTimes = timeinterval.slice(-1)[0];
         /** 更新播放组件总时长 **/
         setVideoTotalTime(totalTimes);
-        Subscriber.videoLoad(sourceUrls);
-        setTimeout(() => {
-          Subscriber.videoLoad(sourceUrls.slice(0, 1));
-        }, 500);
+        Subscriber.videoLoad([...sourceUrls]);
       }
     }
 
@@ -372,7 +369,10 @@
       let transmuxer; // transmuxer
       let mediaSource; // mediaSource
 
-      // video Load
+      /**
+       * @desc 加载视频片段
+       * @params {Array} _segments 播放片段
+       **/
       Subscriber.videoLoad = function (_segments) {
         // console.log("[videoLoad segments]:", _segments);
         if (!_segments || !_segments.length) {
@@ -380,15 +380,6 @@
         }
         segments = _segments;
         load();
-      };
-
-      // removeVideoListener
-      Subscriber.removeVideoListener = function () {
-        bufferQueue.length = 0;
-        // endOfStream();
-        transmuxer.off("data");
-        mediaSource.removeEventListener("sourceopen", appendFirstSegment);
-        videoEl.removeEventListener("timeupdate", handleVideoTimeUpdate);
       };
 
       /**
@@ -408,9 +399,12 @@
        * @desc Video time update
        **/
       function handleVideoTimeUpdate() {
-        const currentTime = videoEl.currentTime;
+        let currentTime = videoEl.currentTime;
         const duration = videoEl.duration;
         const canLoad = duration - currentTime < PLAY_CONFIG.loadTime;
+
+        // currentTime = currentTime + segmentoffsetTime
+        currentTime += videoTimeinterval[segmentoffsetIndex] || 0;
         /** 更新视频播放时间 **/
         updateVideoCurrentTime(currentTime);
         /** 更新进度 **/
@@ -458,6 +452,7 @@
        * @desc 添加第一个节点
        **/
       function appendFirstSegment() {
+        // console.log("appendFirstSegment");
         // 释放一个之前已经存在的、通过调用
         URL.revokeObjectURL(videoEl.src);
         /**
@@ -658,17 +653,17 @@
     const volumeEl = videoControlsEl.querySelector(".volume");
 
     /** event start **/
-    playEl.addEventListener("click", togglePlay);
+    playEl.addEventListener("click", () => togglePlay());
     fullScreenEl.addEventListener("click", toggleFullScreen);
     progressEl.addEventListener("mouseenter", handleProgress);
     volumeEl.addEventListener("mouseenter", handleVolume);
 
     /** 播放按钮 **/
-    function togglePlay() {
+    function togglePlay(play = false) {
       const className = playEl.className;
       const iconPlay = "iconplay";
       const iconPause = "iconpause";
-      if (className.indexOf("iconplay") >= 0) {
+      if (play === true || className.indexOf("iconplay") >= 0) {
         playEl.className = className.replace(iconPlay, iconPause);
         videoEl.play();
       } else {
@@ -904,29 +899,34 @@
       /** 执行进度操作**/
       function handleVideoJump(width) {
         const jumpTimes = (width / progressEl.clientWidth) * totalTimes;
+        console.log("jumpTimes", jumpTimes, videoEl.duration);
+        console.log("videoTimeinterval", videoTimeinterval);
+
         // 如果跳转的失常大于视频总时长则需要获取视频流
         if (jumpTimes > videoEl.duration) {
-          // TODO: 跳转时长大于当前时长时获取视频流
-
           for (let i = 0; i < videoTimeinterval.length; i++) {
             if (videoTimeinterval[i] > jumpTimes) {
-              playOffsetTime = videoTimeinterval[i];
-              // remove listener
-              Subscriber.removeVideoListener();
-              // load
-              Subscriber.videoLoad(videoSourceUrls.slice(i));
+              const index = i - 1;
+              segmentoffsetIndex = index;
+              // videoLoad
+              Subscriber.videoLoad(videoSourceUrls.slice(index));
+
+              // TODO： fix 时间显示不准确
+              videoEl.currentTime = jumpTimes - videoTimeinterval[index];
+              console.log(
+                "currentTime",
+                videoTimeinterval[index],
+                videoEl.currentTime
+              );
               break;
             }
           }
         } else {
-          playOffsetTime = 0;
+          segmentoffsetIndex = 0;
           videoEl.currentTime = jumpTimes;
         }
 
-        // 如果点击后处于暂停状态则播放
-        if (videoEl.paused) {
-          videoEl.play();
-        }
+        togglePlay(true);
       }
     }
 
@@ -939,11 +939,11 @@
       if (videoEl.ended) {
         togglePlay();
       }
-      currentTimeEl.innerHTML = getTime(time + playOffsetTime);
+      currentTimeEl.innerHTML = getTime(time);
     }
     /** 更新播放进度 **/
     function updateVideoProgress(currtTime) {
-      let progress = 1 - (currtTime + playOffsetTime) / totalTimes;
+      let progress = 1 - currtTime / totalTimes;
       progress = progress > 0 ? progress : 0;
       progressBarEl.style.right = `${progress * 100}%`;
     }
