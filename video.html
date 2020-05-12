@@ -312,7 +312,7 @@
 
     let totalTimes = 0, // 视频总时长
       videoTimeinterval, // 播放时间区间
-      segmentoffsetIndex = 0, // 视频偏移时间
+      segmentoffsetIndex, // 视频偏移时间index
       videoSourceUrls; // 解析出来的视频地址list
 
     // _init
@@ -899,33 +899,29 @@
       /** 执行进度操作**/
       function handleVideoJump(width) {
         const jumpTimes = (width / progressEl.clientWidth) * totalTimes;
-        console.log("jumpTimes", jumpTimes, videoEl.duration);
-        console.log("videoTimeinterval", videoTimeinterval);
-
-        // 如果跳转的失常大于视频总时长则需要获取视频流
-        if (jumpTimes > videoEl.duration) {
-          for (let i = 0; i < videoTimeinterval.length; i++) {
-            if (videoTimeinterval[i] > jumpTimes) {
-              const index = i - 1;
-              segmentoffsetIndex = index;
-              // videoLoad
-              Subscriber.videoLoad(videoSourceUrls.slice(index));
-
-              // TODO： fix 时间显示不准确
-              videoEl.currentTime = jumpTimes - videoTimeinterval[index];
-              console.log(
-                "currentTime",
-                videoTimeinterval[index],
-                videoEl.currentTime
-              );
-              break;
-            }
+        let index, isPrev;
+        for (let i = 0; i < videoTimeinterval.length; i++) {
+          if (videoTimeinterval[i] > jumpTimes) {
+            index = i;
+            break;
           }
+        }
+        isPrev = segmentoffsetIndex > index - 1; // 之前节点
+        // 如果跳转的失常大于视频总时长则需要获取视频流
+        if (jumpTimes > videoEl.duration || isPrev) {
+          // videoLoad
+          Subscriber.videoLoad(videoSourceUrls.slice(index));
+          // set currentTime
+          videoEl.currentTime = jumpTimes - (videoTimeinterval[index - 1] || 0);
+
+          console.log(jumpTimes, videoEl.currentTime);
         } else {
-          segmentoffsetIndex = 0;
           videoEl.currentTime = jumpTimes;
         }
-
+        if (isPrev) {
+          segmentoffsetIndex = index - 1;
+        }
+        // play
         togglePlay(true);
       }
     }
