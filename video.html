@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       rel="stylesheet"
-      href="https://at.alicdn.com/t/font_1805033_dzqd0ryrki9.css"
+      href="https://at.alicdn.com/t/font_1805033_fycp0kn26j5.css"
     />
     <title>Video</title>
   </head>
@@ -51,22 +51,49 @@
 
     .video-controls {
       position: absolute;
-      width: 100%;
       height: 48px;
-      left: 0;
+      left: 15px;
+      right: 15px;
       bottom: 20px;
-      padding: 0 15px;
       font-size: 13px;
       color: white;
       /* background-color: rgba(0, 0, 0, 0.25);   */
       /* box-shadow: inset 0px -10px 10px 0px #333; */
       box-sizing: border-box;
-      /* visibility: hidden; */
+      visibility: hidden;
     }
+
+    /* m-play-btn start */
+    .video-area > .m-play-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background-color: rgba(0, 0, 0, 0.35);
+      z-index: 9;
+    }
+
+    .video-area > .m-play-btn > .iconfont {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 55px;
+      color: white;
+      cursor: pointer;
+      transition: color 0.1s ease;
+    }
+
+    .video-area > .m-play-btn > .iconfont:hover {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    /* m-play-btn end*/
 
     .video-area:hover .video-controls {
       visibility: visible;
       user-select: none;
+      z-index: 99;
     }
 
     .video-controls > .controls {
@@ -242,7 +269,7 @@
     <div class="video-area">
       <video
         id="video"
-        src="http://hls.cntv.lxdns.com/asp/hls/main/0303000a/3/default/978a64ddd3a1caa85ae70a23414e6540/main.m3u8"
+        src="https://iptv-org.github.io/iptv/categories/history.m3u"
       ></video>
       <div class="video-controls">
         <div class="controls flex">
@@ -269,6 +296,9 @@
           <div class="bar"></div>
         </div>
       </div>
+      <div class="m-play-btn">
+        <i class="iconfont iconVideo"></i>
+      </div>
     </div>
   </body>
 
@@ -292,6 +322,20 @@
         } catch (error) {
           return null;
         }
+      },
+
+      // 拼接m3u地址根据path
+      getM3uUrlBySoucrUrlAndPathName: function (sUrl, path) {
+        if (util.isUrl(path)) {
+          return path;
+        }
+
+        // 相对地址
+        if (path.indexOf("\/") === 0) {
+          return util.getUrlInfos(sUrl).origin + path;
+        }
+
+        return sUrl.replace(/\w+.m3u8/, path);
       },
     };
   </script>
@@ -519,7 +563,7 @@
     }
 
     /**
-     * @desc 获取资源
+     * @desc 资源能否播放
      * @params {String} txt
      */
     function sourceCanPlay(txt) {
@@ -540,30 +584,39 @@
       return new Promise((resolve, reject) => {
         fetch(sourceUrl)
           .then((response) => {
-            // console.log(response);
             response.text().then((t) => {
               if (sourceCanPlay(t)) {
                 const playList = parseM3uPlayListTxt(t);
                 (playList || []).map((p) => {
-                  if (util.isUrl(p.url)) {
-                    p.sourceUrl = p.url;
-                  } else {
-                    p.sourceUrl = sourceUrl.replace(/\w+.m3u8/, p.url); // soruce url
-                  }
+                  p.sourceUrl = util.getM3uUrlBySoucrUrlAndPathName(
+                    sourceUrl,
+                    p.url
+                  );
                   return p;
                 });
                 resolve(playList);
               } else {
-                const sources = parseM3uTxt(t);
-                let sUrl;
-                // TODO: 根据当前带宽自动播放,如果只有一条播放源则不用选择
-                const playUrl = sources[4].url;
-                if (util.isUrl(playUrl)) {
-                  sUrl = playUrl;
-                } else {
-                  sUrl = util.getUrlInfos(sourceUrl).origin + playUrl;
+                const sources = parseM3uTxt(t).sort(
+                  (a, b) => b.bandwidth - a.bandwidth
+                );
+                let playUrl;
+                if ("navigator" in window && navigator.connection) {
+                  const dLink = navigator.connection.downlink;
+                  for (const source of sources) {
+                    if (dLink > source.bandwidth / 1e6) {
+                      playUrl = source.url;
+                      break;
+                    }
+                  }
                 }
-                getM3uResource(sUrl).then(resolve, reject);
+                // 如果没有地址
+                if (!playUrl) {
+                  playUrl = sources[Math.floor(sources.length / 2)].url;
+                }
+                // 获取资源
+                getM3uResource(
+                  util.getM3uUrlBySoucrUrlAndPathName(sourceUrl, playUrl)
+                ).then(resolve, reject);
               }
             });
           })
@@ -606,6 +659,8 @@
       const tExt = txts.splice(0, 1);
       const sourceUrls = [];
       let i = 0;
+      // TODO: 解析直播流文件
+      // console.log("txts", txts);
       while (i < txts.length) {
         const [PROGRAMID, BANDWIDTH, RESOLUTION] = txts[i]
           .split(",")
@@ -643,6 +698,7 @@
     const videoAreaEl = document.querySelector(".video-area");
     const videoControlsEl = videoAreaEl.querySelector(".video-controls");
     const playEl = videoControlsEl.querySelector("#play");
+    const mPlayEl = videoAreaEl.querySelector(".m-play-btn");
     const totalTimeEl = videoControlsEl.querySelector("#total-time");
     const currentTimeEl = videoControlsEl.querySelector("#current-time");
     const progressEl = videoControlsEl.querySelector(".progress");
@@ -651,12 +707,61 @@
     const fullScreenEl = videoControlsEl.querySelector(".iconFullScreen");
     /** 音量相关按钮 **/
     const volumeEl = videoControlsEl.querySelector(".volume");
+    // timer
+    let timer;
 
     /** event start **/
+    videoAreaEl.addEventListener("mouseenter", handleVideoArea);
     playEl.addEventListener("click", () => togglePlay());
+    mPlayEl.addEventListener("click", () => togglePlay());
     fullScreenEl.addEventListener("click", toggleFullScreen);
     progressEl.addEventListener("mouseenter", handleProgress);
     volumeEl.addEventListener("mouseenter", handleVolume);
+
+    /** 整个播放区域 **/
+    function handleVideoArea() {
+      let _lock = false;
+
+      videoAreaEl.addEventListener("mousemove", move);
+      videoAreaEl.addEventListener("mouseleave", leave);
+      videoControlsEl.addEventListener("mouseenter", controlsEnter);
+      videoControlsEl.addEventListener("mouseleave", controlsLeave);
+
+      function move() {
+        videoControlsEl.style.visibility = "visible";
+        if (timer) {
+          clearTimeout(timer);
+        }
+        timer = setTimeout(hideControls, 1000);
+      }
+
+      function controlsEnter() {
+        _lock = true;
+      }
+
+      function controlsLeave() {
+        _lock = false;
+      }
+
+      function leave() {
+        videoAreaEl.removeEventListener("mouseleave", leave);
+        videoAreaEl.removeEventListener("mousemove", move);
+        videoControlsEl.removeEventListener("mouseenter", controlsEnter);
+        videoControlsEl.removeEventListener("mouseleave", controlsLeave);
+        if (timer) {
+          clearTimeout(timer);
+        }
+        timer = setTimeout(hideControls, 100);
+      }
+
+      function hideControls() {
+        if (_lock) {
+          return;
+        }
+
+        videoControlsEl.style.visibility = "hidden";
+      }
+    }
 
     /** 播放按钮 **/
     function togglePlay(play = false) {
@@ -665,9 +770,11 @@
       const iconPause = "iconpause";
       if (play === true || className.indexOf("iconplay") >= 0) {
         playEl.className = className.replace(iconPlay, iconPause);
+        mPlayEl.style.visibility = "hidden";
         videoEl.play();
       } else {
         playEl.className = className.replace(iconPause, iconPlay);
+        mPlayEl.style.visibility = "visible";
         videoEl.pause();
       }
     }
@@ -855,6 +962,12 @@
 
       /** 进度条移动事件**/
       function progressMove(e) {
+        console.log(e.target.className);
+        if (e.target.className.indexOf("anchor") !== -1) {
+          progressAnchorEl.style.visibility = "hidden";
+          return;
+        }
+
         updateProgressAnchorPosition(e.layerX);
       }
 
@@ -906,19 +1019,19 @@
             break;
           }
         }
-        isPrev = segmentoffsetIndex > index - 1; // 之前节点
-        // 如果跳转的失常大于视频总时长则需要获取视频流
-        if (jumpTimes > videoEl.duration || isPrev) {
+        // 之前节点
+        isPrev = segmentoffsetIndex > index - 1;
+        // 如果跳转的失常大于视频总时长则需要获取视频流（或者点击之前片段）
+        if (isPrev || jumpTimes > videoEl.duration) {
           // videoLoad
           Subscriber.videoLoad(videoSourceUrls.slice(index));
           // set currentTime
           videoEl.currentTime = jumpTimes - (videoTimeinterval[index - 1] || 0);
-
-          console.log(jumpTimes, videoEl.currentTime);
         } else {
           videoEl.currentTime = jumpTimes;
         }
-        if (isPrev) {
+        // 如果播放之前片段或者第一次点击进度条
+        if (isPrev || void 0 === segmentoffsetIndex) {
           segmentoffsetIndex = index - 1;
         }
         // play
