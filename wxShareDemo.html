@@ -1,0 +1,63 @@
+<!-- @format -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Demo</title>
+    </head>
+    <body>
+        <div>wx Demo3</div>
+    </body>
+    <script src="http://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+    <script module="module">
+        window.addEventListener("load", async function () {
+            const res = await fetch("http://localhost:3001/wxJsConfig", {
+                method: "post",
+            })
+            const configs = await res.json()
+            console.log(configs)
+            wx.config({
+                debug: true,
+                appId: configs.appId,
+                timestamp: configs.timestamp,
+                nonceStr: configs.noncestr,
+                signature: configs.signature,
+                jsApiList: ["updateAppMessageShareData"],
+            })
+
+            wx.ready(function (res) {
+                console.log("ready", res)
+                this._wxInit()
+            })
+            wx.error(function (res) {
+                console.error("error", res)
+            })
+        })
+
+        function _wxInit() {
+            wx.updateAppMessageShareData({
+                title: "我是标题", // 分享标题
+                desc: "我是描述", // 分享描述
+                link: location.href, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                // imgUrl: "https://img.yzcdn.cn/vant/cat.jpeg", // 分享图标
+                success: function () {
+                    // 设置成功
+                    console.log("updateAppMessageShareData success")
+                },
+            })
+
+            wx.onMenuShareAppMessage({
+                title: "我是标题", // 分享标题
+                desc: "我是描述", // 分享描述
+                link: location.href, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                // imgUrl: "https://img.yzcdn.cn/vant/cat.jpeg", // 分享图标
+                success: function () {
+                    // 设置成功
+                    console.log("updateAppMessageShareData success")
+                },
+            })
+        }
+    </script>
+</html>
