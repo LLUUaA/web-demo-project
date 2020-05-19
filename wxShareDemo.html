@@ -8,51 +8,42 @@
         <title>Demo</title>
     </head>
     <body>
-        <div>wx Demo3</div>
+        <div>wx Demo2</div>
     </body>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
     <script module="module">
         window.addEventListener("load", async function () {
-            const res = await fetch("https://api.bubaocloud.xin/wxmp/wxJsConfig", {
+            // const url = 'https://api.bubaocloud.xin/wxmp/wxJsConfig';
+            const url = "http://192.168.5.56:3001/wxJsConfig"
+            const res = await fetch(url, {
                 method: "post",
+                body: JSON.stringify({
+                    shareUrl: location.href.split("#")[0],
+                }),
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
             })
             const configs = await res.json()
             console.log(configs)
             wx.config({
-                debug: true,
-                appId: configs.appId,
-                timestamp: configs.timestamp,
-                nonceStr: configs.noncestr,
-                signature: configs.signature,
+                ...configs.sdkConfig,
+                debug: false,
                 jsApiList: ["updateAppMessageShareData"],
             })
 
             wx.ready(function (res) {
                 console.log("ready", res)
-                _wxInit()
+                _wxInit(configs.shareConfig)
             })
             wx.error(function (res) {
                 console.error("error", res)
             })
         })
 
-        function _wxInit() {
+        function _wxInit(config) {
             wx.updateAppMessageShareData({
-                title: "我是标题", // 分享标题
-                desc: "我是描述", // 分享描述
-                link: location.href, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-                // imgUrl: "https://img.yzcdn.cn/vant/cat.jpeg", // 分享图标
-                success: function () {
-                    // 设置成功
-                    console.log("updateAppMessageShareData success")
-                },
-            })
-
-            wx.onMenuShareAppMessage({
-                title: "我是标题", // 分享标题
-                desc: "我是描述", // 分享描述
-                link: location.href, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-                // imgUrl: "https://img.yzcdn.cn/vant/cat.jpeg", // 分享图标
+                ...config,
                 success: function () {
                     // 设置成功
                     console.log("updateAppMessageShareData success")
